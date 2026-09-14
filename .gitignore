@@ -1,0 +1,59 @@
+# ---- dependencies ----
+node_modules/
+.pnpm-store/
+.yarn/
+jspm_packages/
+.pnp.*
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+
+# ---- build output ----
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+
+# ---- caches ----
+.npm/
+.pnpm-cache/
+.eslintcache
+.stylelintcache
+.cache/
+.vite/
+.turbo/
+.parcel-cache/
+.nx/
+
+# ---- 运行期数据（SQLite 与 config.json，不进版本库）----
+apps/server/data/
+
+# ---- 冒烟测试截图 ----
+.shots/
+
+# ---- environment / secrets ----
+.env
+.env.*
+!.env.example
+*.local
+
+# ---- logs ----
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- editors & OS ----
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

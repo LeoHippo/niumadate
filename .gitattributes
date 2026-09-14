@@ -1,0 +1,27 @@
+# 统一换行符：仓库内一律 LF，避免 Windows / Unix 协作时整文件 diff
+* text=auto eol=lf
+
+# Windows 脚本必须保持 CRLF，否则 cmd/pwsh 可能无法执行
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# 二进制文件不做换行转换
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+
+# 锁文件在 diff 中折叠显示
+pnpm-lock.yaml      linguist-generated=true
+package-lock.json   linguist-generated=true
+yarn.lock           linguist-generated=true

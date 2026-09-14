@@ -1,0 +1,13 @@
+# Caddy 反向代理配置（推荐，比 Nginx 省心）
+#
+# 装法：
+#   sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# Caddy 会**自动申请并续期 HTTPS 证书**，不需要 certbot、不需要手写 ssl 配置。
+# 前提：域名已经解析到这台服务器的公网 IP。
+
+your-domain.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8787
+}

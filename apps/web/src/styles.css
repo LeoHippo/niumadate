@@ -1,0 +1,3647 @@
+/* =====================================================================
+   非工作时间约会审批系统 —— 样式
+   基调：红头文件 / 审批表（纸感、表格线、公章）
+   点缀：卡通表情包感（圆润按钮、有弹性、小人动图）
+   ===================================================================== */
+
+/*
+  好宝宝专用的圆体。只打进界面用到的字形，134 KB。
+  font-display: swap —— 先拿系统字体顶上，字体到了再换，不让首屏白等。
+*/
+@font-face {
+  font-family: 'ZCOOL QingKe HuangYou';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/zcool-qingke-huangyou-subset.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light;
+
+  --paper: #f4efe3;
+  --paper-2: #fffdf8;
+  --ink: #24211c;
+  --ink-soft: #4a443a;
+  --red: #b3121b;
+  --red-deep: #8c0e15;
+  --red-wash: #fdeff0;
+  --line: #cdc0a6;
+  --line-soft: #e5dcc8;
+  --muted: #7d7364;
+  --frost: #7fb2d9;
+  --frost-bg: #e9f4fd;
+  --frost-ink: #3f6683;
+  --ok: #1f7a4d;
+  --warn: #b8860b;
+  --shadow: rgba(60, 45, 20, 0.14);
+
+  --song: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif SC', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* =====================================================================
+   身份主题：每个身份从头到脚一套皮
+   ---------------------------------------------------------------------
+   分两层做：
+   1) **覆写配色变量**（--red / --paper-2 / --line …），所有既有规则自动跟着变；
+   2) 再针对「形状和装饰」覆写具体选择器（圆角、虚线、阴影、角标）。
+   入口页四张卡各挂各的 data-theme，翻到入口就等于看到四套皮肤的预览。
+   主题挂在 <html> 上时页面底色也跟着换，见 usePageTheme()。
+   ===================================================================== */
+
+/* 每个主题先声明自己「方圆」和字体的取向，下面按主题覆写。 */
+:root {
+  --r-sheet: 3px;
+  --r-card: 10px;
+  --r-field: 9px;
+  --r-btn: 5px;
+  --title-font: var(--song);
+  --title-spacing: 0.12em;
+  --title-weight: 900;
+}
+
+/* ---------- 好兄弟：直来直去、红头文件（也就是原来那套） ---------- */
+[data-theme='brother'] {
+  --red: #b3121b;
+  --red-deep: #8c0e15;
+  --red-wash: #fdeff0;
+  --paper-2: #fffdf8;
+  --line: #cdc0a6;
+  --line-soft: #e5dcc8;
+  --ink: #24211c;
+  --ink-soft: #4a443a;
+  --muted: #7d7364;
+  --r-sheet: 3px;
+  --r-card: 5px;
+  --r-field: 3px;
+  --r-btn: 4px;
+  --title-font: var(--song);
+  --title-spacing: 0.12em;
+  --title-weight: 900;
+}
+
+/* ---------- 好姐妹：精致、温柔，圆角但不幼稚 ---------- */
+[data-theme='sister'] {
+  --red: #d4638a;
+  --red-deep: #b34a6f;
+  --red-wash: #fdf1f5;
+  --paper-2: #fffcfd;
+  --line: #eccfdb;
+  --line-soft: #f7e6ee;
+  --ink: #47343c;
+  --ink-soft: #6b5560;
+  --muted: #9c8390;
+  --shadow: rgba(180, 90, 130, 0.16);
+  --r-sheet: 22px;
+  --r-card: 18px;
+  --r-field: 14px;
+  --r-btn: 999px;
+  --title-font: var(--song);
+  --title-spacing: 0.2em;
+  --title-weight: 700;
+}
+
+/* ---------- 好宝宝：甜甜软软、粉粉浪漫 ---------- */
+[data-theme='baby'] {
+  --red: #ff7fb4;
+  --red-deep: #ef5f9b;
+  --red-wash: #fff2f8;
+  --paper-2: #fffbfe;
+  --line: #ffcfe4;
+  --line-soft: #ffe6f1;
+  --ink: #5c3d4d;
+  --ink-soft: #7d5b6b;
+  --muted: #b08fa0;
+  --shadow: rgba(255, 120, 180, 0.24);
+  --r-sheet: 30px;
+  --r-card: 26px;
+  --r-field: 22px;
+  --r-btn: 999px;
+  --title-font: var(--sans);
+  --title-spacing: 0.06em;
+  --title-weight: 900;
+}
+
+/* ---------- DAD&MUM：正式、完全领命，方方正正 ---------- */
+[data-theme='dadmam'] {
+  --red: #1f3a63;
+  --red-deep: #14294a;
+  --red-wash: #f1f5fa;
+  --paper-2: #ffffff;
+  --line: #aab6c6;
+  --line-soft: #dde4ec;
+  --ink: #17202e;
+  --ink-soft: #33404f;
+  --muted: #6b7787;
+  --shadow: rgba(20, 40, 70, 0.14);
+  --r-sheet: 0;
+  --r-card: 0;
+  --r-field: 0;
+  --r-btn: 0;
+  --title-font: var(--song);
+  --title-spacing: 0.16em;
+  --title-weight: 900;
+}
+
+/* ---------------- 通用：让形状变量真正生效 ---------------- */
+
+.paper {
+  border-radius: var(--r-sheet);
+}
+
+.id-card,
+.slot-card,
+.block,
+.admin-item-wrap,
+.receipt,
+.cal {
+  border-radius: var(--r-card);
+}
+
+.input,
+.textarea,
+.cal-select,
+.cal-day {
+  border-radius: var(--r-field);
+}
+
+.btn,
+.chip,
+.month-chip {
+  border-radius: var(--r-btn);
+}
+
+/* 选择器带 [data-theme] 是为了压过下面 .redhead-title 里写死的值：
+   同优先级下后写的赢，而主题块在最上面，只能靠权重赢回来。 */
+[data-theme] .redhead-title {
+  font-family: var(--title-font);
+  letter-spacing: var(--title-spacing);
+  font-weight: var(--title-weight);
+}
+
+/* ---------------- 好姐妹的专属装饰 ---------------- */
+
+:root[data-theme='sister'] body {
+  background-color: #fff5f8;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(212, 99, 138, 0.055) 0 2px, transparent 2px 13px),
+    radial-gradient(circle at 18% 6%, rgba(255, 214, 230, 0.75), transparent 58%);
+}
+
+[data-theme='sister'] .paper {
+  background: linear-gradient(180deg, #fffafc 0 130px, #fffcfd 130px);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 40px -24px rgba(180, 90, 130, 0.55);
+}
+
+/* 分隔线换成一条圆点珠链，比双实线柔和 */
+[data-theme='sister'] .rule {
+  height: 6px;
+  border: none;
+  padding: 0;
+  background-image: radial-gradient(circle, var(--red) 1.7px, transparent 1.8px);
+  background-size: 11px 6px;
+  background-position: center;
+  opacity: 0.75;
+}
+
+[data-theme='sister'] .stamp {
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme='sister'] .btn-primary {
+  box-shadow: 0 6px 16px -8px rgba(179, 74, 111, 0.7);
+}
+
+/* ---------------- 好宝宝的专属装饰 ---------------- */
+
+:root[data-theme='baby'] body {
+  background-color: #ffeef7;
+  background-image:
+    radial-gradient(circle at 12% 6%, rgba(255, 190, 220, 0.8), transparent 55%),
+    radial-gradient(circle at 88% 18%, rgba(198, 222, 255, 0.6), transparent 50%),
+    radial-gradient(circle at 50% 98%, rgba(255, 218, 236, 0.85), transparent 60%);
+}
+
+[data-theme='baby'] .paper {
+  background: #fffbfe;
+  border: 2px dashed var(--line);
+  box-shadow: 0 18px 46px -26px rgba(255, 120, 180, 0.7);
+}
+
+/* 分隔线变一排小爱心 */
+[data-theme='baby'] .rule {
+  height: 12px;
+  border: none;
+  padding: 0;
+  background-image: radial-gradient(circle, var(--red) 2.1px, transparent 2.3px);
+  background-size: 15px 12px;
+  background-position: center;
+  opacity: 0.6;
+}
+
+[data-theme='baby'] .redhead {
+  position: relative;
+}
+
+/* 红头右下角冒出两个气泡，像在冒粉红泡泡 */
+[data-theme='baby'] .redhead::after {
+  content: '💕';
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  font-size: 18px;
+  animation: bob 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 注意：入口页的四张卡是「卡自己带 data-theme」，
+   所以这些装饰规则要同时匹配「后代」和「元素自身」两种写法。 */
+[data-theme='baby'] .id-card,
+.id-card[data-theme='baby'],
+[data-theme='baby'] .slot-card {
+  position: relative;
+  background: linear-gradient(180deg, #fffdfe, #fff6fb);
+  border-color: var(--line);
+}
+
+[data-theme='baby'] .id-card::after,
+.id-card[data-theme='baby']::after {
+  content: '💗';
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  font-size: 13px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* 卡自己带主题时，卡片外观也要跟着这套皮走 */
+.id-card[data-theme='sister'] {
+  background: linear-gradient(180deg, #fffdfe, #fff8fb);
+}
+
+.id-card[data-theme='dadmam'] {
+  background: #fff;
+  box-shadow: none;
+  border-color: var(--line);
+}
+
+.id-card[data-theme='sister'],
+.id-card[data-theme='baby'] {
+  box-shadow: 0 8px 22px -16px rgba(180, 90, 130, 0.6);
+}
+
+[data-theme='baby'] .stamp {
+  /* 圆角大一点，但仍然是实线双圈 —— 印章得像个印章 */
+  border-radius: 24px;
+  animation-delay: 0.26s;
+}
+
+[data-theme='baby'] .btn-primary {
+  background-image: linear-gradient(180deg, #ff9cc6, var(--red));
+  box-shadow: 0 8px 18px -9px rgba(239, 95, 155, 0.85);
+}
+
+/* ---------------- DAD&MUM 的专属装饰 ---------------- */
+
+:root[data-theme='dadmam'] body {
+  background-color: #e9edf2;
+  background-image: none;
+}
+
+/* 外面再套一圈细线，就是公文那种「双框」 */
+[data-theme='dadmam'] .paper {
+  background: #ffffff;
+  border: 1px solid var(--red);
+  outline: 1px solid var(--red);
+  outline-offset: 4px;
+  box-shadow: none;
+}
+
+[data-theme='dadmam'] .redhead-title {
+  color: var(--ink);
+  text-shadow: none;
+}
+
+[data-theme='dadmam'] .doc-number {
+  letter-spacing: 0.38em;
+  color: var(--ink-soft);
+}
+
+[data-theme='dadmam'] .redhead-sub {
+  letter-spacing: 0.16em;
+}
+
+[data-theme='dadmam'] .rule {
+  border-top: 2px solid var(--red);
+  border-bottom: 1px solid var(--red);
+  padding-top: 3px;
+}
+
+/* 印章改成方章，并且不歪 —— 公文不该歪 */
+[data-theme='dadmam'] .stamp {
+  border: 2px solid var(--red);
+  border-radius: 0;
+  transform: none;
+  background: #fff;
+  letter-spacing: 0.24em;
+}
+
+[data-theme='dadmam'] .btn {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+[data-theme='dadmam'] .id-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+[data-theme='dadmam'] .slot-card,
+[data-theme='dadmam'] .input,
+[data-theme='dadmam'] .textarea,
+[data-theme='dadmam'] .cal {
+  box-shadow: none;
+}
+
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  /* 真要换行也换得好看：别让最后一行只剩一两个字 */
+  text-wrap: pretty;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(rgba(180, 165, 130, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180, 165, 130, 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+/* ---------------------------------------------------------------- 纸张 */
+
+.paper {
+  position: relative;
+  max-width: 720px;
+  margin: 18px auto 60px;
+  padding: 26px 20px 40px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 0 var(--line-soft), 0 14px 34px -18px var(--shadow);
+}
+
+@media (min-width: 760px) {
+  .paper {
+    padding: 34px 40px 48px;
+  }
+}
+
+.boot {
+  max-width: 520px;
+  margin: 80px auto;
+  padding: 30px;
+  text-align: center;
+}
+
+.boot-title {
+  font-family: var(--song);
+  font-size: 20px;
+  color: var(--red);
+}
+
+.boot-detail {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ------------------------------------------------------------ 红头文件 */
+
+.redhead {
+  text-align: center;
+}
+
+/* 红头上那枚牛马徽标 */
+.head-mark {
+  display: block;
+  margin: 0 auto 8px;
+}
+
+/* 跟文字并排的小徽标 */
+.inline-mark {
+  vertical-align: -2px;
+  margin-right: 3px;
+}
+
+.doc-number {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+
+.redhead-title {
+  margin: 0;
+  font-family: var(--song);
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 0.12em;
+  color: var(--red);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  line-height: 1.35;
+}
+
+@media (min-width: 760px) {
+  .redhead-title {
+    font-size: 32px;
+  }
+}
+
+.redhead-sub {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.rule {
+  height: 0;
+  margin: 16px 0 22px;
+  border-top: 3px solid var(--red);
+  border-bottom: 1px solid var(--red);
+  padding-top: 2px;
+}
+
+/* -------------------------------------------------------------- 公章 */
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 8px 20px;
+  border: 4px double var(--red);
+  border-radius: 999px;
+  color: var(--red);
+  font-family: var(--song);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  /* 0.86 才像「盖上去的墨」，实心的反而像贴纸 */
+  opacity: 0.86;
+  background: rgba(255, 255, 255, 0.35);
+  /*
+    印章外圈再描一道细的：真正的公章是双圈 + 内圈，
+    加上 border 的 double，纸面上就有三层线，更像那么回事。
+  */
+  box-shadow: inset 0 0 0 1px rgba(179, 18, 27, 0.35);
+}
+
+.stamp-gray {
+  border-color: #9b968c;
+  color: #6f6a60;
+}
+
+/* ------------------------------------------------------- 入口页身份卡 */
+
+.entry-hint {
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0 0 18px;
+}
+
+.id-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.id-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 12px 14px;
+  background: var(--paper-2);
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.id-card:hover {
+  transform: translateY(-3px) rotate(-0.6deg);
+  border-color: var(--red);
+  box-shadow: 0 10px 18px -12px var(--shadow);
+}
+
+.id-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.id-card-off {
+  filter: grayscale(0.75);
+  opacity: 0.75;
+}
+
+/* 列向 flex + align-items:center 会让子元素按 max-content 撑开，
+   必须显式收住宽度，长文案才有机会换行 */
+.id-card > * {
+  max-width: 100%;
+}
+
+.id-emoji {
+  font-size: 34px;
+  line-height: 1;
+  animation: bob 2.6s ease-in-out infinite;
+}
+
+/* Noto 动画 emoji（真·动图）。放不出来时组件会退回静态字符，样式复用这个类。 */
+.big-emoji {
+  display: inline-block;
+  object-fit: contain;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.id-name {
+  font-family: var(--song);
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+.id-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 32px;
+  overflow-wrap: anywhere;
+}
+
+.id-state {
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.id-state-on {
+  color: var(--ok);
+}
+
+.id-state-off {
+  color: var(--muted);
+}
+
+.seal-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.seal-note {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* -------------------------------------------------------------- 区块 */
+
+.block {
+  margin: 22px 0 0;
+  padding-top: 4px;
+}
+
+.block-title {
+  margin: 0 0 10px;
+  padding-left: 10px;
+  font-family: var(--song);
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  border-left: 4px solid var(--red);
+}
+
+.block-hint {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* -------------------------------------------------------------- 控件 */
+
+.input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.input:focus-visible {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-wash);
+}
+
+.input-sm {
+  width: auto;
+  min-width: 74px;
+}
+
+.input-lg {
+  padding: 14px 16px;
+  font-size: 17px;
+  border-radius: 10px;
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.field > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin: 0 12px 8px 0;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--red);
+}
+
+.btn {
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--red);
+  border-color: var(--red-deep);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.btn-ghost {
+  background: var(--paper-2);
+}
+
+.btn-danger {
+  color: var(--red);
+  border-color: #e3b6b8;
+  background: #fff8f8;
+}
+
+.btn-link {
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  font-size: 13px;
+}
+
+.btn-big {
+  padding: 13px 34px;
+  font-size: 16px;
+  border-radius: 999px;
+  box-shadow: 0 8px 0 -4px rgba(140, 14, 21, 0.35);
+}
+
+.btn-big:active {
+  box-shadow: 0 4px 0 -4px rgba(140, 14, 21, 0.35);
+}
+
+.row-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.row-wrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.custom-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.custom-row > * {
+  min-width: 0;
+}
+
+.custom-row .input {
+  flex: 1 1 140px;
+}
+
+.notice {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--red-deep);
+  background: var(--red-wash);
+  border: 1px dashed #e8bcbf;
+  border-radius: 10px;
+}
+
+.receipt-hint {
+  margin: 22px 0 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: #fdfbf6;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.receipt-hint p {
+  margin: 0;
+}
+
+.receipt-hint p + p {
+  margin-top: 4px;
+}
+
+/*
+ * 这句是整段里最要紧的，绝对不能从中间断开——
+ * 一旦折行，视线会被割成两截。nowrap 保证它整句落在一行上。
+ */
+.receipt-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.receipt-hint .receipt-hint-key {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--red-deep);
+  white-space: nowrap;
+}
+
+.error-box {
+  margin: 14px 0 0;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--red-deep);
+  background: var(--red-wash);
+  border: 1px solid #e8bcbf;
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------ 向导 */
+
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.wizard-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 20px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  transition: background 0.2s ease;
+}
+
+.dot-on {
+  background: var(--red);
+}
+
+.wizard-count {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.wizard-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -12px 0 16px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.wizard-picked {
+  color: var(--red-deep);
+  font-weight: 700;
+}
+
+/* 「这天全天在岗」的提示，要够醒目 */
+.notice-blocked {
+  padding: 13px 15px;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.wizard-body {
+  min-height: 240px;
+}
+
+.ask {
+  margin: 0 0 6px;
+  font-family: var(--song);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  color: var(--red-deep);
+}
+
+@media (min-width: 760px) {
+  .ask {
+    font-size: 25px;
+  }
+}
+
+.ask-hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 月历 */
+
+.calendar {
+  padding: 14px 12px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cal-pickers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-select {
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--song);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cal-select:focus-visible {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-wash);
+}
+
+.cal-nav {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--red-deep);
+  background: var(--paper-2);
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.cal-nav:hover:not(:disabled) {
+  background: var(--red-wash);
+}
+
+.cal-nav:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.cal-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cal-dow,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-dow {
+  margin-bottom: 6px;
+}
+
+.cal-dow span {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cal-blank {
+  aspect-ratio: 1;
+}
+
+.cal-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease, border-color 0.12s ease;
+}
+
+.cal-day:hover:not(:disabled) {
+  border-color: var(--red);
+  transform: translateY(-2px);
+}
+
+.cal-day:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.cal-day-off {
+  color: #c8c1b3;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.cal-day-today {
+  border-color: var(--line);
+  font-weight: 700;
+}
+
+.cal-day-on {
+  background: var(--red);
+  border-color: var(--red-deep);
+  color: #fff;
+  font-weight: 900;
+}
+
+.cal-num {
+  line-height: 1;
+}
+
+/* 「你已经选过时段」的日子：以前是个不起眼的小绿点，现在给个明确的勾 */
+.cal-mark {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* 休息日：底色偏暖，一眼能和工作日分开 */
+.cal-day-rest:not(.cal-day-on) {
+  background: #fff8ec;
+  box-shadow: inset 0 0 0 1.5px #f0dfbf;
+}
+
+/* 这天全约不上：压暗 + 划掉 + 一把小锁，别让好友白点 */
+.cal-day-full:not(.cal-day-on) {
+  color: #b8b0a1;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cal-day-full:not(.cal-day-on) .cal-num {
+  text-decoration: line-through;
+  text-decoration-color: rgba(0, 0, 0, 0.16);
+}
+
+.cal-lock {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.cal-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 9px;
+  border-top: 1px dashed var(--line-soft);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cal-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.legend-rest {
+  background: #fff8ec;
+  box-shadow: inset 0 0 0 1.5px #f0dfbf;
+}
+
+.legend-full {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--line-soft);
+}
+
+.legend-picked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ok);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.cal-day-on .cal-mark {
+  background: #fff;
+  /* 勾是白色的，选中后底色变白就得把字反成主色，不然看不见 */
+  color: var(--red);
+}
+
+/* 时段选择 */
+
+.slot-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 14px 16px;
+  font: inherit;
+  text-align: left;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.slot-card:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+}
+
+.slot-card:active {
+  transform: scale(0.98);
+}
+
+.slot-card-on {
+  background: var(--red-wash);
+  border-color: var(--red);
+}
+
+.slot-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.slot-card-name {
+  font-family: var(--song);
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.slot-card-range {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.slot-card-mood {
+  font-size: 12px;
+  color: var(--red-deep);
+}
+
+.slot-card-badge {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.slot-card .puppet {
+  font-size: 24px;
+  padding: 0;
+}
+
+/* 被工作冻住 */
+.slot-card-frozen {
+  background: var(--frost-bg);
+  border-color: var(--frost);
+  border-style: dashed;
+  color: var(--frost-ink);
+}
+
+.slot-card-frozen .slot-card-name,
+.slot-card-frozen .slot-card-badge,
+.slot-card-frozen .slot-card-range {
+  color: var(--frost-ink);
+}
+
+.slot-card-frozen:hover {
+  transform: none;
+  border-color: var(--frost);
+}
+
+/* 只放出来看看 */
+.slot-card-display {
+  background: #f7f4ec;
+  border-color: var(--line-soft);
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.slot-card-display .slot-card-name {
+  color: var(--muted);
+}
+
+.slot-card-display:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
+.step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.step-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lock-tip {
+  position: fixed;
+  z-index: 40;
+  transform: translate(-50%, -100%);
+  width: 240px;
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #fff;
+  background: rgba(36, 33, 28, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+  animation: pop 0.16s ease-out;
+}
+
+.lock-tip strong {
+  color: #ffd9dc;
+}
+
+/* 自定义时间列表 */
+
+.custom-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+}
+
+/* ------------------------------------------------------------ 地点 */
+
+.place-field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.place-field .input {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.btn-dodge {
+  position: relative;
+  max-width: 100%;
+  font-weight: 700;
+  color: var(--red-deep);
+  background: #fff5f5;
+  border-color: #e8bcbf;
+  /*
+    丝滑的关键是缓动曲线，不是时长。
+    0.62s + easeOutQuint 起步快、收尾极缓，看着像滑过去的；
+    原来 0.8s 的 easeOut 收尾偏「停」，有点顿。
+  */
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.place-decided {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #fdfbf6;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.place-decided-text {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------ 回执 */
+
+.receipt {
+  text-align: center;
+  padding: 20px 0 6px;
+}
+
+.receipt-list {
+  margin: 18px 0 0;
+  padding: 0;
+  text-align: left;
+  border-top: 1px solid var(--line-soft);
+}
+
+.receipt-list > div {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.receipt-list dt {
+  flex: 0 0 74px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.receipt-list dd {
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.receipt-custom {
+  display: inline-block;
+  margin: 2px 6px 2px 0;
+  padding: 1px 8px;
+  font-size: 12px;
+  background: var(--red-wash);
+  border-radius: 999px;
+}
+
+.receipt-custom .btn-link {
+  font-size: 11px;
+  padding: 0 2px;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+}
+
+/* =====================================================================
+   排版原则：一句话尽量别从中间断开
+   1) 短标签 / 短句     → nowrap，永远不断
+   2) 列表里的一行      → 一行到底，超了打省略号（完整内容在展开 / 详情里看）
+   3) 真正长的正文      → 允许换行，但用 balance / pretty 让断点好看
+   ===================================================================== */
+
+/* 1) 短的：永不断行 */
+.stamp,
+.badge,
+.id-state,
+.wizard-count,
+.receipt-hint-key,
+.receipt-list dt,
+.admin-item-line em,
+.field > span,
+.block-title,
+.slot-card-name,
+.slot-card-range,
+.slot-card-badge,
+.cal-dow span,
+.cal-select,
+.date-side,
+.wizard-dots,
+.tab,
+.shop-name,
+.shop-sign-inner,
+.site-bar-title,
+.step-hint,
+.placeholder-hint {
+  white-space: nowrap;
+}
+
+/* 一个「日期 + 时段」是一个整体，不许拆开；要换行在条目之间换 */
+.receipt-custom {
+  white-space: nowrap;
+}
+
+/* 2) 列表行：一行到底 + 省略号 */
+.admin-item-line span,
+.list-head .block-hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 3) 长的正文：允许换行，但断得均匀 */
+.redhead-title,
+.ask,
+.art-text,
+.receipt-hint p,
+.receipt-apology,
+.shop-copy,
+.id-tagline,
+.site-bar-desc {
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------ 暂停营业 · 拉闸关门 */
+
+.shop {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0 6px;
+}
+
+.shop-frame {
+  width: min(320px, 100%);
+  filter: drop-shadow(0 18px 26px rgba(60, 45, 20, 0.22));
+}
+
+.shop-board {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: linear-gradient(180deg, #c2181f, #9d0f16);
+  border: 3px solid #7d0a10;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  color: #fff5e8;
+  font-family: var(--song);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+/* 营业灯：关门的过程中由绿转红 */
+.shop-lamp {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 9px #4ade80;
+  animation: lamp-switch 1.9s ease-in-out both;
+}
+
+.shop-door {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2f2a24, #1d1a16);
+  border-left: 3px solid #7d0a10;
+  border-right: 3px solid #7d0a10;
+}
+
+.shop-shutter {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    #e7eaee 0px,
+    #f4f6f8 3px,
+    #c9cfd6 8px,
+    #a8b0b8 11px,
+    #dfe3e7 15px
+  );
+  border-bottom: 5px solid #8f979f;
+  animation: shutter-down 1.5s cubic-bezier(0.33, 0.02, 0.18, 1) both;
+}
+
+/* 落定之后一道高光扫过去，像刚拉下来的新帘子 */
+.shop-shutter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    104deg,
+    rgba(255, 255, 255, 0) 34%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 66%
+  );
+  animation: shutter-sheen 2.4s 1.5s ease-out both;
+}
+
+.shop-sign {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  animation: sign-drop 0.55s 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.shop-sign-inner {
+  display: inline-block;
+  padding: 7px 16px;
+  background: #fffdf5;
+  border: 2px solid var(--red);
+  border-radius: 7px;
+  color: var(--red);
+  font-family: var(--song);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  box-shadow: 0 8px 16px -9px rgba(0, 0, 0, 0.6);
+  transform-origin: top center;
+  animation: sign-sway 3.2s 2.1s ease-in-out infinite;
+}
+
+.shop-floor {
+  height: 11px;
+  background: linear-gradient(180deg, #a89c84, #8a7f6a);
+  border: 3px solid #7d0a10;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.shop-copy {
+  max-width: 340px;
+  margin: 20px auto 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------ 弹窗 */
+
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(36, 33, 28, 0.55);
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease-out;
+}
+
+.modal {
+  width: min(420px, 100%);
+  padding: 24px 22px;
+  text-align: center;
+  background: var(--paper-2);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.5);
+  animation: pop 0.2s ease-out;
+}
+
+.art-text {
+  margin: 16px 0;
+  font-family: var(--song);
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--red);
+  text-shadow: 0 1px 0 #fff, 0 2px 0 rgba(179, 18, 27, 0.16);
+}
+
+/* ------------------------------------------------------------ 小人 */
+
+.puppet {
+  position: relative;
+  display: inline-block;
+  font-size: 34px;
+  line-height: 1;
+  padding: 6px 10px;
+}
+
+.puppet-body {
+  display: inline-block;
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+.puppet-hot .puppet-body {
+  animation: pant 0.5s ease-in-out infinite;
+}
+
+.puppet-cold .puppet-body {
+  animation: shiver 0.16s infinite alternate;
+}
+
+.puppet-cry .puppet-body {
+  animation: sob 0.9s ease-in-out infinite;
+}
+
+.puppet-cry .puppet-bit {
+  animation: tear-drop 1.4s ease-in infinite;
+}
+
+.puppet-cry .puppet-bit-2 {
+  animation-delay: 0.7s;
+}
+
+.puppet-happy .puppet-body {
+  animation: cheer 0.75s ease-in-out infinite;
+}
+
+.puppet-happy .puppet-bit {
+  animation: sparkle 1.3s ease-out infinite;
+}
+
+.puppet-happy .puppet-bit-2 {
+  animation-delay: 0.55s;
+}
+
+/* 驳回是一句道歉，别让它在宽屏上拉成一条长线 */
+.receipt-apology {
+  max-width: 300px;
+  margin: 2px auto 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+
+.receipt-subline {
+  margin: 2px 0 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.puppet-bit {
+  position: absolute;
+  top: 2px;
+  right: 12px;
+  font-size: 13px;
+  animation: drift 1.5s ease-out infinite;
+}
+
+.puppet-bit-2 {
+  right: 2px;
+  animation-delay: 0.6s;
+}
+
+/* ------------------------------------------------------------ 提示条 */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 50;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(420px, 90vw);
+  padding: 8px 16px 8px 6px;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.45);
+  animation: rise 0.24s ease-out;
+}
+
+/* ------------------------------------------------------------ 后台 */
+
+/* 总开关：后台最重要的一件东西，做成一条显眼的横条 */
+.site-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 18px 0 4px;
+  padding: 15px 18px;
+  border: 2px solid;
+  border-radius: 14px;
+}
+
+.site-bar-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.site-bar-dot {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.site-bar-title {
+  margin: 0;
+  font-family: var(--song);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.site-bar-desc {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.site-bar-btn {
+  flex: 0 0 auto;
+  padding: 11px 24px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border-radius: 999px;
+}
+
+.site-bar-open {
+  background: #f0fbf4;
+  border-color: #9ad9b4;
+}
+
+.site-bar-open .site-bar-dot {
+  background: var(--ok);
+  animation: site-pulse 2s ease-out infinite;
+}
+
+.site-bar-open .site-bar-title {
+  color: var(--ok);
+}
+
+.site-bar-open .site-bar-btn {
+  background: #fff;
+  border-color: #9ad9b4;
+  color: var(--red-deep);
+}
+
+.site-bar-closed {
+  background: var(--red-wash);
+  border-color: #e8bcbf;
+}
+
+.site-bar-closed .site-bar-dot {
+  background: var(--red);
+}
+
+.site-bar-closed .site-bar-title {
+  color: var(--red);
+}
+
+.site-bar-closed .site-bar-btn {
+  background: var(--red);
+  border-color: var(--red-deep);
+  color: #fff;
+}
+
+.admin-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.admin-bar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  padding: 7px 16px;
+  font: inherit;
+  font-size: 14px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tab-on {
+  background: var(--red);
+  border-color: var(--red-deep);
+  color: #fff;
+  font-weight: 700;
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.admin-item-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 13px;
+  background: #fff;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 10px;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.pick {
+  display: grid;
+  place-items: center;
+  padding-top: 3px;
+}
+
+.pick input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+.admin-item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.input-search {
+  flex: 1 1 180px;
+  min-width: 140px;
+}
+
+.quick-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.chip {
+  padding: 4px 11px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.chip:hover {
+  border-color: var(--red);
+  background: var(--red-wash);
+}
+
+.chip:active {
+  transform: scale(0.94);
+}
+
+/* 后台列表的排序说明 */
+.list-order-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.list-order-hint strong {
+  color: var(--red-deep);
+}
+
+/* 今天交上来的打个标，排序就不是黑盒了 */
+.badge-today {
+  background: #e8a33d;
+  border-color: transparent;
+  color: #fff;
+  font-weight: 800;
+}
+
+.list-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 6px;
+  padding-left: 2px;
+}
+
+.list-head .block-hint {
+  margin: 0;
+}
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: var(--red-wash);
+  border: 1.5px solid #e8bcbf;
+  border-radius: 10px;
+}
+
+.bulk-count {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--red-deep);
+}
+
+.admin-item-on {
+  border-color: var(--red);
+  background: var(--red-wash);
+}
+
+/* 展开的详情紧贴在单子底下，看起来像同一张纸 */
+.admin-item-wrap .admin-item-on {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+.admin-item-wrap .detail {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: var(--red);
+}
+
+.admin-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-item-name {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.admin-item-role {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-item-line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13.5px;
+}
+
+.admin-item-line em {
+  flex: 0 0 34px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.admin-item-line span {
+  flex: 1;
+  min-width: 0;
+}
+
+.dd-strong {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--red-deep);
+}
+
+.badge {
+  padding: 2px 9px;
+  font-size: 11px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.badge-pending {
+  color: var(--warn);
+}
+
+.badge-accepted {
+  color: var(--ok);
+}
+
+.badge-cancelled {
+  color: var(--muted);
+}
+
+.detail {
+  margin-top: 18px;
+  padding: 16px;
+  background: #fdfbf6;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+}
+
+.detail-title {
+  margin: 0 0 10px;
+  font-family: var(--song);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+
+.sub-card {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #fdfbf6;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.sub-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.weekdays {
+  margin-bottom: 8px;
+}
+
+/* 月份：点格子选，也能在下面输入框里敲 */
+.month-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.month-chip {
+  width: 40px;
+  height: 34px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+
+.month-chip:hover {
+  border-color: var(--red);
+}
+
+.month-chip:active {
+  transform: scale(0.92);
+}
+
+.month-chip-on {
+  background: var(--red);
+  border-color: var(--red-deep);
+  color: #fff;
+  font-weight: 800;
+}
+
+.raw {
+  margin-top: 14px;
+  font-size: 12px;
+}
+
+.raw pre {
+  overflow: auto;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* 让「导入配置」这个 label 看起来就是个按钮 */
+.backup-import {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.settings-panel {
+  /* 给固定在底部的保存条留位置，别把最后一个字段盖住 */
+  padding-bottom: 86px;
+}
+
+/* 保存条：钉在视口底部，改完立刻能存，不用滑到底 */
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: rgba(255, 253, 248, 0.96);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -10px 24px -18px rgba(60, 45, 20, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.save-bar-text {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.save-bar-dirty {
+  border-top-color: var(--red);
+  background: rgba(255, 248, 248, 0.97);
+}
+
+.save-bar-dirty .save-bar-text {
+  color: var(--red-deep);
+  font-weight: 800;
+}
+
+.save-bar-btn {
+  padding: 10px 26px;
+  border-radius: 999px;
+}
+
+/* ------------------------------------------------------------ 动画 */
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pant {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.06);
+  }
+}
+
+@keyframes shiver {
+  from {
+    transform: translate(-1px, 0) rotate(-2deg);
+  }
+  to {
+    transform: translate(1px, 0) rotate(2deg);
+  }
+}
+
+/* 接单中的小绿点在呼吸 */
+@keyframes site-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(31, 122, 77, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 11px rgba(31, 122, 77, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(31, 122, 77, 0);
+  }
+}
+
+@keyframes shutter-down {
+  0% {
+    transform: translateY(-102%);
+  }
+  72% {
+    transform: translateY(1.6%);
+  }
+  86% {
+    transform: translateY(-0.7%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes shutter-sheen {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+@keyframes lamp-switch {
+  0%,
+  42% {
+    background: #4ade80;
+    box-shadow: 0 0 9px #4ade80;
+  }
+  100% {
+    background: #ff6b6b;
+    box-shadow: 0 0 9px #ff6b6b;
+  }
+}
+
+@keyframes sign-drop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -28px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes sign-sway {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+@keyframes sob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(2px) rotate(3deg);
+  }
+}
+
+@keyframes tear-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.7);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(18px) scale(1.1);
+  }
+}
+
+@keyframes cheer {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) scale(1.08);
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.2) rotate(40deg);
+  }
+}
+
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.8);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.1);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /*
+    例外：躲避按钮。
+    「减少动态效果」要挡的是大幅位移和视差，而这个按钮**躲就是它的全部意义** ——
+    压成 0.01ms 等于这个功能消失了（使用者只会看到它换个字就没反应）。
+    所以这里保留一段短过渡，配合 JS 里减半的步长，动静已经很小。
+  */
+  .btn-dodge {
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* =====================================================================
+   主题形状收口 —— 必须放在文件最末尾
+   ---------------------------------------------------------------------
+   上面几十个组件把 border-radius 写死了，主题块在文件开头根本赢不了
+   （同优先级后写的赢）。这里统一加 [data-theme] 提高权重收口，
+   各组件只认 --r-* 变量，具体数值由主题决定。
+   入口页的卡片是「卡自己带 data-theme」，所以额外补了元素级选择器。
+   ===================================================================== */
+
+[data-theme] .btn,
+[data-theme] .btn-big,
+[data-theme] .tab,
+[data-theme] .chip,
+[data-theme] .month-chip,
+[data-theme] .save-bar-btn {
+  border-radius: var(--r-btn);
+}
+
+[data-theme] .input,
+[data-theme] .textarea,
+[data-theme] .cal-select,
+[data-theme] .cal-day,
+[data-theme] .quick-notes {
+  border-radius: var(--r-field);
+}
+
+[data-theme] .id-card,
+[data-theme] .slot-card,
+[data-theme] .block,
+[data-theme] .sub-card,
+[data-theme] .cal,
+[data-theme] .receipt,
+[data-theme] .admin-item-wrap,
+[data-theme] .modal {
+  border-radius: var(--r-card);
+}
+
+/* 卡自己带主题时，也要吃到自己的圆角 */
+.id-card[data-theme] {
+  border-radius: var(--r-card);
+}
+
+/* 好宝宝：日期格子做成小圆豆 */
+[data-theme='baby'] .cal-day {
+  border-radius: 999px;
+}
+
+/* DAD&MUM：一切都方，连圆点标记也别圆 */
+[data-theme='dadmam'] .slot-card-badge,
+[data-theme='dadmam'] .badge,
+[data-theme='dadmam'] .id-state {
+  border-radius: 0;
+}
+
+
+/* =====================================================================
+   主题的字体 / 动效 / 定制按钮 —— 放在最后，保证压得过前面写死的值
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- 字体
+   中文 Web 字体动辄十几 MB，塞进微信链接是灾难，所以走**系统字体栈**：
+   iOS / macOS / Windows 都自带这几套字，各平台略有差异但都比默认强。
+   ---------------------------------------------------------------- */
+
+[data-theme='brother'] {
+  --song: 'Songti SC', STSong, SimSun, 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* 楷体：有笔锋，秀气 */
+[data-theme='sister'] {
+  --song: 'Kaiti SC', STKaiti, KaiTi, 'Kaiti TC', 'AR PL UKai CN', 'Noto Serif SC', serif;
+  --sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+/*
+  圆体：笔画端点都是圆的，天然显软。
+
+  原来用系统自带的**幼圆**，问题是它比黑体轻约 22%（同一个「要」字：
+  幼圆 1103 像素的墨、雅黑 1418），12~13px 的小字就发虚，
+  连标点都会显得「总有一个字很淡」。试过用合成加粗硬撑 —— 更糟，糊。
+
+  现在换成**站酷庆科黄油体**（SIL OFL，可商用）：一样圆润可爱，
+  但笔画是实的，小字也清楚。已按界面用到的 981 个字符打了子集，
+  134 KB（原体 8.1 MB）。
+  好友自己填的名字 / 留言里如果有子集外的生僻字，会自动回退到下面的系统字体。
+*/
+[data-theme='baby'] {
+  --round: 'ZCOOL QingKe HuangYou', 'Yuanti SC', YouYuan, 'Yuanti TC', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  --song: var(--round);
+  --sans: var(--round);
+}
+
+/* 仿宋：GB/T 9704 规定党政机关公文的**正文**就用仿宋_GB2312 */
+[data-theme='dadmam'] {
+  --song: 'FangSong', STFangsong, 'FangSong_GB2312', 'Noto Serif SC', SimSun, serif;
+  --sans: 'FangSong', STFangsong, 'FangSong_GB2312', 'Noto Serif SC', SimSun, serif;
+}
+
+/* 仿宋笔画细，小字号得放大一点才看得清 */
+[data-theme='dadmam'] body {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+/*
+  黄油体比幼圆**紧凑** —— 笔画是实了，但字挨得近，整段看着挤。
+  把它松开：字距 +0.035em、行高抬到 1.85，小字之间也留口气。
+*/
+[data-theme='baby'] body {
+  letter-spacing: 0.035em;
+  line-height: 1.85;
+}
+
+[data-theme='baby'] .ask,
+[data-theme='baby'] .redhead-title,
+[data-theme='baby'] .block-title {
+  letter-spacing: 0.06em;
+}
+
+/* 按钮和徽章本来就窄，再撑字距会顶出去，给个小的就行 */
+[data-theme='baby'] .btn,
+[data-theme='baby'] .dot,
+[data-theme='baby'] .cal-num {
+  letter-spacing: 0.02em;
+}
+
+[data-theme='dadmam'] .redhead-sub,
+[data-theme='dadmam'] .ask-hint,
+[data-theme='dadmam'] .block-hint {
+  font-size: 14px;
+}
+
+/* 好宝宝：圆体配粗字更可爱 */
+[data-theme='baby'] .ask,
+[data-theme='baby'] .id-name {
+  font-weight: 900;
+}
+
+/* ---------------------------------------------------------------- 动效 */
+
+@keyframes th-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes th-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes th-stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(1.7) rotate(-14deg);
+  }
+  to {
+    opacity: 0.9;
+    transform: scale(1) rotate(-5deg);
+  }
+}
+
+@keyframes th-sheen {
+  0%,
+  62% {
+    transform: translateX(-170%);
+  }
+  100% {
+    transform: translateX(330%);
+  }
+}
+
+@keyframes th-hearts {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -480px;
+  }
+}
+
+/* 好兄弟：进门像把文件拍在桌上，干脆 */
+[data-theme='brother'] .paper {
+  animation: th-rise 0.26s ease-out;
+}
+
+[data-theme='brother'] .stamp {
+  animation: th-stamp-in 0.34s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+/* 好姐妹：柔柔地浮上来 */
+[data-theme='sister'] .paper {
+  animation: th-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme='sister'] .modal,
+[data-theme='sister'] .block {
+  animation: th-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 好宝宝：弹一下出来，像被戳了一下 */
+[data-theme='baby'] .paper {
+  animation: th-pop 0.5s cubic-bezier(0.2, 1.45, 0.4, 1);
+}
+
+[data-theme='baby'] .modal {
+  animation: th-pop 0.42s cubic-bezier(0.2, 1.45, 0.4, 1);
+}
+
+/*
+  这里原来有一条 [data-theme='baby'] .stamp { animation: th-pop ... }。
+  它特异性比后面那条「公章压下去」高，**把整个印章动画盖掉了** ——
+  章会弹出来，但不会「印」下去。
+  印章的动画统一由 .stamp 那条 stamp-press 负责，这里不再单独指派。
+*/
+
+/* 好宝宝：纸张四周飘爱心（铺在纸底下，只在页边露出） */
+:root[data-theme='baby'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Cg fill='%23ff9ec4'%3E%3Cpath d='M26 34c-5-6-13-3-13 4 0 6 9 11 13 15 4-4 13-9 13-15 0-7-8-10-13-4z' opacity='.55'/%3E%3Cpath d='M88 92c-3.4-4-8.6-2-8.6 2.7 0 4 5.9 7.3 8.6 9.9 2.7-2.6 8.6-5.9 8.6-9.9 0-4.7-5.2-6.7-8.6-2.7z' opacity='.4'/%3E%3Cpath d='M72 138c-2.6-3-6.5-1.5-6.5 2 0 3 4.4 5.5 6.5 7.4 2.1-1.9 6.5-4.4 6.5-7.4 0-3.5-3.9-5-6.5-2z' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 160px;
+  animation: th-hearts 20s linear infinite;
+}
+
+/* DAD&MUM：官方文件不做花活，直接出现 —— 这份克制本身就是态度 */
+[data-theme='dadmam'] .paper,
+[data-theme='dadmam'] .modal,
+[data-theme='dadmam'] .stamp {
+  animation: none;
+}
+
+[data-theme='dadmam'] * {
+  transition-duration: 0s;
+}
+
+/* ---------------------------------------------------------- 定制按钮 */
+
+/* 好兄弟：硬阴影，像橡皮图章按下去 */
+[data-theme='brother'] .btn-primary {
+  box-shadow: 3px 3px 0 var(--red-deep);
+  transition: none;
+}
+
+[data-theme='brother'] .btn-primary:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+[data-theme='brother'] .btn-ghost {
+  border-width: 2px;
+}
+
+/* 好姐妹：胶囊 + 一道柔光来回掠过 */
+[data-theme='sister'] .btn-primary {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(180deg, #e585a6, var(--red));
+}
+
+[data-theme='sister'] .btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 68%
+  );
+  transform: translateX(-170%);
+  animation: th-sheen 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 好宝宝：粉色渐变 + 按下去会弹 */
+[data-theme='baby'] .btn-primary {
+  background-image: linear-gradient(180deg, #ffabcf, var(--red));
+  box-shadow: 0 8px 18px -9px rgba(239, 95, 155, 0.85);
+  transition: transform 0.18s cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+
+[data-theme='baby'] .btn-primary:active {
+  transform: scale(0.93);
+}
+
+/* DAD&MUM：方角 + 内白线，按下去只压暗，绝不弹 */
+[data-theme='dadmam'] .btn-primary {
+  background: var(--red);
+  border: 1px solid var(--red-deep);
+  box-shadow: inset 0 0 0 1px #fff;
+}
+
+[data-theme='dadmam'] .btn-primary:active {
+  transform: none;
+  opacity: 0.85;
+}
+
+[data-theme='dadmam'] .btn-ghost {
+  border-color: var(--red);
+  border-width: 1px;
+}
+
+
+/* =====================================================================
+   后台增强：待审批角标 / 行内操作 / 提交时间 / 复制回复 / 牛马年报
+   ===================================================================== */
+
+/* 标签页上的待审批数量 */
+.tab-badge {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* 没在看的标签页面板：藏起来但不卸载，状态才不会丢 */
+.tab-panel-off {
+  display: none;
+}
+
+/* 列表行里的快捷操作 */
+.admin-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 10px;
+}
+
+.btn-mini {
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-mini:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.btn-mini-ok:not(:disabled) {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.btn-mini-no:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* 「9月14日 23:41 交的」 */
+.admin-item-stamp {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.export-hint {
+  align-self: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 复制回复话术 */
+.copy-reply {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  background: var(--red-wash);
+  border: 1px dashed var(--red);
+  border-radius: 8px;
+}
+
+.copy-reply-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 牛马年报 */
+.report {
+  margin-top: 12px;
+  padding: 22px 20px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-top: 6px solid var(--red);
+  border-radius: 6px;
+}
+
+.report-line {
+  margin: 0 0 20px;
+  font-size: 16px;
+  line-height: 2;
+  color: var(--ink-soft);
+}
+
+.report-line strong {
+  padding: 0 2px;
+  font-family: var(--song);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--red-deep);
+}
+
+.report-foot {
+  margin: 22px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-soft);
+  text-align: right;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+
+/* =====================================================================
+   搜索框与图标按钮
+   ===================================================================== */
+
+/* 放大镜放在输入框里面 —— 「这里能搜」的通用语言，不用配文字说明 */
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 200px;
+  min-width: 150px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-field .input-search {
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 28px;
+}
+
+/* 有内容才出现的清空按钮 */
+.search-clear {
+  position: absolute;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.search-clear:hover {
+  background: var(--line-soft);
+  color: var(--ink);
+}
+
+/* 图标按钮：刷新 */
+.icon-btn {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* 转起来 = 真的在刷新，不是点了个寂寞 */
+.icon-btn-spin svg {
+  animation: icon-spin 0.7s linear infinite;
+}
+
+@keyframes icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 搜索框 + 刷新编成一组，刷新紧贴在搜索框右侧 */
+.search-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 240px;
+  max-width: 460px;
+}
+
+/* =====================================================================
+   文案：每个身份一个可折叠块
+   ===================================================================== */
+
+.copy-block {
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.copy-block > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--red-wash);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* 干掉浏览器默认那个三角，换自己的 */
+.copy-block > summary::-webkit-details-marker {
+  display: none;
+}
+
+.copy-block > summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.copy-block[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.copy-block-name {
+  font-weight: 800;
+}
+
+.copy-block-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.copy-block-body {
+  padding: 14px 14px 2px;
+}
+
+/* 语气预设的一键套用按钮 */
+.copy-presets {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line-soft);
+}
+
+.copy-presets-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* =====================================================================
+   日历：把「能不能约」做成一眼能看出来的事
+   ---------------------------------------------------------------------
+   之前底色的意义是乱的：休息日占着暖色底，而「有没有空」只能靠灰掉来反推。
+   现在分工明确 —— **底色只说有没有空，其它属性一律用小标记**。
+   ===================================================================== */
+
+/* 有空：淡绿底。正面信号，别再让好友靠「不是灰的」去猜 */
+.cal-day-open:not(.cal-day-on) {
+  background: #edf7f0;
+  border-color: #cfe8d8;
+}
+
+.cal-day-open:not(.cal-day-on) .cal-num {
+  color: #1d6b45;
+  font-weight: 700;
+}
+
+/* 全约不上：灰底 + 划掉 + 锁。让它是「明确没戏」，不是「看起来有点淡」 */
+.cal-day-full:not(.cal-day-on) {
+  color: #b9b0a1;
+  background: #f4f1ec;
+  border-color: transparent;
+}
+
+.cal-day-full:not(.cal-day-on) .cal-num {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(0, 0, 0, 0.28);
+}
+
+.cal-lock {
+  top: 1px;
+  right: 3px;
+  font-size: 10px;
+}
+
+/* 休息日：改成暖色的数字，底色让给「有没有空」 */
+.cal-day-rest:not(.cal-day-on) {
+  background: inherit;
+  box-shadow: none;
+}
+
+.cal-day-rest:not(.cal-day-on) .cal-num {
+  color: #b8791f;
+  font-weight: 800;
+}
+
+.cal-day-rest.cal-day-open:not(.cal-day-on) {
+  background: #f7f5e9;
+  border-color: #e3ddc0;
+}
+
+/* 今天：给个环，别只是换个边框颜色 */
+.cal-day-today:not(.cal-day-on) {
+  border-color: var(--red);
+  box-shadow: inset 0 0 0 1px var(--red);
+  font-weight: 800;
+}
+
+/* 图例 */
+.cal-legend {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-open {
+  background: #edf7f0;
+  box-shadow: inset 0 0 0 1.5px #cfe8d8;
+}
+
+.legend-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 11px;
+  height: 11px;
+  font-size: 10px;
+  font-weight: 900;
+  font-style: normal;
+  color: #b8791f;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------------
+   上面那版把「约不上」做成了灰底圆片，实测糊成一堵灰墙 ——
+   一个月里往往有十五六天约不上，全都涂灰等于没重点。
+   改成：**能约的给颜色，约不上的只压暗划掉**。少数的那个才该响。
+   --------------------------------------------------------------------- */
+
+.cal-day-open:not(.cal-day-on) {
+  background: #e8f6ee;
+  border-color: #bfe3cc;
+}
+
+.cal-day-open:not(.cal-day-on) .cal-num {
+  color: #14603c;
+  font-weight: 800;
+}
+
+/* 约不上：不给底色，只压暗 + 划掉。安静下来，让能约的跳出来 */
+.cal-day-full:not(.cal-day-on) {
+  color: #b9b0a1;
+  background: transparent;
+  border-color: transparent;
+}
+
+/* 休息日只改数字颜色，不抢底色 —— 底色已经用来表示「能不能约」了 */
+.cal-day-rest:not(.cal-day-on),
+.cal-day-rest.cal-day-open:not(.cal-day-on) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.cal-day-rest.cal-day-open:not(.cal-day-on) {
+  background: #e8f6ee;
+  border-color: #bfe3cc;
+}
+
+.cal-day-rest:not(.cal-day-on) .cal-num {
+  color: #b8791f;
+}
+
+.cal-day-rest.cal-day-open:not(.cal-day-on) .cal-num {
+  color: #b8791f;
+}
+
+.legend-open {
+  background: #e8f6ee;
+  box-shadow: inset 0 0 0 1.5px #bfe3cc;
+}
+
+/* =====================================================================
+   多行文本：好友和牛马都可能写好几句，HTML 默认会把换行折叠成一个空格
+   ===================================================================== */
+
+.dd-note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*
+  审批意见输入框：能跟着内容长高。
+  field-sizing 是较新的 CSS，不支持的浏览器会退回 rows={3} 的固定高度，不影响用。
+*/
+.note-input {
+  field-sizing: content;
+  min-height: 4.5em;
+  max-height: 16em;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+/* =====================================================================
+   可读性修正 + 每套皮自己的「招牌动作」
+   ===================================================================== */
+
+/*
+  好宝宝的配色原来太浅，实测对比度：标题 2.29、强调 3.02、提示 2.81 ——
+  三项全都不达 WCAG（大字要 3、正文要 4.5），难怪看不清。
+  深一档之后：3.61 / 5.75 / 4.64，全部达标，粉色还是粉色。
+*/
+[data-theme='baby'] {
+  --red: #e04f8c;
+  --red-deep: #b82b63;
+  --muted: #8a6a78;
+}
+
+/* 好姐妹的提示文字也偏浅（3.40 → 4.77） */
+[data-theme='sister'] {
+  --muted: #86697a;
+}
+
+/* 白字压在浅粉上同样不够：按钮渐变的下半段改用深一档 */
+[data-theme='baby'] .btn-primary {
+  background-image: linear-gradient(180deg, #f07aae, var(--red-deep));
+}
+
+/* 选中的日期也是白字压色块，统一用深一档（顺带所有主题都更清楚） */
+.cal-day-on {
+  background: var(--red-deep);
+  border-color: var(--red-deep);
+}
+
+/* ---------------------------------------------------------------- 招牌动作
+   每套皮一个**只有它有**的动作，翻页时一眼能认出这是谁那页。
+   ---------------------------------------------------------------- */
+
+@keyframes rule-print {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes title-glow {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  45% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+@keyframes baby-breathe {
+  0%,
+  100% {
+    box-shadow: 0 18px 46px -26px rgba(224, 79, 140, 0.55);
+  }
+  50% {
+    box-shadow: 0 24px 58px -20px rgba(224, 79, 140, 0.95);
+  }
+}
+
+@keyframes heart-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  16% {
+    transform: scale(1.28);
+  }
+  32% {
+    transform: scale(1);
+  }
+  48% {
+    transform: scale(1.18);
+  }
+  64% {
+    transform: scale(1);
+  }
+}
+
+/* 好兄弟：红头下面那条双线「啪」地印出来，从左往右，收尾干脆 */
+[data-theme='brother'] .rule {
+  transform-origin: left center;
+  animation: rule-print 0.3s cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+
+/* 好姐妹：一道柔光缓缓扫过整个红头 */
+[data-theme='sister'] .redhead {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='sister'] .redhead::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 58%
+  );
+  transform: translateX(-120%);
+  animation: title-glow 6s ease-in-out 1s infinite;
+  pointer-events: none;
+}
+
+/* 好宝宝：整张纸外面一圈粉光在慢慢呼吸，角上的爱心在跳 */
+[data-theme='baby'] .paper {
+  animation: th-pop 0.5s cubic-bezier(0.2, 1.45, 0.4, 1), baby-breathe 4.5s ease-in-out 0.6s infinite;
+}
+
+[data-theme='baby'] .redhead::after {
+  animation: heart-beat 2s ease-in-out infinite;
+}
+
+/*
+  DAD&MUM 的躲避按钮也得动 —— 上面那条 `[data-theme='dadmam'] *` 会把它的过渡
+  一起压成 0s，等于这个功能没了。这里用更高的优先级把它救回来：
+  依然是匀速、不弹，符合公文皮的性子。
+*/
+[data-theme='dadmam'] .btn-dodge {
+  transition: transform 0.34s linear;
+}
+
+/* DAD&MUM：只留一个「文件正在被划出来」的动作 —— 匀速、不弹、不花 */
+[data-theme='dadmam'] .paper {
+  animation: rule-print 0.28s linear both;
+  transform-origin: top center;
+}
+
+[data-theme='dadmam'] .rule {
+  transform-origin: left center;
+  animation: rule-print 0.36s linear both;
+}
+
+/* =====================================================================
+   好宝宝的字重补丁 —— **已作废**
+   ---------------------------------------------------------------------
+   原来这里是一整套「合成加粗」的补丁（整页基准 600 + 表单控件单独点名），
+   因为系统自带的幼圆太轻（同一个「要」字只有雅黑 78% 的墨）。
+   但合成加粗会把圆体糊成一团 —— 那是拿错误的办法解决正确的问题。
+
+   现在字体本身换成了笔画够实的站酷庆科黄油体，**这套补丁全部撤掉**，
+   字重回到正常。留着这段说明是因为「列选择器名单永远列不全」
+   这个教训仍然成立（当时漏了「第 X / N 步」「星期那一行」好几处）。
+   ===================================================================== */
+
+/* 占位符要明显比真内容轻，不然会被当成「框里已经有字」 */
+[data-theme='baby'] .input::placeholder,
+[data-theme='baby'] .textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* =====================================================================
+   动效：让每一页都活起来，四套皮各有各的进场方式
+   ---------------------------------------------------------------------
+   关键细节：animation-fill-mode 用 **backwards** 而不是 both。
+   both 会把动画结束时的 transform 一直钉在那儿，之后 hover 的
+   translateY(-2px)、按钮按下的缩放就全都失效了 —— 动画做完了反而不能交互。
+   backwards 只保证「延迟期间先藏好」，播完就交还样式。
+   ===================================================================== */
+
+@keyframes nx-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nx-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  62% { transform: scale(1.02); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nx-slide {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nx-drift {
+  from { opacity: 0; transform: translateY(-9px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes nx-stamp {
+  from { opacity: 0; transform: scale(2.1) rotate(-8deg); }
+  68% { opacity: 1; transform: scale(0.95) rotate(-8deg); }
+  to { opacity: 1; transform: scale(1) rotate(-8deg); }
+}
+
+/* ---- 1. 切一步就换一种进场方式 ---- */
+.wizard-body {
+  animation: nx-rise 0.3s cubic-bezier(0.2, 1, 0.3, 1) backwards;
+}
+[data-theme='sister'] .wizard-body {
+  animation: nx-rise 0.44s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+[data-theme='baby'] .wizard-body {
+  animation: nx-pop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) backwards;
+}
+[data-theme='dadmam'] .wizard-body {
+  animation: nx-slide 0.34s linear backwards;
+}
+
+/* ---- 2. 日历一格一格往下落，形成一道波（延迟由内联 style 给）---- */
+.cal-day {
+  animation: nx-rise 0.3s cubic-bezier(0.2, 1, 0.3, 1) backwards;
+}
+[data-theme='sister'] .cal-day {
+  animation-name: nx-pop;
+  animation-duration: 0.36s;
+}
+[data-theme='baby'] .cal-day {
+  animation-name: nx-pop;
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+[data-theme='dadmam'] .cal-day {
+  animation-name: nx-drift;
+  animation-duration: 0.26s;
+  animation-timing-function: linear;
+}
+
+/* ---- 3. 时段卡片一张一张弹出来 ---- */
+.slot-card {
+  animation: nx-rise 0.34s cubic-bezier(0.2, 1, 0.3, 1) backwards;
+}
+[data-theme='sister'] .slot-card {
+  animation-duration: 0.44s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-theme='baby'] .slot-card {
+  animation-name: nx-pop;
+  animation-duration: 0.46s;
+  animation-timing-function: cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+[data-theme='dadmam'] .slot-card {
+  animation: nx-slide 0.3s linear backwards;
+}
+
+/* ---- 4. 进度小点一段一段亮起来 ---- */
+.wizard-dots .dot {
+  animation: nx-pop 0.3s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+}
+.wizard-dots .dot:nth-child(1) { animation-delay: 0.03s; }
+.wizard-dots .dot:nth-child(2) { animation-delay: 0.08s; }
+.wizard-dots .dot:nth-child(3) { animation-delay: 0.13s; }
+.wizard-dots .dot:nth-child(4) { animation-delay: 0.18s; }
+.wizard-dots .dot:nth-child(5) { animation-delay: 0.23s; }
+.wizard-dots .dot:nth-child(6) { animation-delay: 0.28s; }
+[data-theme='dadmam'] .wizard-dots .dot {
+  animation-name: nx-rise;
+  animation-timing-function: linear;
+  animation-duration: 0.22s;
+}
+
+/* ---- 5. 选身份：卡片依次飞进来 + 悬停浮起 ---- */
+.id-card {
+  animation: nx-pop 0.42s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+}
+.id-card:nth-child(1) { animation-delay: 0.04s; }
+.id-card:nth-child(2) { animation-delay: 0.14s; }
+.id-card:nth-child(3) { animation-delay: 0.24s; }
+.id-card:nth-child(4) { animation-delay: 0.34s; }
+[data-theme='dadmam'] .id-card {
+  animation-name: nx-slide;
+  animation-timing-function: linear;
+}
+.id-card:hover {
+  transform: translateY(-3px);
+}
+
+/* ---- 6. 回执：整张纸滑进来，公章「砸」下来 ---- */
+.receipt {
+  animation: nx-rise 0.44s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.stamp {
+  animation: nx-stamp 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) 0.14s backwards;
+}
+[data-theme='dadmam'] .stamp {
+  animation-name: nx-stamp;
+  animation-duration: 0.36s;
+  animation-timing-function: linear;
+}
+
+/* =====================================================================
+   动效调档：动作类的要给够时间
+   ---------------------------------------------------------------------
+   第一版普遍偏快（0.3~0.5s），看着像「闪了一下」，感知不强。
+   这里把**动作类**的拉长：切步骤、落格、弹卡、公章。
+   装饰类（进度点、身体浮动）保持轻快，不然整页会拖。
+   ===================================================================== */
+
+/* ---- 切步骤：这是最大的一次「动作」，给到 0.42~0.62s ---- */
+.wizard-body { animation-duration: 0.42s; }
+[data-theme='sister'] .wizard-body { animation-duration: 0.58s; }
+[data-theme='baby'] .wizard-body { animation-duration: 0.62s; }
+[data-theme='dadmam'] .wizard-body { animation-duration: 0.48s; }
+
+/* ---- 日历落格 ---- */
+.cal-day { animation-duration: 0.42s; }
+[data-theme='sister'] .cal-day { animation-duration: 0.48s; }
+[data-theme='baby'] .cal-day { animation-duration: 0.54s; }
+[data-theme='dadmam'] .cal-day { animation-duration: 0.38s; }
+
+/* ---- 时段卡片 ---- */
+.slot-card { animation-duration: 0.48s; }
+[data-theme='sister'] .slot-card { animation-duration: 0.56s; }
+[data-theme='baby'] .slot-card { animation-duration: 0.58s; }
+[data-theme='dadmam'] .slot-card { animation-duration: 0.4s; }
+
+/* ---- 身份卡 + 进度点 ---- */
+.id-card { animation-duration: 0.52s; }
+.id-card:nth-child(1) { animation-delay: 0.06s; }
+.id-card:nth-child(2) { animation-delay: 0.18s; }
+.id-card:nth-child(3) { animation-delay: 0.30s; }
+.id-card:nth-child(4) { animation-delay: 0.42s; }
+
+.wizard-dots .dot { animation-duration: 0.36s; }
+.wizard-dots .dot:nth-child(1) { animation-delay: 0.04s; }
+.wizard-dots .dot:nth-child(2) { animation-delay: 0.10s; }
+.wizard-dots .dot:nth-child(3) { animation-delay: 0.16s; }
+.wizard-dots .dot:nth-child(4) { animation-delay: 0.22s; }
+.wizard-dots .dot:nth-child(5) { animation-delay: 0.28s; }
+.wizard-dots .dot:nth-child(6) { animation-delay: 0.34s; }
+
+/* ---- 回执整张纸 ---- */
+.receipt { animation-duration: 0.6s; }
+
+/* =====================================================================
+   公章：一整套「印上去」的动作
+   ---------------------------------------------------------------------
+   分五段，共 1.15s：
+     0%   高抬 —— 从上方远处、放大两倍、还没显影
+     40%  压下 —— 砸到纸面，略微过冲
+     48%  顿住 —— 极短地一沉，就是「咚」的那一下
+     60%  回弹 —— 弹回来一点点
+     100% 落定
+   同时盖出去一圈**墨晕**（伪元素做，不占 DOM）。
+   旋转角用 CSS 变量传，因为四套皮的公章歪的角度不一样
+   （公文那套必须是正的）。
+   ===================================================================== */
+
+.stamp {
+  position: relative;
+  --stamp-rot: -5deg;
+  transform: rotate(var(--stamp-rot));
+  animation: stamp-press 1.15s cubic-bezier(0.3, 0.9, 0.3, 1) 0.2s backwards;
+}
+
+[data-theme='baby'] .stamp {
+  --stamp-rot: -8deg;
+}
+
+[data-theme='dadmam'] .stamp {
+  --stamp-rot: 0deg;
+  animation-duration: 0.9s;
+  animation-timing-function: linear;
+}
+
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: translateY(-46px) scale(2.1) rotate(var(--stamp-rot));
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0) scale(1.14) rotate(var(--stamp-rot));
+  }
+  48% {
+    opacity: 1;
+    transform: translateY(3px) scale(0.93) rotate(var(--stamp-rot));
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.03) rotate(var(--stamp-rot));
+  }
+  76% {
+    opacity: 1;
+    transform: scale(0.995) rotate(var(--stamp-rot));
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1) rotate(var(--stamp-rot));
+  }
+}
+
+/* 墨晕：盖上那一瞬间，一圈边往外散掉 */
+.stamp::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--red);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  animation: stamp-ink 1.5s ease-out 0.62s backwards;
+}
+
+@keyframes stamp-ink {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+/* 上面这套是给「刚盖上」那一瞬间用的。列表里已经盖好的章不该再演一遍。 */
+.receipt-list .stamp,
+.stamp-static {
+  animation: none;
+}
+.receipt-list .stamp::after,
+.stamp-static::after {
+  animation: none;
+}

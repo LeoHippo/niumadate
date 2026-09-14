@@ -1,0 +1,23 @@
+{
+  "name": "niumadate",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "start": "pnpm --filter @niumadate/server run start",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:ui": "node scripts/ui-smoke.mjs",
+    "preflight": "node scripts/preflight.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "typescript": "^7.0.2"
+  }
+}

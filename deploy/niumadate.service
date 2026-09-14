@@ -1,0 +1,41 @@
+# 牛马约会审批系统 —— systemd 服务
+#
+# 装法：
+#   sudo cp deploy/niumadate.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now niumadate
+#
+# 看日志：
+#   sudo journalctl -u niumadate -f
+
+[Unit]
+Description=牛马约会审批系统 (niumadate)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=niumadate
+Group=niumadate
+WorkingDirectory=/opt/niumadate/apps/server
+
+# 环境变量全在 .env 里（权限设成 600），启动时读进来
+EnvironmentFile=/opt/niumadate/.env
+
+ExecStart=/usr/bin/node dist/index.js
+
+# 崩了自动拉起来
+Restart=always
+RestartSec=3
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=niumadate
+
+# 一点基本加固。真出奇怪权限问题时，可以先注释掉这三行排查。
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
