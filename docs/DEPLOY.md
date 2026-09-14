@@ -121,7 +121,7 @@ pnpm -v
 先在**你自己的电脑**上把项目推到一个仓库（GitHub / Gitee 都行）：
 
 ```powershell
-cd E:\niumadate
+cd <你放代码的目录>
 git remote add origin <你的仓库地址>
 git push -u origin main
 ```
@@ -141,7 +141,7 @@ chown -R niumadate:niumadate /opt/niumadate
 在**你自己的电脑**上：
 
 ```powershell
-cd E:\niumadate
+cd <你放代码的目录>
 .\scripts\upload.ps1 -Server root@你的公网IP
 ```
 
@@ -217,8 +217,8 @@ openssl rand -base64 32
 ════════════════════════════════════════════════════
   已为你生成新的密钥（只显示这一次，请立刻记下来）
 ════════════════════════════════════════════════════
-  后台口令：942C-B7MK-VUBC
-  会话密钥：W2XZ-WFHY-FZZG
+  后台口令：ABCD-EFGH-JKLM
+  会话密钥：NOPQ-RSTU-VWXY
   存放位置：/opt/niumadate/apps/server/data/admin-password、session-secret
 ════════════════════════════════════════════════════
 ```
@@ -228,7 +228,7 @@ openssl rand -base64 32
 cat /opt/niumadate/apps/server/data/admin-password
 ```
 
-> 生成的口令是 3 组 4 位、形如 `942C-B7MK-VUBC`。
+> 生成的口令是 3 组 4 位、形如 `ABCD-EFGH-JKLM`。
 > 字母表**故意不含 `0 O 1 I l`** —— 抄口令时最容易错的就是这几个，
 > 而它只显示一次，抄错一次就得重来。
 
@@ -442,7 +442,7 @@ tail -f /var/log/niumadate/app.log      # 文件那份（带配置改动 diff、
 仓库里有现成的 `Dockerfile` 和 `docker-compose.yml`，换成：
 
 ```bash
-git clone https://github.com/LeoHippo/niumadate.git /opt/niumadate
+git clone <你的仓库地址> /opt/niumadate
 cd /opt/niumadate
 docker compose up -d
 docker compose logs -f app      # 后台口令在里面，第一次启动时打印一次

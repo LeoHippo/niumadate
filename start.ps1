@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-#  牛马出约会 —— 一键启动（应用 + 公网隧道）
+#  牛马出栏约会 —— 一键启动（应用 + 公网隧道）
 #
 #  为什么中文不写在 .cmd 里：
 #    cmd.exe 按系统 ANSI（中文 Windows 是 GBK）解析 .cmd 文件，
@@ -18,19 +18,42 @@ $ErrorActionPreference = 'Continue'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
-$cf = 'E:\tools\cloudflared.exe'
+# ---------- 找 cloudflared ----------
+# **不写死路径** —— 别人机器上它可能在 PATH 里，也可能在别的地方。
+# 查找顺序：环境变量 CLOUDFLARED → PATH → 和本脚本同目录 → 常见安装位置。
+function Find-Cloudflared {
+  if ($env:CLOUDFLARED -and (Test-Path $env:CLOUDFLARED)) { return $env:CLOUDFLARED }
+  $onPath = Get-Command cloudflared -ErrorAction SilentlyContinue
+  if ($onPath) { return $onPath.Source }
+  $beside = Join-Path $PSScriptRoot 'cloudflared.exe'
+  if (Test-Path $beside) { return $beside }
+  $places = @(
+    (Join-Path $env:LOCALAPPDATA 'cloudflared\cloudflared.exe'),
+    (Join-Path $env:ProgramFiles 'cloudflared\cloudflared.exe'),
+    (Join-Path $env:USERPROFILE 'cloudflared.exe')
+  )
+  foreach ($p in $places) { if (Test-Path $p) { return $p } }
+  return $null
+}
+
+$cf = Find-Cloudflared
 $log = Join-Path $root 'tunnel.log'
 $url = 'http://localhost:8787'
 
 Write-Host ''
 Write-Host '============================================' -ForegroundColor Cyan
-Write-Host '  牛马出约会 · 一键启动' -ForegroundColor Cyan
+Write-Host '  牛马出栏约会 · 一键启动' -ForegroundColor Cyan
 Write-Host '============================================' -ForegroundColor Cyan
 
-if (-not (Test-Path $cf)) {
+if (-not $cf) {
   Write-Host ''
-  Write-Host "[X] 找不到 cloudflared：$cf" -ForegroundColor Red
-  Write-Host '    下载：https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe'
+  Write-Host '[X] 找不到 cloudflared。三选一：' -ForegroundColor Red
+  Write-Host '    1. 下载到本目录（和 start.cmd 放一起）'
+  Write-Host '    2. 放进 PATH'
+  Write-Host '    3. 设环境变量 CLOUDFLARED 指向它'
+  Write-Host ''
+  Write-Host '    下载地址：' -ForegroundColor DarkGray
+  Write-Host '    https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe' -ForegroundColor DarkGray
   exit 1
 }
 

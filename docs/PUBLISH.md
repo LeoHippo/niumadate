@@ -24,7 +24,7 @@
 两条路都从这里开始。
 
 ```powershell
-cd E:\niumadate
+cd <你放代码的目录>
 docker compose up -d
 
 # 确认活着（别只看首页，接口才是真的）
@@ -48,7 +48,7 @@ curl.exe http://127.0.0.1:8787/api/health
 ## A1. 临时地址（30 秒，验证用）
 
 ```powershell
-& "E:\tools\cloudflared.exe" tunnel --url http://localhost:8787
+cloudflared tunnel --url http://localhost:8787
 ```
 
 会打印一个 `https://随机三个词.trycloudflare.com`。**手机用流量打开它** ——
@@ -87,7 +87,7 @@ ssh root@你的服务器IP
 curl -fsSL https://get.docker.com | sh
 
 # 5. 拉代码起服务
-git clone https://github.com/LeoHippo/niumadate.git /opt/niumadate
+git clone <你的仓库地址> /opt/niumadate
 cd /opt/niumadate
 docker compose up -d
 
@@ -120,11 +120,11 @@ sudo systemctl reload caddy
 ## 情况 1：容器正在跑（最常用）
 
 ```powershell
-cd E:\niumadate
+cd <你放代码的目录>
 docker compose exec -T app cat /data/admin-password
 ```
 
-输出就是口令，形如 `TDBD-KEVV-LTLV`。
+输出就是口令，形如 `ABCD-EFGH-JKLM`。
 
 ## 情况 2：容器停了或删了（数据卷还在）
 

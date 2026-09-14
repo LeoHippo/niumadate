@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-#  牛马出约会 —— 一键停止（隧道 + 应用）
+#  牛马出栏约会 —— 一键停止（隧道 + 应用）
 #
 #  和 start.ps1 一样：中文放这里，.cmd 只当纯 ASCII 启动器。
 #  本文件必须带 UTF-8 BOM。
@@ -12,7 +12,7 @@ Set-Location $root
 
 Write-Host ''
 Write-Host '============================================' -ForegroundColor Cyan
-Write-Host '  牛马出约会 · 停止' -ForegroundColor Cyan
+Write-Host '  牛马出栏约会 · 停止' -ForegroundColor Cyan
 Write-Host '============================================' -ForegroundColor Cyan
 
 # ---------- 1. 公网隧道 ----------

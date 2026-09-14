@@ -34,7 +34,7 @@
 docker compose up -d
 
 # 起隧道（这个窗口别关）
-& "E:\tools\cloudflared.exe" tunnel --url http://localhost:8787
+cloudflared tunnel --url http://localhost:8787
 ```
 
 > 下面一律按 **8787** 写 —— 那是 `docker compose` 起的实例。
@@ -60,7 +60,7 @@ https://strictly-bernard-discs-diy.trycloudflare.com
 | --- | --- | --- |
 | 一个域名 | 首年 **3~15 元**，续费 30~80 元/年 | 阿里云 / 腾讯云（最省事）、Namecheap 等 |
 | Cloudflare 账号 | **免费** | <https://dash.cloudflare.com/sign-up>，邮箱就能注册 |
-| `cloudflared` | 免费 | 已经下好在 `E:\tools\cloudflared.exe` |
+| `cloudflared` | 免费 | 官网下载一个 exe，放 PATH 里或本目录 |
 
 ### ⭐ 需要备案吗？**不需要**
 
@@ -106,7 +106,7 @@ nslookup -type=NS 你的域名.com 223.5.5.5
 ### 第 3 步：登录并建隧道
 
 ```powershell
-$cf = "E:\tools\cloudflared.exe"
+$cf = "cloudflared"   # 在 PATH 里，或者换成它的完整路径
 
 # 会弹出浏览器，选你刚加的那个域名，点授权
 & $cf tunnel login
@@ -128,11 +128,11 @@ $cf = "E:\tools\cloudflared.exe"
 
 ### 第 5 步：写配置文件
 
-新建 `C:\Users\<你的用户名>\.cloudflared\config.yml`：
+新建 `%USERPROFILE%\.cloudflared\config.yml`：
 
 ```yaml
 tunnel: 把刚才那串-UUID-填这里
-credentials-file: C:\Users\<你的用户名>\.cloudflared\把刚才那串-UUID-填这里.json
+credentials-file: %USERPROFILE%\.cloudflared\把刚才那串-UUID-填这里.json
 
 ingress:
   - hostname: niuma.你的域名.com
@@ -178,21 +178,21 @@ ingress:
 
 ```powershell
 # 窗口 1
-cd E:\niumadate; docker compose up -d
+cd <你放代码的目录>; docker compose up -d
 
 # 窗口 2
-& "E:\tools\cloudflared.exe" tunnel run niumadate
+cloudflared tunnel run niumadate
 ```
 
 **做法 B：把 cloudflared 装成 Windows 服务**（开机自启，崩了自动重启）
 
 ```powershell
-& "E:\tools\cloudflared.exe" service install
-& "E:\tools\cloudflared.exe" service start
+cloudflared service install
+cloudflared service start
 
 # 看状态 / 卸掉
 Get-Service cloudflared
-& "E:\tools\cloudflared.exe" service uninstall
+cloudflared service uninstall
 ```
 
 ---

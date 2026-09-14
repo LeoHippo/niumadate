@@ -63,3 +63,7 @@ Desktop.ini
 
 # ---- 隧道日志（start.cmd 生成的，里面有你的公网地址）----
 tunnel.log
+
+# ---- cloudflared 可执行文件（50MB+，各人自己下载）----
+cloudflared.exe
+cloudflared
