@@ -1,0 +1,23 @@
+# 这些不该进镜像
+node_modules
+**/node_modules
+
+.git
+.gitignore
+.sandbox
+.shots
+docs/shots
+
+# 本地数据（里面有你的后台口令和数据库）
+apps/server/data
+
+# 本地构建产物 —— builder 阶段会在镜像里重新生成
+dist
+**/dist
+*.log
+*.tsbuildinfo
+
+# 编辑器
+.vscode
+.idea
+.DS_Store

@@ -338,7 +338,42 @@ tail -f /var/log/niumadate/app.log
 
 ## 部署
 
-见 `docs/DEPLOY.md`。
+见 `docs/DEPLOY.md`（从零到能发给好友的链接，十步）。
+
+### 想先试一把、又不想弄脏本机
+
+有两条路，**都能删得一干二净**。
+
+**一、Docker（最干净，推荐）**
+
+```bash
+docker compose up -d            # 第一次会自动构建，几分钟
+docker compose logs -f app      # 后台口令在里面，第一次启动时打印一次
+
+# 打开 http://localhost:8788
+```
+
+不要了：
+
+```bash
+docker compose down -v          # -v 会把数据卷一起删掉，一点都不剩
+docker image rm niumadate       # 镜像也一起清掉（可选）
+```
+
+数据放在名为 `niumadate-data` 的卷里 —— 容器删了它还在，`down -v` 才真删。
+
+**二、不装 Docker（脚本，用同样的代码 + 独立目录）**
+
+```bash
+pnpm -r run build
+node scripts/sandbox.mjs start      # 起在 8788，数据在 .sandbox/
+
+node scripts/sandbox.mjs status     # 看状态、看口令
+node scripts/sandbox.mjs stop       # 停掉，数据留着
+node scripts/sandbox.mjs nuke       # 删掉 .sandbox/，彻底没了
+```
+
+它不复制代码，只是**换了个数据目录和端口**，所以和 8787 那份主环境完全互不干扰。
 
 ## 还没做
 

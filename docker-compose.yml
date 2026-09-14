@@ -1,0 +1,28 @@
+# 一条命令起一个**可以随时彻底删干净**的实例。
+#
+#   docker compose up -d        起（第一次会自动构建镜像）
+#   docker compose logs -f app  看日志，后台口令就在里面（第一次启动时打印一次）
+#   docker compose down         停掉，数据留着
+#   docker compose down -v      停掉**并把数据卷一起删掉** —— 一点都不剩
+#
+# 想换端口改下面 ports 的左边那个数（右边 8787 是容器内的，别动）。
+
+services:
+  app:
+    build: .
+    image: niumadate
+    container_name: niumadate
+    ports:
+      - "8788:8787"
+    volumes:
+      - niumadate-data:/data
+    restart: unless-stopped
+    environment:
+      # 想自己定后台口令就取消注释（不填的话第一次启动会随机生成、打印一次）
+      # ADMIN_PASSWORD: 换成一个又长又好记的
+      # 挂在反向代理后面时打开这个
+      # TRUST_PROXY: "true"
+      LOG_LEVEL: info
+
+volumes:
+  niumadate-data:

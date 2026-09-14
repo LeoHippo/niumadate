@@ -34,6 +34,9 @@ apps/server/data/
 # ---- 冒烟测试截图 ----
 .shots/
 
+# ---- 一次性的演练环境（scripts/sandbox.mjs 建的，删掉就没了）----
+.sandbox/
+
 # ---- environment / secrets ----
 .env
 .env.*
