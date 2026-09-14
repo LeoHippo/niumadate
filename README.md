@@ -338,7 +338,15 @@ tail -f /var/log/niumadate/app.log
 
 ## 部署
 
-见 `docs/DEPLOY.md`（从零到能发给好友的链接，十步）。
+三份文档，按你需要看：
+
+| 文档 | 讲什么 |
+| --- | --- |
+| **[docs/PUBLISH.md](docs/PUBLISH.md)** ⭐ | **让朋友在公网打开：两条路怎么选**、后台口令在哪找、上线验收清单 |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | 服务器部署十步（含「换成 Docker 部署」附录） |
+| [docs/TUNNEL.md](docs/TUNNEL.md) | 不买服务器，用 Cloudflare 隧道暴露本机（临时地址 / 固定域名） |
+
+**一句话选路**：不想花钱、电脑能一直开着 → 隧道；想让朋友随时能打开 → 香港轻量服务器（28 元/月）。
 
 ### 想先试一把、又不想弄脏本机
 
