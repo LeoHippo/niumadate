@@ -1,5 +1,5 @@
 import { buildServer } from './server';
-import { loadConfig, usesDevSecrets } from './config';
+import { loadConfig } from './config';
 import { setLogger } from './log';
 import { initSettings } from './settings';
 import { initSubmissions } from './submissions';
@@ -28,9 +28,36 @@ if (config.isProduction && !config.trustProxy) {
   );
 }
 
-if (usesDevSecrets(config)) {
+// 现场生成了口令 / 密钥，说明之前没配过。**必须让主人看见**，
+// 否则他既进不去后台，也不知道该去哪里找。
+if (config.generatedAdminPassword || config.generatedSessionSecret) {
+  const lines = [
+    '',
+    '════════════════════════════════════════════════════',
+    '  已为你生成新的密钥（只显示这一次，请立刻记下来）',
+    '════════════════════════════════════════════════════',
+  ];
+  if (config.generatedAdminPassword) {
+    lines.push(`  后台口令：${config.adminPassword}`);
+  }
+  if (config.generatedSessionSecret) {
+    lines.push(`  会话密钥：${config.sessionSecret}`);
+  }
+  lines.push(
+    `  存放位置：${config.dataDir}\\admin-password、session-secret`,
+    '',
+    '  想换成自己的口令：设环境变量 ADMIN_PASSWORD，或者',
+    '  直接改上面那个文件，然后重启。',
+    '════════════════════════════════════════════════════',
+    '',
+  );
+  app.log.warn(lines.join('\n'));
+}
+
+// 口令太短，登录限流也挡不住慢慢猜。
+if (config.adminPasswordSource === 'env' && config.adminPassword.length < 12) {
   app.log.warn(
-    '正在使用开发默认口令（ADMIN_PASSWORD=niuma-dev）。部署到公网前务必用环境变量覆盖 ADMIN_PASSWORD 与 SESSION_SECRET。',
+    `ADMIN_PASSWORD 只有 ${config.adminPassword.length} 位，偏短。建议 12 位以上，或者干脆不设、让程序随机生成。`,
   );
 }
 
@@ -54,7 +81,7 @@ try {
       logFile: config.logFile,
       isProduction: config.isProduction,
       trustProxy: config.trustProxy,
-      usingDevSecrets: usesDevSecrets(config),
+      adminPasswordSource: config.adminPasswordSource,
     },
     '启动完成',
   );

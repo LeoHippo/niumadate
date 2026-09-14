@@ -7,12 +7,14 @@
  *
  * 环境变量：
  *   SMOKE_BASE       后端地址，默认 http://127.0.0.1:8787
- *   ADMIN_PASSWORD   后台口令，默认 niuma-dev
+ *   ADMIN_PASSWORD   后台口令；不设就从 apps/server/data/admin-password 读
  */
+
+import { resolveAdminPassword } from './admin-password.mjs';
 
 const BASE = process.env.SMOKE_BASE ?? 'http://127.0.0.1:8787';
 const API = `${BASE}/api`;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'niuma-dev';
+const ADMIN_PASSWORD = resolveAdminPassword();
 const DEVICE_ID = `smoke-device-${Date.now()}`;
 
 let passed = 0;
@@ -133,24 +135,15 @@ async function main() {
 
   // 每个身份一套文案：四种口气必须真的不一样，不能是同一句话抄四遍
   const voices = config.roles.map((role) => role.copies?.pending ?? '');
+  // 只断言「四份文案彼此不同」这种结构性的事。
+  //
+  // 具体字句**不能在这里断言**：后台随时能改文案（「好姐妹带语气词」那条
+  // 就因为把文案换成了男生版而红过）。要验默认字句，得等恢复出厂之后，
+  // 拿 reset 返回的那一份来验 —— 见下面「出厂默认文案」。
   check('四个身份各有各的文案', new Set(voices).size === 4, JSON.stringify(voices));
-  // 好宝宝的文案刻意降过温：可爱但不用叠字堆
   check(
-    '好宝宝的文案不带叠字',
-    config.roles.find((role) => role.key === 'baby')?.copies?.pending?.includes('宝宝') !== true,
-    config.roles.find((role) => role.key === 'baby')?.copies?.pending,
-  );
-  check(
-    '好姐妹的文案带语气词',
-    config.roles.find((role) => role.key === 'sister')?.copies?.pending?.includes('～') === true,
-  );
-  check(
-    'DAD&MUM 的口吻是公文',
-    config.roles.find((role) => role.key === 'dadmam')?.copies?.pending?.includes('审阅') === true,
-  );
-  check(
-    '好兄弟的口吻直来直去',
-    config.roles.find((role) => role.key === 'brother')?.copies?.pending === '牛马在审，别急。',
+    '四个身份的文案都不是空的',
+    config.roles.every((role) => typeof role.copies?.pending === 'string' && role.copies.pending.trim() !== ''),
   );
 
   /**
@@ -534,6 +527,22 @@ async function main() {
       reset.status === 200 && reset.payload?.site?.open === true && reset.payload?.roles?.length === 4,
       `实际 ${reset.status}`,
     );
+
+    /*
+      出厂默认文案 —— **只能在这里验**。
+
+      这几条原来放在「公开配置」那一节，直接断言当前配置里的字句。
+      但那些文案后台随时能改，把好姐妹换成男生版就会红，
+      报出来像功能坏了，其实只是文案变了。
+      恢复出厂之后正好拿 reset 返回的这份默认值来验，两件事互不干扰。
+    */
+    if (reset.payload !== undefined) {
+      const byKey = (key) => reset.payload.roles.find((role) => role.key === key)?.copies?.pending ?? '';
+      check('出厂默认：好兄弟直来直去', byKey('brother').includes('别急'), byKey('brother'));
+      check('出厂默认：好姐妹带语气词', byKey('sister').includes('～'), byKey('sister'));
+      check('出厂默认：好宝宝不堆叠字', !byKey('baby').includes('宝宝'), byKey('baby'));
+      check('出厂默认：DAD&MUM 是公文腔', byKey('dadmam').includes('审阅'), byKey('dadmam'));
+    }
 
     // 复原成基准线。只有确认过「没人动过」才走到这里，所以整份盖回去是安全的。
     await req('PUT', '/admin/config', { token, body: baseline });

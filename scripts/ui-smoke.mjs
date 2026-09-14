@@ -6,18 +6,20 @@
  *   2. node scripts/ui-smoke.mjs
  *
  * 环境变量：
- *   SMOKE_BASE   默认 http://127.0.0.1:8787
- *   CHROME_PATH  Chrome 可执行文件路径
- *   SHOT_DIR     截图目录，默认 .shots
+ *   SMOKE_BASE       默认 http://127.0.0.1:8787
+ *   ADMIN_PASSWORD   后台口令；不设就从 apps/server/data/admin-password 读
+ *   CHROME_PATH      Chrome 可执行文件路径
+ *   SHOT_DIR         截图目录，默认 .shots
  */
 
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { resolveAdminPassword } from './admin-password.mjs';
 
 const BASE = process.env.SMOKE_BASE ?? 'http://127.0.0.1:8787';
 const API = `${BASE}/api`;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'niuma-dev';
+const ADMIN_PASSWORD = resolveAdminPassword();
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SHOT_DIR = process.env.SHOT_DIR ?? '.shots';
 const PORT = 9333;
@@ -585,7 +587,13 @@ async function main() {
     await waitFor("document.querySelector('.input-search')", '后台审批列表');
     await sleep(500);
 
-    const kw = '晚上';
+    /*
+      搜**这个冒烟自己刚提交的那条**（名字是「老王」）。
+      原来搜的是「晚上」—— 那要求库里碰巧有含「晚上」的数据，
+      换台机器、库被清过、或者时段选的是中午，就会一条都搜不到，
+      报出来像搜索坏了，其实是断言依赖了不该依赖的数据。
+    */
+    const kw = '老王';
     await evaluate(`(() => {
       const el = document.querySelector('.input-search');
       Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(el, ${JSON.stringify(kw)});

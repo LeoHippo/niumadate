@@ -122,10 +122,11 @@ NODE_ENV=production
 HOST=127.0.0.1
 PORT=8787
 
-# 🚩 改成一个够长的口令（登录后台用的）
-ADMIN_PASSWORD=换成一个又长又好记的密码
-# 🚩 随便一串随机字符，越长越好
-SESSION_SECRET=换成一串随机字符串
+# 后台口令和会话密钥——**这两行可以整段删掉**。
+# 不写的话，服务第一次启动会各随机生成一个、存进 data/、并在日志里打印一次。
+# 想自己定就填，详见下面的「管理员鉴权」。
+# ADMIN_PASSWORD=换成一个又长又好记的密码
+# SESSION_SECRET=换成一串随机字符串
 
 # 🚩 换成你的域名，带 https
 WEB_ORIGIN=https://your-domain.com
@@ -147,11 +148,95 @@ mkdir -p /var/log/niumadate
 chown niumadate:niumadate /var/log/niumadate
 ```
 
-生成随机密钥的小办法：
+生成随机密钥的小办法（填 `SESSION_SECRET` 用得上）：
 
 ```bash
 openssl rand -base64 32
 ```
+
+---
+
+## 管理员鉴权：口令从哪来、怎么改、忘了怎么办
+
+后台**只有一个口令**，没有账号体系 —— 这是刻意的：只有你一个人用，
+多一套用户名密码只会多一个忘记的地方。
+
+### 口令有三个来源，按优先级
+
+| 优先级 | 来源 | 什么时候用 |
+| --- | --- | --- |
+| 1 | 环境变量 `ADMIN_PASSWORD` | 想自己指定（推荐） |
+| 2 | `data/admin-password` 文件 | 服务自动生成后存在这儿 |
+| 3 | **随机生成** | 前两个都没有时，服务自己造一个 |
+
+**为什么不给默认口令。** 这个仓库是公开的，任何写死的默认值都等于公开。
+会话密钥更严重：它泄露的话，**别人不用知道口令，自己签一个合法 token 就进来了**。
+所以「没配」的后果只能是随机生成，不能是兜底。
+
+### 第一次部署：口令在哪看
+
+不设 `ADMIN_PASSWORD` 直接起服务，日志里会有一段很显眼的提示：
+
+```
+════════════════════════════════════════════════════
+  已为你生成新的密钥（只显示这一次，请立刻记下来）
+════════════════════════════════════════════════════
+  后台口令：942C-B7MK-VUBC
+  会话密钥：W2XZ-WFHY-FZZG
+  存放位置：/opt/niumadate/apps/server/data/admin-password、session-secret
+════════════════════════════════════════════════════
+```
+
+```bash
+# 抄下来之后，忘了也能随时再看
+cat /opt/niumadate/apps/server/data/admin-password
+```
+
+> 生成的口令是 3 组 4 位、形如 `942C-B7MK-VUBC`。
+> 字母表**故意不含 `0 O 1 I l`** —— 抄口令时最容易错的就是这几个，
+> 而它只显示一次，抄错一次就得重来。
+
+### 换成自己的口令
+
+```bash
+# 办法一：改 .env（推荐，重启后依然生效）
+echo 'ADMIN_PASSWORD=你的新口令' >> /opt/niumadate/.env
+systemctl restart niumadate
+
+# 办法二：直接改文件
+echo '你的新口令' > /opt/niumadate/apps/server/data/admin-password
+systemctl restart niumadate
+```
+
+> 口令**短于 12 位**服务会打一条警告 —— 登录限流挡得住暴力猜，挡不住慢慢猜。
+> 拿不准就干脆不设，让程序生成。
+
+### 忘了口令
+
+```bash
+cat /opt/niumadate/apps/server/data/admin-password   # 先看一眼
+# 真想换一个：
+rm /opt/niumadate/apps/server/data/admin-password
+systemctl restart niumadate      # 会重新生成并打印
+```
+
+### 登录之后是怎么记住的
+
+| | |
+| --- | --- |
+| 形式 | `payload.signature` 的 token，HMAC-SHA256 签名 |
+| 有效期 | **7 天**，存在浏览器 `localStorage` |
+| 放在哪 | `Authorization: Bearer <token>` |
+| 限流 | 登录接口 10 分钟 40 次（`LOGIN_RATE_MAX`） |
+
+**换了 `SESSION_SECRET`，所有人都会被登出**（旧 token 签名对不上）——
+这是想要的行为：密钥泄露时换掉它，就等于把所有旧会话一次性作废。
+
+### 别做的事
+
+- ❌ 把口令或 `SESSION_SECRET` 提交进仓库（`.env` 已在 `.gitignore` 里）
+- ❌ 把 `data/` 目录提交进去（里面有 `admin-password`；已在 `.gitignore` 里）
+- ❌ 在公网直接用 `HTTP` —— token 会在路上裸奔，务必挂 HTTPS
 
 ---
 
@@ -323,8 +408,8 @@ tail -f /var/log/niumadate/app.log      # 文件那份（带配置改动 diff、
 | `PORT` | `8787` | |
 | `DATA_DIR` | `apps/server/data` | 数据库和配置放哪 |
 | `WEB_DIST` | `apps/web/dist` | 前端产物在哪 |
-| `ADMIN_PASSWORD` | `niuma-dev` | **上线必须改**，不改会打警告 |
-| `SESSION_SECRET` | `niuma-dev-secret` | **上线必须改** |
+| `ADMIN_PASSWORD` | **随机生成** | 不设就生成一个存进 `data/admin-password` 并打印一次 |
+| `SESSION_SECRET` | **随机生成** | 同上；换掉它会让所有已登录的会话失效 |
 | `WEB_ORIGIN` | `http://localhost:5173` | 允许跨域的来源，填你的域名 |
 | `TRUST_PROXY` | `false` | **反代后面必须设 true** |
 | `NODE_ENV` | — | 线上设 `production` |
@@ -333,5 +418,5 @@ tail -f /var/log/niumadate/app.log      # 文件那份（带配置改动 diff、
 | `LOG_FILE_MAX_MB` | `5` | 单文件上限，超了滚成 `.1` |
 | `SUBMIT_RATE_MAX` | `120` | 提交限流：窗口内最多次数 |
 | `SUBMIT_RATE_WINDOW_MIN` | `60` | 提交限流窗口（分钟） |
-| `LOGIN_RATE_MAX` | `20` | 后台登录限流 |
+| `LOGIN_RATE_MAX` | `40` | 后台登录限流（定 20 时自己调试就先撞上了） |
 | `LOGIN_RATE_WINDOW_MIN` | `10` | 后台登录限流窗口（分钟） |

@@ -80,7 +80,12 @@ pnpm dev
 - 前端 http://localhost:5173 （Vite dev server，`/api` 自动代理到后端）
   - `/` 入口页选身份 → `/date/:role` 填写 → `/status/:role` 回执 / 驳回结果
 - 后端 http://127.0.0.1:8787
-- 后台 http://localhost:5173/admin ，默认口令 `niuma-dev`
+- 后台 http://localhost:5173/admin
+
+> **后台口令从哪来。** 没有默认口令（仓库是公开的，写死的默认值等于公开）。
+> 第一次启动时服务会**随机生成一个、存进 `apps/server/data/admin-password`、
+> 并在终端打印一次**，抄下来即可。想自己定就往 `apps/server/.env` 里写
+> `ADMIN_PASSWORD=...`。详见 [docs/DEPLOY.md 的「管理员鉴权」](docs/DEPLOY.md)。
 
 > Vite 默认只监听 localhost（IPv6）。想用手机在同一个 WiFi 下测试，加 `--host`：
 > `pnpm --filter @niumadate/web run dev -- --host`，然后用电脑的局域网 IP 访问。
@@ -273,14 +278,16 @@ node -e "const {DatabaseSync}=require('node:sqlite');const db=new DatabaseSync('
 | `LOG_FILE_MAX_MB` | `5` | 日志文件上限，超了滚成 `.1`（只留一代） |
 | `SUBMIT_RATE_MAX` | `120` | 提交限流：窗口内最多次数 |
 | `SUBMIT_RATE_WINDOW_MIN` | `60` | 提交限流的窗口（分钟） |
-| `LOGIN_RATE_MAX` | `20` | 后台登录限流：窗口内最多次数 |
+| `LOGIN_RATE_MAX` | `40` | 后台登录限流：窗口内最多次数 |
 | `LOGIN_RATE_WINDOW_MIN` | `10` | 后台登录限流的窗口（分钟） |
-| `ADMIN_PASSWORD` | `niuma-dev` | 后台口令，**上线必须改** |
-| `SESSION_SECRET` | `niuma-dev-secret` | token 签名密钥，**上线必须改** |
-| `DATA_DIR` | `apps/server/data` | 数据目录 |
+| `ADMIN_PASSWORD` | **随机生成** | 后台口令。不设就生成一个存进 `data/admin-password` 并打印一次 |
+| `SESSION_SECRET` | **随机生成** | token 签名密钥。换掉它 = 所有已登录的会话全部失效 |
+| `DATA_DIR` | `apps/server/data` | 数据目录（口令文件也存在这里） |
 | `WEB_DIST` | `apps/web/dist` | 前端产物目录 |
 
-用默认口令启动时，服务端会打印一条醒目的 warn。
+**这两项为什么没有默认值。** 仓库是公开的，任何写死的默认口令都等于公开；
+会话密钥更严重 —— 知道它的人可以**自己签一个合法 token**，连口令都不用猜。
+所以「没配」的后果只能是随机生成，不能是兜底。
 
 ## 日志
 

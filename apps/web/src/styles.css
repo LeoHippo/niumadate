@@ -2559,21 +2559,21 @@ body {
   把它松开：字距 +0.035em、行高抬到 1.85，小字之间也留口气。
 */
 [data-theme='baby'] body {
-  letter-spacing: 0.035em;
-  line-height: 1.85;
+  letter-spacing: 0.055em;
+  line-height: 1.95;
 }
 
 [data-theme='baby'] .ask,
 [data-theme='baby'] .redhead-title,
 [data-theme='baby'] .block-title {
-  letter-spacing: 0.06em;
+  letter-spacing: 0.09em;
 }
 
 /* 按钮和徽章本来就窄，再撑字距会顶出去，给个小的就行 */
 [data-theme='baby'] .btn,
 [data-theme='baby'] .dot,
 [data-theme='baby'] .cal-num {
-  letter-spacing: 0.02em;
+  letter-spacing: 0.035em;
 }
 
 [data-theme='dadmam'] .redhead-sub,

@@ -82,11 +82,19 @@ if (existsSync(dataDir)) {
 // ---------- 4. 环境变量 ----------
 const adminPassword = process.env.ADMIN_PASSWORD;
 if (adminPassword === undefined || adminPassword === '') {
-  warn('ADMIN_PASSWORD', '没设 —— 会用开发默认口令，**上线必须设**');
+  // 现在不设也安全了：服务第一次启动会随机生成一个并打出来，存在 data/ 下。
+  ok('ADMIN_PASSWORD', '没设 —— 服务会自动生成一个强口令并打印，无需干预');
 } else if (adminPassword.length < 12) {
-  warn('ADMIN_PASSWORD', `只有 ${adminPassword.length} 位，建议 12 位以上`);
+  warn('ADMIN_PASSWORD', `只有 ${adminPassword.length} 位，建议 12 位以上（或者干脆不设，让程序生成）`);
 } else {
   ok('ADMIN_PASSWORD', '已设置');
+}
+
+const sessionSecret = process.env.SESSION_SECRET;
+if (sessionSecret !== undefined && sessionSecret !== '' && sessionSecret.length < 24) {
+  warn('SESSION_SECRET', `只有 ${sessionSecret.length} 位，建议 24 位以上（或者干脆不设，让程序生成）`);
+} else {
+  ok('SESSION_SECRET', sessionSecret ? '已设置' : '没设 —— 服务会自动生成一个并落盘');
 }
 
 const origin = process.env.WEB_ORIGIN;
