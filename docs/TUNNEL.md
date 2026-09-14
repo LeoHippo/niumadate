@@ -15,7 +15,7 @@
 
 | | 临时隧道（Quick Tunnel） | 固定隧道（Named Tunnel） |
 | --- | --- | --- |
-| 命令 | `cloudflared tunnel --url http://localhost:8788` | 见下面 |
+| 命令 | `cloudflared tunnel --url http://localhost:8787` | 见下面 |
 | 地址 | `https://随机三个词.trycloudflare.com` | **`https://niuma.你的域名.com`** |
 | 每次重启 | **换一个新地址** ✗ | 永远是这个 ✓ |
 | 需要域名 | 不用 | **要**（十几块一年） |
@@ -34,8 +34,12 @@
 docker compose up -d
 
 # 起隧道（这个窗口别关）
-& "E:\tools\cloudflared.exe" tunnel --url http://localhost:8788
+& "E:\tools\cloudflared.exe" tunnel --url http://localhost:8787
 ```
+
+> 下面一律按 **8787** 写 —— 那是 `docker compose` 起的实例。
+> 如果你用的是演练环境 `node scripts/sandbox.mjs`（**故意用 8788**，免得和主实例撞），
+> 把下面所有 `8787` 换成 `8788` 即可。
 
 输出里会有一行：
 
@@ -101,7 +105,7 @@ credentials-file: C:\Users\<你的用户名>\.cloudflared\把刚才那串-UUID-�
 
 ingress:
   - hostname: niuma.你的域名.com
-    service: http://localhost:8788
+    service: http://localhost:8787
   # 最后这条是兜底，必须有
   - service: http_status:404
 ```
@@ -166,6 +170,6 @@ Get-Service cloudflared
 
 隧道是**把本机端口开到公网**。这个应用本身做得比较稳（后台是指令 + HMAC token、口令自动随机生成、有登录限流），但注意：
 
-- **别把 8788 以外的端口也穿出去**（尤其是 Docker 的 2375、或者是别的开发服务）
+- **别把 8787 以外的端口也穿出去**（尤其是 Docker 的 2375、或者是别的开发服务）
 - 隧道地址**知道的人就能访问**，别发到公开的地方
 - 用完就 `Ctrl+C` 停掉，别让它一直开着

@@ -363,7 +363,7 @@ tail -f /var/log/niumadate/app.log
 docker compose up -d            # 第一次会自动构建，实测 42 秒
 docker compose logs -f app      # 后台口令在里面，第一次启动时打印一次
 
-# 打开 http://localhost:8788
+# 打开 http://localhost:8787
 ```
 
 不要了：

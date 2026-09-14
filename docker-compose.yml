@@ -5,7 +5,15 @@
 #   docker compose down         停掉，数据留着
 #   docker compose down -v      停掉**并把数据卷一起删掉** —— 一点都不剩
 #
-# 想换端口改下面 ports 的左边那个数（右边 8787 是容器内的，别动）。
+# 端口映射 "8787:8787" 两边看着一样，但含义不同：
+#   左边 = 你电脑（或服务器）上对外开放的端口 ← 浏览器访问的是这个
+#   右边 = 容器里 Node 监听的端口（Dockerfile 里 ENV PORT=8787），别动
+#
+# **左边故意也是 8787**，不是随便定的：deploy/Caddyfile 和 deploy/nginx.conf
+# 里写的是 reverse_proxy 127.0.0.1:8787。改成别的数，服务器上挂 HTTPS 时反代就指错了。
+#
+# 想同时跑两个实例（比如一份真实数据 + 一份随便玩的），就自己改左边那个数 ——
+# scripts/sandbox.mjs 起的是 8788，正是为了不和这个撞。
 
 services:
   app:
@@ -13,7 +21,7 @@ services:
     image: niumadate
     container_name: niumadate
     ports:
-      - "8788:8787"
+      - "8787:8787"
     volumes:
       - niumadate-data:/data
     restart: unless-stopped
