@@ -346,8 +346,21 @@ tail -f /var/log/niumadate/app.log
 
 **一、Docker（最干净，推荐）**
 
+> ⚠️ **在国内拉不动镜像。** Docker Hub 直连超时，免费公共加速器也基本都停了
+> （实测：hello-world 能拉，80MB 的 node:24-slim 就断）。
+> **先让 Docker 走代理**，否则第一步就卡住：
+>
+> Docker Desktop → Settings → Resources → Proxies → Manual proxy configuration
+> → HTTP / HTTPS 都填 `http://127.0.0.1:7897`（Clash Verge 默认端口，以你实际的为准）
+> → Apply & Restart
+>
+> **不能只开 Windows 的「系统代理」** —— Docker 引擎跑在 WSL2 虚拟机里，吃不到它。
+> 验证：`docker pull node:24-slim` 能下来就成了。
+>
+> （香港 / 境外的服务器不需要这一步，那边 Docker Hub 是直通的。）
+
 ```bash
-docker compose up -d            # 第一次会自动构建，几分钟
+docker compose up -d            # 第一次会自动构建，实测 42 秒
 docker compose logs -f app      # 后台口令在里面，第一次启动时打印一次
 
 # 打开 http://localhost:8788

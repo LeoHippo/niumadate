@@ -1,4 +1,5 @@
 import { buildServer } from './server';
+import { join } from 'node:path';
 import { loadConfig } from './config';
 import { setLogger } from './log';
 import { initSettings } from './settings';
@@ -44,7 +45,9 @@ if (config.generatedAdminPassword || config.generatedSessionSecret) {
     lines.push(`  会话密钥：${config.sessionSecret}`);
   }
   lines.push(
-    `  存放位置：${config.dataDir}\\admin-password、session-secret`,
+    // 用 join 而不是手写分隔符：Linux 上是 /，Windows 上是 ，
+    // 写死反斜杠的话在容器里就会打出 /data\admin-password 这种怪东西。
+    `  存放位置：${join(config.dataDir, 'admin-password')}、session-secret`,
     '',
     '  想换成自己的口令：设环境变量 ADMIN_PASSWORD，或者',
     '  直接改上面那个文件，然后重启。',

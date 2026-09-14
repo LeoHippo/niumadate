@@ -436,6 +436,73 @@ tail -f /var/log/niumadate/app.log      # 文件那份（带配置改动 diff、
 
 ---
 
+## 附：换成 Docker 部署
+
+上面十步是**裸机**做法（服务器上装 Node、跑 systemd）。不想在服务器上装 Node 的话，
+仓库里有现成的 `Dockerfile` 和 `docker-compose.yml`，换成：
+
+```bash
+git clone https://github.com/LeoHippo/niumadate.git /opt/niumadate
+cd /opt/niumadate
+docker compose up -d
+docker compose logs -f app      # 后台口令在里面，第一次启动时打印一次
+```
+
+然后前面照旧挂 Caddy（第 7 步），反代目标不变，还是 `127.0.0.1:8787`。
+
+### 只有一件事要特别注意：镜像从哪拉
+
+| 服务器在哪 | 要不要配镜像代理 |
+| --- | --- |
+| **香港 / 新加坡 / 其他境外** | **不用**，Docker Hub 直通 |
+| **中国大陆** | **必须配**，否则 `docker compose build` 第一步就卡住 |
+
+本地（Docker Desktop）：
+
+```
+Settings → Resources → Proxies → Manual proxy configuration
+  HTTP        http://127.0.0.1:7897
+  HTTPS       http://127.0.0.1:7897
+  Apply & Restart
+```
+
+服务器上没有 Docker Desktop，改用 **systemd 环境变量**：
+
+```bash
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/proxy.conf > /dev/null << 'EOF'
+[Service]
+Environment="HTTP_PROXY=http://127.0.0.1:7890"
+Environment="HTTPS_PROXY=http://127.0.0.1:7890"
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+> **为什么「系统代理」不够。** 拉镜像的是**守护进程**（本地在 WSL2 虚拟机里，
+> 服务器上是 dockerd），它不吃浏览器那套系统代理，必须单独告诉它。
+>
+> **免费公共加速器现在基本都废了。** 2026-09 实测：`docker.m.daocloud.io`、
+> `docker.1ms.run`、`docker.xuanyuan.me` 拉 10KB 的 hello-world 能过，
+> 一到 80MB 的 node 镜像就断（有的直接弹付费引导）。别在这上面耗时间，**配代理更快**。
+
+### 数据放在哪
+
+```bash
+docker volume ls | grep niumadate       # 数据在这个卷里
+docker compose down                     # 停掉，数据留着
+docker compose down -v                  # 停掉并把数据卷一起删掉 —— 一点都不剩
+```
+
+备份就是备份这个卷：
+
+```bash
+docker run --rm -v niumadate_niumadate-data:/data -v "$(pwd)":/backup \
+  alpine tar czf /backup/niumadate-data.tgz -C /data .
+```
+
+---
+
 ## 环境变量速查
 
 | 变量 | 默认 | 说明 |
