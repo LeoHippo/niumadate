@@ -20,8 +20,16 @@ services:
     environment:
       # 想自己定后台口令就取消注释（不填的话第一次启动会随机生成、打印一次）
       # ADMIN_PASSWORD: 换成一个又长又好记的
-      # 挂在反向代理后面时打开这个
-      # TRUST_PROXY: "true"
+
+      # 信任反向代理传来的 X-Forwarded-For。**容器里请保持打开。**
+      #
+      # 不打开会怎样：请求进容器时源 IP 全是 Docker 的网关地址（172.18.0.1），
+      # 于是**所有好友在限流眼里是同一个人**，一个人刷几条就把大家全挡住了；
+      # 日志里的来源 IP 也全是 172.18.0.1，出事没法查。
+      #
+      # 云隧道（cloudflared）和 Caddy / Nginx 都会带上真实的客户端 IP，所以开着是对的。
+      TRUST_PROXY: "true"
+
       LOG_LEVEL: info
 
 volumes:
