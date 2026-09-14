@@ -60,3 +60,6 @@ Desktop.ini
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# ---- 隧道日志（start.cmd 生成的，里面有你的公网地址）----
+tunnel.log
