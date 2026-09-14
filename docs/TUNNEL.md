@@ -56,23 +56,54 @@ https://strictly-bernard-discs-diy.trycloudflare.com
 
 ### 需要准备
 
-| | 大概花多少 | 说明 |
+| | 花多少 | 在哪弄 |
 | --- | --- | --- |
-| 一个域名 | **十几块/年** | 阿里云、腾讯云、Namecheap 都行。`.top` `.xyz` `.icu` 首年最便宜 |
-| Cloudflare 账号 | **免费** | <https://dash.cloudflare.com/sign-up> |
+| 一个域名 | 首年 **3~15 元**，续费 30~80 元/年 | 阿里云 / 腾讯云（最省事）、Namecheap 等 |
+| Cloudflare 账号 | **免费** | <https://dash.cloudflare.com/sign-up>，邮箱就能注册 |
 | `cloudflared` | 免费 | 已经下好在 `E:\tools\cloudflared.exe` |
 
-### 第 1 步：把域名交给 Cloudflare 管
+### ⭐ 需要备案吗？**不需要**
 
-1. 先买好域名
-2. 登录 Cloudflare → **Add a site** → 填你的域名 → 选 **Free** 套餐
-3. Cloudflare 会给你**两个 NS 地址**（形如 `xxx.ns.cloudflare.com`）
-4. **回到你买域名的地方**，把域名的 NS 改成这两个
-5. 等生效（几分钟到几小时，Cloudflare 面板上会变成 Active）
+这是最多人卡住的地方，先说清楚：
 
-> 只有 NS 交给 Cloudflare，它才能给你签 HTTPS 证书、才能把域名指到隧道上。
+- **备案是针对「中国大陆的服务器」的** —— 你的应用跑在**自己家电脑**上，
+  流量从 Cloudflare 隧道出去，**全程没有任何大陆服务器参与** ✓
+- 所以**不用备案** ✓✓✓
+- 域名在国内注册商买**也不影响** —— **域名实名认证 ≠ 网站备案**，是两件事，别混
 
-### 第 2 步：登录并建隧道
+（只有当你把应用部署到**大陆的服务器**上，才需要备案。香港服务器同样不用。）
+
+### 第 1 步：买域名
+
+1. 打开阿里云 / 腾讯云 → **域名注册** → 搜一个名字 → 加入清单 → 付款
+2. `.com` 最正式也最贵；`.top` `.xyz` `.icu` 首年经常几块钱
+3. ⚠️ **一定要看「续费价」那一栏** —— 首年 5 元、明年 60 元的套路很常见
+4. 买完要**实名认证**（身份证 + 人脸，几分钟）—— 不实名域名会被暂停解析 ✗
+
+### 第 2 步：把域名交给 Cloudflare 管
+
+1. 登录 Cloudflare → **Add a site** → 填你的域名 → 选 **Free** 套餐
+2. Cloudflare 会给你**两个 NS 地址**，形如：
+   ```
+   ada.ns.cloudflare.com
+   bob.ns.cloudflare.com
+   ```
+3. **回到阿里云**改 NS：
+   `域名控制台` → 点你的域名 → `DNS 修改`（或 `DNS 服务器`）
+   → 选「**修改 DNS 服务器**」→ 选「**自定义 DNS**」→ 填那两个地址 → 保存
+4. **等** —— 快则几分钟，慢则几小时。Cloudflare 面板上从 `Pending` 变成 `Active` 才算好
+
+**验证 NS 改成功没有：**
+
+```powershell
+# 应该输出 Cloudflare 给你的那两个 NS
+nslookup -type=NS 你的域名.com 223.5.5.5
+```
+
+> 只有 NS 交给 Cloudflare，它才能给你**自动签 HTTPS 证书**、才能把域名指到隧道上。
+> 这一步没生效，后面的 `tunnel login` 里**根本选不到你的域名** ✗
+
+### 第 3 步：登录并建隧道
 
 ```powershell
 $cf = "E:\tools\cloudflared.exe"
@@ -87,7 +118,7 @@ $cf = "E:\tools\cloudflared.exe"
 `create` 会打印一串 **UUID**（形如 `4a1b2c3d-5e6f-...`），**记下来**，
 下面要用，配置文件名也是它。
 
-### 第 3 步：把一个子域名指到这条隧道
+### 第 4 步：把一个子域名指到这条隧道
 
 ```powershell
 & $cf tunnel route dns niumadate niuma.你的域名.com
@@ -95,7 +126,7 @@ $cf = "E:\tools\cloudflared.exe"
 
 这会自动在 Cloudflare 里加一条 CNAME 记录 ✓ 不用手动去配 DNS。
 
-### 第 4 步：写配置文件
+### 第 5 步：写配置文件
 
 新建 `C:\Users\<你的用户名>\.cloudflared\config.yml`：
 
@@ -110,7 +141,7 @@ ingress:
   - service: http_status:404
 ```
 
-### 第 5 步：跑起来
+### 第 6 步：跑起来
 
 ```powershell
 & $cf tunnel run niumadate
@@ -120,7 +151,26 @@ ingress:
 
 ---
 
-## 三、别让它每次开机都要手动跑
+## 三、每一步怎么验证
+
+固定隧道涉及「浏览器点几下」和「命令行跑几条」两类操作，**每步都能验证**。
+卡住的时候按这张表查，能立刻定位是哪一步没生效：
+
+| 做完 | 验证命令 | 看到什么才算过 |
+| --- | --- | --- |
+| 买完域名 | 登录注册商控制台 | 域名状态是「正常」，且已实名 |
+| 改完 NS | `nslookup -type=NS 你的域名.com 223.5.5.5` | 出现 `xxx.ns.cloudflare.com` |
+| NS 生效 | Cloudflare 面板看域名 | 从 `Pending` 变成 **`Active`** |
+| `tunnel login` | 浏览器弹出的授权页 | 页面里**能选到你的域名**（选不到 = NS 还没生效） |
+| `tunnel create` | `cloudflared tunnel list` | 列出 `niumadate` 和它的 UUID |
+| `tunnel route dns` | `nslookup niuma.你的域名.com 223.5.5.5` | 解析到一个 Cloudflare 的 IP |
+| 写配置 | `cloudflared tunnel ingress validate` | `All good` |
+| `tunnel run` | 看窗口输出 | `Registered tunnel connection` |
+| 全部完成 | 手机 4G 打开 `https://niuma.你的域名.com` | 出页面，地址栏有锁 |
+
+---
+
+## 四、别让它每次开机都要手动跑
 
 临时和固定隧道都是**前台进程**，窗口一关就断。想省事有两种做法：
 
@@ -147,7 +197,7 @@ Get-Service cloudflared
 
 ---
 
-## 四、这种方案的三个硬伤
+## 五、这种方案的三个硬伤
 
 | 问题 | 说明 |
 | --- | --- |
@@ -166,7 +216,7 @@ Get-Service cloudflared
 
 ---
 
-## 五、安全提醒
+## 六、安全提醒
 
 隧道是**把本机端口开到公网**。这个应用本身做得比较稳（后台是指令 + HMAC token、口令自动随机生成、有登录限流），但注意：
 
