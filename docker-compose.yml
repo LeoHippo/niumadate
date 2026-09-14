@@ -25,6 +25,16 @@ services:
     volumes:
       - niumadate-data:/data
     restart: unless-stopped
+
+    # 日志轮转。**Docker 默认不限制日志大小** —— 一个长期运行的容器
+    # 会把 json 日志无限写下去，几个月后能把磁盘撑满。
+    # 这里每条容器最多留 3 个文件、每个 5MB，也就是最多 15MB。
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
     environment:
       # 想自己定后台口令就取消注释（不填的话第一次启动会随机生成、打印一次）
       # ADMIN_PASSWORD: 换成一个又长又好记的
