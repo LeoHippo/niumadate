@@ -1,19 +1,51 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { buildDocNumber } from '@niumadate/shared';
 import type { RoleConfig } from '@niumadate/shared';
 import { BigEmoji } from '../big-emoji';
 import { ClosedModal, NiumaMark, SiteClosed, Stamp } from '../components';
 import { useConfig } from '../config-context';
+import { useMySubmissions } from '../use-submission';
 
 /** 入口页：红头文件 + 四张身份卡。卡片一直可见，关掉的点进去才甩话。 */
 export function EntryPage() {
   const config = useConfig();
   const navigate = useNavigate();
+  const location = useLocation();
   const [closed, setClosed] = useState<RoleConfig | null>(null);
+
+  // 钩子必须在任何提前 return 之前调用，否则钩子数量会时多时少
+  const { latest, loading } = useMySubmissions();
+
+  /**
+   * 想**换个身份**再来一单：状态页里那个入口会带 `?pick=1` 回来。
+   * 没有它就自动跳转，有它就老老实实显示身份卡 —— 否则会「跳走 → 点回来 → 又跳走」。
+   */
+  const picking = new URLSearchParams(location.search).get('pick') === '1';
 
   // 总开关关掉：整站只留一句暂停营业
   if (!config.site.open) return <SiteClosed config={config} />;
+
+  /*
+    已经有申请了 → **直接把好友送回他自己的状态页**。
+
+    点这种链接的人，想看的是「我那件事办得怎么样了」，
+    而不是又看一遍「先刷一下身份，我好知道该用哪副面孔见你」。
+
+    查询期间先显示一句话，别先闪一下身份卡再跳走 —— 那样很像页面坏了。
+  */
+  if (!picking) {
+    if (loading) {
+      return (
+        <main className="paper">
+          <p className="boot-title">正在找你的申请……</p>
+        </main>
+      );
+    }
+    if (latest !== null && latest !== undefined) {
+      return <Navigate to={`/status/${latest.role}`} replace />;
+    }
+  }
 
   return (
     <main className="paper">

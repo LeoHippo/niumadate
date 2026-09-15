@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { buildDayRows, buildDocNumber, copiesFor, findRole, isRoleKey } from '@niumadate/shared';
 import type { SlotCell, SlotDef } from '@niumadate/shared';
 import { api, describeError } from '../api';
@@ -60,6 +60,7 @@ type Tip = { cell: SlotCell; slot: SlotDef; anchor: HTMLElement };
 export function BookingPage() {
   const config = useContext(ConfigContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const roleKey = params.role ?? '';
 
@@ -269,8 +270,28 @@ export function BookingPage() {
     );
   }
 
-  // 手上有生效中的单子：填写页没什么可填的，去状态页
-  if (submission !== null && submission !== undefined && isSubmissionActive(submission, config.reopenAfterDays)) {
+  /**
+   * 手上有单子 → **先去状态页看结果，别直接开始填新的**。
+   *
+   * 这条规则以前只覆盖「生效中的单子」，被驳回的就直接放进表单了 ——
+   * 结果好友**看不到牛马写的意见**，只看到一张空表单，
+   * 会以为自己的申请凭空没了。所以现在驳回的也要先去看一眼。
+   *
+   * ⚠️ 这里的条件必须和**状态页往回跳的条件严丝合缝**：
+   *     状态页往回跳 =「约会日过了 且 不是驳回」
+   *     这里往前跳   =「驳回 或 单子还有效」
+   * 两条正好互补。要是这里写宽了（比如「只要有过单子就跳」），
+   * 过期的单子就会「状态页赶我去填写页 → 填写页又把我送回状态页」，
+   * **来回弹、死循环**。
+   *
+   * 真想重填：状态页上那个「重新填一份」会带 `?again=1` 回来。
+   */
+  const again = new URLSearchParams(location.search).get('again') === '1';
+  const worthShowing =
+    submission !== null &&
+    submission !== undefined &&
+    (submission.status === 'cancelled' || isSubmissionActive(submission, config.reopenAfterDays));
+  if (!again && worthShowing) {
     return <Navigate to={`/status/${roleKey}`} replace />;
   }
 

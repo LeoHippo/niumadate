@@ -113,24 +113,37 @@ export function StatusPage() {
         </section>
 
         <div className="receipt-hint">
-          <p>可以重新填一份，这次从选身份开始。</p>
+          <p>想换个时间再约一次，直接点下面重新填。</p>
           <p>要是不想重填，或者想问清楚，</p>
           <p className="receipt-hint-key">请直接微信联系牛马</p>
         </div>
 
         {/*
-          重新填一份 = 重新开一单。暂停营业时不能给这个入口，
-          否则点下去只会撞到卷帘门，白跑一趟。
+          重新填一份 = 重新开一单。
+
+          **不绕回入口页**：入口页只要发现本机有申请，就会把人送回状态页，
+          绕一圈还会回到这里 —— 而且好友已经选过身份了，没必要再选一遍。
+          带上 ?again=1 直接进这个身份的表单。
+
+          暂停营业时不给这个入口，否则点下去只会撞到卷帘门，白跑一趟。
         */}
         {config.site.open ? (
           <div className="row-center">
             <button
               type="button"
               className="btn btn-primary btn-big"
-              title="回身份选择页，重新填一份申请"
-              onClick={() => navigate('/')}
+              title="用同一个身份，重新填一份申请"
+              onClick={() => navigate(`/date/${roleKey}?again=1`)}
             >
               重新填一份
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              title="换一个身份重新填"
+              onClick={() => navigate('/?pick=1')}
+            >
+              换个身份
             </button>
           </div>
         ) : (
