@@ -152,6 +152,17 @@ export function StatusPage() {
             <p className="receipt-hint-key">等开门，或者直接微信催他</p>
           </div>
         )}
+
+        <nav className="step-nav">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            title="看看这台设备上交过的全部申请"
+            onClick={() => navigate('/mine')}
+          >
+            ← 我的申请
+          </button>
+        </nav>
       </main>
     );
   }
@@ -226,6 +237,17 @@ export function StatusPage() {
         这份回执只存在你这台设备的浏览器里。换了手机、换了浏览器或者清了缓存就看不到了，
         到时候直接在微信上问牛马。
       </p>
+
+      <nav className="step-nav">
+        <button
+          type="button"
+          className="btn btn-ghost"
+          title="看看这台设备上交过的全部申请"
+          onClick={() => navigate('/mine')}
+        >
+          ← 我的申请
+        </button>
+      </nav>
     </main>
   );
 }

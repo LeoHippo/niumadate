@@ -83,6 +83,24 @@ export function EntryPage() {
         ))}
       </div>
 
+      {/*
+        交过申请的人再点这个链接，会被自动送回状态页（见上面的跳转）。
+        但有两种人会需要这个入口：
+          1. 换了浏览器 / 清了缓存，自动跳转认不出他
+          2. 想把全部申请翻一遍
+        所以入口要一直摆在这儿，不能只给「没申请的人」看。
+      */}
+      <div className="row-center" style={{ marginTop: 18 }}>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          title="看看在这台设备上交过的申请"
+          onClick={() => navigate('/mine')}
+        >
+          我提交过，看看我的申请 →
+        </button>
+      </div>
+
       <footer className="seal-row">
         <Stamp text="牛马审批专用章" />
         <span className="seal-note">受理范围：下班后 · 周末 · 老板出差时</span>

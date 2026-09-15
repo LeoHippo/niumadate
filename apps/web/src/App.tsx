@@ -6,6 +6,7 @@ import { ConfigContext } from './config-context';
 import { AdminPage } from './pages/Admin';
 import { BookingPage } from './pages/Booking';
 import { EntryPage } from './pages/Entry';
+import { MinePage } from './pages/Mine';
 import { StatusPage } from './pages/Status';
 
 export function App() {
@@ -53,6 +54,7 @@ export function App() {
     <ConfigContext.Provider value={config}>
       <Routes>
         <Route path="/" element={<EntryPage />} />
+        <Route path="/mine" element={<MinePage />} />
         <Route path="/date/:role" element={<BookingPage />} />
         <Route path="/status/:role" element={<StatusPage />} />
         <Route path="/admin/*" element={<AdminPage />} />

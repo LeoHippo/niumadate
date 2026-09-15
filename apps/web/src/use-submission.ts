@@ -63,9 +63,16 @@ export interface LatestSubmission {
  * 取提交时间最新的那条。身份最多四个、每条记录都很小，
  * 比为了入口页专门加一个接口简单得多。
  */
-export function useMySubmissions(): { latest: LatestSubmission | null | undefined; loading: boolean } {
+export interface MySubmissions {
+  /** 按提交时间倒序；undefined = 还在查，null 不会出现（查不到就是空数组） */
+  all: LatestSubmission[] | undefined;
+  latest: LatestSubmission | null | undefined;
+  loading: boolean;
+}
+
+export function useMySubmissions(): MySubmissions {
   const config = useConfig();
-  const [latest, setLatest] = useState<LatestSubmission | null | undefined>(undefined);
+  const [all, setAll] = useState<LatestSubmission[] | undefined>(undefined);
   const deviceId = getDeviceId();
 
   // 只查开启的身份：关掉的身份本来就不该有新的申请
@@ -74,7 +81,7 @@ export function useMySubmissions(): { latest: LatestSubmission | null | undefine
 
   useEffect(() => {
     if (keys.length === 0) {
-      setLatest(null);
+      setAll([]);
       return;
     }
     let alive = true;
@@ -88,13 +95,13 @@ export function useMySubmissions(): { latest: LatestSubmission | null | undefine
           }),
         );
         const found = results.filter((item): item is LatestSubmission => item !== null);
-        // 取提交时间最新的那条
+        // 提交时间倒序：最近交的排最前
         found.sort((a, b) => b.submission.createdAt.localeCompare(a.submission.createdAt));
-        if (alive) setLatest(found[0] ?? null);
+        if (alive) setAll(found);
       } catch (cause) {
         // 查不到就当作「没提交过」，绝不能因为查询失败把好友挡在门外
         console.warn('[submission] 查询本机申请失败，按「没提交过」处理', cause);
-        if (alive) setLatest(null);
+        if (alive) setAll([]);
       }
     })();
 
@@ -104,5 +111,9 @@ export function useMySubmissions(): { latest: LatestSubmission | null | undefine
     // keySignature 是 keys 的稳定形式，避免每次渲染都重查
   }, [deviceId, keySignature]);
 
-  return { latest, loading: latest === undefined };
+  return {
+    all,
+    latest: all === undefined ? undefined : (all[0] ?? null),
+    loading: all === undefined,
+  };
 }
