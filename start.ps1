@@ -80,21 +80,37 @@ if ($running) {
   Write-Host ''
   Write-Host '[2/2] 启动公网隧道...' -ForegroundColor Green
 
+  # 两种隧道：
+  #   有命名隧道（~/.cloudflared/config.yml 存在）→ 用它，地址是**固定**的
+  #   没有 → 退回快速隧道，地址是随机的，重启就变
+  # 建命名隧道的步骤见 docs/TUNNEL.md，跑一次就一直有。
+  $namedConfig = Join-Path $env:USERPROFILE '.cloudflared\config.yml'
+  if (Test-Path $namedConfig) {
+    $script:fixedHost = (Select-String -Path $namedConfig -Pattern '^\s*-\s*hostname:\s*(\S+)' |
+      Select-Object -First 1).Matches[0].Groups[1].Value
+    Write-Host "    发现命名隧道，用固定地址：$script:fixedHost" -ForegroundColor Green
+    # 不带参数运行：cloudflared 自己会读 config.yml
+    Start-Process -FilePath $cf -ArgumentList @('--logfile', $log, 'tunnel', 'run') -WindowStyle Minimized
+    Write-Host '    等隧道建立连接（约 15 秒）...' -ForegroundColor DarkGray
+    Start-Sleep -Seconds 16
+    $script:useFixed = $true
+  } else {
+    Write-Host '    (没找到命名隧道，用快速隧道 —— 地址每次重启都会变)' -ForegroundColor DarkGray
+    Start-Process -FilePath $cf -ArgumentList @(
+      '--logfile', $log,
+      'tunnel', '--url', $url, '--no-autoupdate'
+    ) -WindowStyle Minimized
+    Write-Host '    等隧道建立连接（约 15 秒）...' -ForegroundColor DarkGray
+    Start-Sleep -Seconds 16
+    $script:useFixed = $false
+  }
+
   # 记下当前日志有多少行。日志是**追加**的，跑几次就攒下几个地址，
   # 直接取「最后一条」有可能拿到之前那个已经死掉的隧道地址。
   # 所以下面只在这条线之后的新内容里找。
   $linesBefore = 0
   if (Test-Path $log) { $linesBefore = @(Get-Content $log -ErrorAction SilentlyContinue).Count }
 
-  # --logfile 是**全局参数，必须写在 tunnel 前面**。
-  # 写在后面不生效，地址就会随刷屏丢掉。
-  Start-Process -FilePath $cf -ArgumentList @(
-    '--logfile', $log,
-    'tunnel', '--url', $url, '--no-autoupdate'
-  ) -WindowStyle Minimized
-
-  Write-Host '    等隧道建立连接（约 15 秒）...' -ForegroundColor DarkGray
-  Start-Sleep -Seconds 16
 }
 
 # ---------- 把地址捞出来 ----------
@@ -104,17 +120,24 @@ Write-Host '  你的公网地址' -ForegroundColor Cyan
 Write-Host '============================================' -ForegroundColor Cyan
 
 $found = $null
-if (Test-Path $log) {
-  # 优先只看这次新增的部分
-  $tail = @(Get-Content $log -ErrorAction SilentlyContinue) | Select-Object -Skip $linesBefore
-  $hit = $tail | Select-String -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' | Select-Object -Last 1
-  if ($hit) { $found = $hit.Matches[0].Value }
 
-  # 没找到就退回全量找（比如隧道本来就在跑、这次没重启）
-  if (-not $found) {
-    $all = Select-String -Path $log -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' -ErrorAction SilentlyContinue |
-      Select-Object -Last 1
-    if ($all) { $found = $all.Matches[0].Value }
+# 命名隧道：地址是**固定**的，直接从 config.yml 读，不用去日志里捞
+if ($script:useFixed -and $script:fixedHost) {
+  $found = "https://$script:fixedHost"
+} else {
+  # 快速隧道：地址随机，只能从日志里找
+  if (Test-Path $log) {
+    # 优先只看这次新增的部分
+    $tail = @(Get-Content $log -ErrorAction SilentlyContinue) | Select-Object -Skip $linesBefore
+    $hit = $tail | Select-String -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' | Select-Object -Last 1
+    if ($hit) { $found = $hit.Matches[0].Value }
+
+    # 没找到就退回全量找（比如隧道本来就在跑、这次没重启）
+    if (-not $found) {
+      $all = Select-String -Path $log -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' -ErrorAction SilentlyContinue |
+        Select-Object -Last 1
+      if ($all) { $found = $all.Matches[0].Value }
+    }
   }
 }
 
@@ -122,6 +145,11 @@ Write-Host ''
 if ($found) {
   Write-Host "  $found" -ForegroundColor Green
   Write-Host ''
+  if ($script:useFixed) {
+    Write-Host '  ↑ 固定地址，重启也不会变' -ForegroundColor DarkGray
+  } else {
+    Write-Host '  ↑ 临时地址，重启就换新的' -ForegroundColor DarkGray
+  }
   Write-Host "  后台：$found/admin" -ForegroundColor Gray
 } else {
   Write-Host '  (日志里还没出现地址 —— 再运行一次这个脚本就行)' -ForegroundColor Yellow
@@ -140,5 +168,10 @@ if ($LASTEXITCODE -eq 0 -and $pw) {
 
 Write-Host ''
 Write-Host '  停掉隧道：   taskkill /im cloudflared.exe /f' -ForegroundColor DarkGray
-Write-Host '  查看地址：   findstr trycloudflare tunnel.log' -ForegroundColor DarkGray
+if ($script:useFixed) {
+  Write-Host '  地址永远是这个，不用记：https://' -NoNewline -ForegroundColor DarkGray
+  Write-Host $script:fixedHost -ForegroundColor DarkGray
+} else {
+  Write-Host '  查当前地址： findstr trycloudflare tunnel.log' -ForegroundColor DarkGray
+}
 Write-Host ''
