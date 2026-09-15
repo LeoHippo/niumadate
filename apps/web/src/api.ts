@@ -1,4 +1,5 @@
 import { API_PREFIX } from '@niumadate/shared';
+import { safeStorage } from './lib';
 import type { AppConfig, ApiError, CreateSubmissionInput, Submission, SubmissionStatus } from '@niumadate/shared';
 
 /** 后端返回了结构化错误，或者响应本身就不是 2xx。 */
@@ -18,12 +19,14 @@ const TOKEN_KEY = 'niumadate.admin.token';
 
 /** 后台 token 存浏览器；用户端完全不需要登录。 */
 export const adminToken = {
+  // 同样走 safeStorage：手机上 localStorage 会抛异常，
+  // 而后台也要能在这种浏览器里打开（大不了每次重新登录）。
   get(): string | null {
-    return window.localStorage.getItem(TOKEN_KEY);
+    return safeStorage.get(TOKEN_KEY);
   },
   set(value: string | null): void {
-    if (value === null) window.localStorage.removeItem(TOKEN_KEY);
-    else window.localStorage.setItem(TOKEN_KEY, value);
+    if (value === null) safeStorage.remove(TOKEN_KEY);
+    else safeStorage.set(TOKEN_KEY, value);
   },
 };
 

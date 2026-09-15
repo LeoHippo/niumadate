@@ -12,12 +12,68 @@ import type {
 
 const DEVICE_KEY = 'niumadate.deviceId';
 
+/**
+ * 安全的 localStorage 读写。
+ *
+ * **为什么必须包一层**：手机浏览器里 localStorage 会**直接抛异常**，
+ * 不是优雅地返回 null —— 微信内置浏览器、无痕模式、用户禁用了存储、
+ * 配额满了，都会抛。一旦抛出来又没人接住，**整页白屏**。
+ *
+ * 这个 bug 真的发生过，也真的复现过：入口页正常（它不碰存储），
+ * 一点进「选日期」那页就白屏（那页要读设备号）。好友只会以为链接坏了。
+ *
+ * 所以这里全部兜住：拿不到就当「这台设备没有存储」，
+ * 功能降级（记不住人、存不住草稿），但**页面照常能用**。
+ */
+export const safeStorage = {
+  get(key: string): string | null {
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string): void {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch {
+      // 存不下就算了。这一次的填写不受影响，只是下次回来认不出人。
+    }
+  },
+  remove(key: string): void {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // 同上
+    }
+  },
+};
+
+/**
+ * 生成一个随机 id。
+ *
+ * `crypto.randomUUID` 在 **iOS 15.4 以下的 Safari / 微信内置浏览器**里不存在 ——
+ * 直接调用会抛 "not a function"，而那又会让整页白屏。所以要有退路。
+ * 这个 id 只是「认人」用的，不需要密码学强度，时间戳 + 随机数足够。
+ */
+function randomId(): string {
+  const c = globalThis.crypto;
+  if (c !== undefined && typeof c.randomUUID === 'function') {
+    try {
+      return c.randomUUID();
+    } catch {
+      // 落到下面的退路
+    }
+  }
+  return `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
 /** 浏览器生成的随机设备号，用来让好友下次进来还能看到自己的申请。 */
 export function getDeviceId(): string {
-  const existing = window.localStorage.getItem(DEVICE_KEY);
+  const existing = safeStorage.get(DEVICE_KEY);
   if (existing !== null && existing !== '') return existing;
-  const created = crypto.randomUUID();
-  window.localStorage.setItem(DEVICE_KEY, created);
+  const created = randomId();
+  safeStorage.set(DEVICE_KEY, created);
   return created;
 }
 
@@ -65,11 +121,11 @@ export function loadDraft(role: string): Draft {
 }
 
 export function saveDraft(role: string, draft: Draft): void {
-  window.localStorage.setItem(draftKey(role), JSON.stringify(draft));
+  safeStorage.set(draftKey(role), JSON.stringify(draft));
 }
 
 export function clearDraft(role: string): void {
-  window.localStorage.removeItem(draftKey(role));
+  safeStorage.remove(draftKey(role));
 }
 
 /** 把 {name} 占位符换成昵称。 */
