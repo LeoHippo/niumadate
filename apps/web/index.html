@@ -30,7 +30,28 @@
     <meta name="mobile-web-app-capable" content="yes" />
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      #root 里这段是「JS 还没加载出来」时的兜底，React 一挂载就会被替换掉。
+
+      为什么要放它：JS 文件加载失败时（网络断了、隧道挂了、网关 502），
+      页面会是**一整片纯白** —— 好友会以为你发了个坏链接，而不是「稍后再试」。
+      实测过：隧道配错那次，手机上看到的就是白屏。
+
+      内联样式是故意的：这种情况下 styles.css 本身很可能也没加载出来。
+    -->
+    <div id="root">
+      <div
+        style="
+          padding: 48px 24px;
+          text-align: center;
+          font: 15px/1.9 system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+          color: #7d7364;
+        "
+      >
+        <p style="margin: 0 0 14px; font-size: 17px; color: #b3121b">正在打开…</p>
+        <p style="margin: 0">要是停在这儿不动，<strong>下拉刷新</strong>一下。</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

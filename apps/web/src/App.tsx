@@ -28,11 +28,15 @@ export function App() {
   }, []);
 
   if (error !== null) {
+    // 技术细节只进控制台。**好友不该看到开发者的话** ——
+    // 以前这里写着「后端起了吗？本地开发要先跑 pnpm dev」，
+    // 好友在手机上看到这句只会一脸懵，还以为自己操作错了。
+    console.error('[niumadate] 加载配置失败：', error);
     return (
       <div className="boot">
-        <p className="boot-title">配置加载失败</p>
-        <p className="boot-detail">{error}</p>
-        <p className="boot-detail">后端起了吗？本地开发要先跑 pnpm dev。</p>
+        <p className="boot-title">暂时连不上</p>
+        <p className="boot-detail">网络好像不太顺 —— 下拉刷新一下试试。</p>
+        <p className="boot-detail">要是还不行，过一会儿再来，或者直接微信问牛马。</p>
       </div>
     );
   }
