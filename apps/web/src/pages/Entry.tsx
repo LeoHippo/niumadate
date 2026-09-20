@@ -6,8 +6,18 @@ import { BigEmoji } from '../big-emoji';
 import { ClosedModal, NiumaMark, SiteClosed, Stamp } from '../components';
 import { useConfig } from '../config-context';
 import { useMySubmissions } from '../use-submission';
+import '../entry-ways.css';
 
-/** 入口页：红头文件 + 四张身份卡。卡片一直可见，关掉的点进去才甩话。 */
+/**
+ * 入口页。
+ *
+ * 两副面孔，靠 `?pick=1` 切：
+ *   默认       **两条路**：我要约牛马 / 我的记录
+ *   ?pick=1    四张身份卡（点「我要约牛马」、或状态页的「换个身份」会来这儿）
+ *
+ * 为什么默认不是身份卡：老用户点链接进来，想看的是「我那件事怎么样了」，
+ * 而不是又选一遍身份。先给两条路，想约的再进去选身份 —— 顺序反过来了，更顺。
+ */
 export function EntryPage() {
   const config = useConfig();
   const navigate = useNavigate();
@@ -17,10 +27,7 @@ export function EntryPage() {
   // 钩子必须在任何提前 return 之前调用，否则钩子数量会时多时少
   const { latest, loading } = useMySubmissions();
 
-  /**
-   * 想**换个身份**再来一单：状态页里那个入口会带 `?pick=1` 回来。
-   * 没有它就自动跳转，有它就老老实实显示身份卡 —— 否则会「跳走 → 点回来 → 又跳走」。
-   */
+  /** 想看身份卡。 */
   const picking = new URLSearchParams(location.search).get('pick') === '1';
 
   // 总开关关掉：整站只留一句暂停营业
@@ -29,10 +36,8 @@ export function EntryPage() {
   /*
     已经有申请了 → **直接把好友送回他自己的状态页**。
 
-    点这种链接的人，想看的是「我那件事办得怎么样了」，
-    而不是又看一遍「先刷一下身份，我好知道该用哪副面孔见你」。
-
-    查询期间先显示一句话，别先闪一下身份卡再跳走 —— 那样很像页面坏了。
+    点这种链接的人，想看的是「我那件事办得怎么样了」。
+    查询期间先显示一句话，别先闪一下再跳走 —— 那样很像页面坏了。
   */
   if (!picking) {
     if (loading) {
@@ -48,7 +53,7 @@ export function EntryPage() {
   }
 
   return (
-    <main className="paper">
+    <main className="paper entry-shell">
       <header className="redhead">
         <NiumaMark size={46} className="head-mark" />
         <p className="doc-number">{buildDocNumber()}</p>
@@ -58,48 +63,75 @@ export function EntryPage() {
 
       <div className="rule" />
 
-      <p className="entry-hint">先刷一下身份，我好知道该用哪副面孔见你：</p>
+      {picking ? (
+        <>
+          <p className="entry-hint">先刷一下身份，我好知道该用哪副面孔见你：</p>
 
-      <div className="id-grid">
-        {config.roles.map((role) => (
+          <div className="id-grid">
+            {config.roles.map((role, index) => (
+              <button
+                key={role.key}
+                type="button"
+                data-theme={role.theme}
+                className={role.enabled ? 'id-card' : 'id-card id-card-off'}
+                style={{ animationDelay: `${index * 70}ms` }}
+                title={
+                  role.enabled
+                    ? `以「${role.label}」的身份填一份申请`
+                    : `「${role.label}」暂停受理，点一下看提示`
+                }
+                onClick={() => {
+                  if (role.enabled) navigate(`/date/${role.key}`);
+                  else setClosed(role);
+                }}
+              >
+                <BigEmoji char={role.emoji} size={46} className="id-emoji" />
+                <span className="id-name">{role.label}</span>
+                <span className="id-tagline">{role.tagline}</span>
+                <span className={role.enabled ? 'id-state id-state-on' : 'id-state id-state-off'}>
+                  {role.enabled ? '受理中' : '暂停受理'}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <nav className="step-nav">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              title="回到上一页"
+              onClick={() => navigate('/')}
+            >
+              ← 回上一页
+            </button>
+          </nav>
+        </>
+      ) : (
+        /* ---------- 两条路 ---------- */
+        <div className="entry-ways">
           <button
-            key={role.key}
             type="button"
-            data-theme={role.theme}
-            className={role.enabled ? 'id-card' : 'id-card id-card-off'}
-            title={role.enabled ? `以「${role.label}」的身份填一份申请` : `「${role.label}」暂停受理，点一下看提示`}
-            onClick={() => {
-              if (role.enabled) navigate(`/date/${role.key}`);
-              else setClosed(role);
-            }}
+            className="way-card way-card-ask"
+            title="选个身份，填一份约会申请"
+            onClick={() => navigate('/?pick=1')}
           >
-            <BigEmoji char={role.emoji} size={46} className="id-emoji" />
-            <span className="id-name">{role.label}</span>
-            <span className="id-tagline">{role.tagline}</span>
-            <span className={role.enabled ? 'id-state id-state-on' : 'id-state id-state-off'}>
-              {role.enabled ? '受理中' : '暂停受理'}
-            </span>
+            <span className="way-emoji">🐮</span>
+            <span className="way-title">我要约牛马</span>
+            <span className="way-sub">选个身份，选个时间，点两下就交上去了</span>
           </button>
-        ))}
-      </div>
 
-      {/*
-        交过申请的人再点这个链接，会被自动送回状态页（见上面的跳转）。
-        但有两种人会需要这个入口：
-          1. 换了浏览器 / 清了缓存，自动跳转认不出他
-          2. 想把全部申请翻一遍
-        所以入口要一直摆在这儿，不能只给「没申请的人」看。
-      */}
-      <div className="row-center" style={{ marginTop: 18 }}>
-        <button
-          type="button"
-          className="btn btn-ghost"
-          title="看看在这台设备上交过的申请"
-          onClick={() => navigate('/mine')}
-        >
-          我提交过，看看我的申请 →
-        </button>
-      </div>
+          <button
+            type="button"
+            className="way-card way-card-mine"
+            title="看我提交过的申请、收到的邀请"
+            onClick={() => navigate('/mine')}
+          >
+            <span className="way-emoji">🗂️</span>
+            <span className="way-title">我的记录</span>
+            <span className="way-sub">我提交的申请、我收到的邀请，都在这儿</span>
+          </button>
+        </div>
+      )}
 
       <footer className="seal-row">
         <Stamp text="牛马审批专用章" />

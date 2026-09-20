@@ -3645,3 +3645,22 @@ body {
 .stamp-static::after {
   animation: none;
 }
+
+/* 入口页的两条路（邀请功能那一轮加的）*/
+
+
+/* 銆屾垜鐨勮褰曘€嶉噷鐨勫皬鑺傛爣棰樺拰绌虹姸鎬侊紙閭€璇峰姛鑳介偅涓€杞姞鐨勶級*/
+.mine-section {
+  margin: 24px 0 10px;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: #8a7f6d;
+  border-bottom: 1px dashed #e2d6c0;
+  padding-bottom: 8px;
+}
+
+.mine-empty {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #a89d8c;
+}

@@ -3,134 +3,246 @@
    和填写页**刻意不一样**：填写页天天用、要填东西，所以克制；
    这一页一辈子看一两次，所以放开了做 —— 材质、光、动效都上。
 
-   四套「材质语言」，靠 data-theme 切：
+   四套「材质语言」靠 data-theme 切：
      brother  牛皮纸 + 酒渍 + 深红火漆
      sister   珠光信笺 + 玫瑰金烫印
-     baby     奶油纸 + 糖果色
+     baby     奶油纸 + 云 + 糖果色
      dadmam   红头文件 + 钢印
    ------------------------------------------------------------------ */
 
 .invite-page {
   --paper: #fbf6ea;
   --paper-edge: #e6d9bd;
+  --paper-tex: none;
   --ink: #3b3228;
   --ink-soft: #7d7264;
   --accent: #b3121b;
+  --accent-2: #8c1414;
   --seal: #9e1b1b;
   --seal-dark: #6d0f0f;
-  --glow: rgba(216, 178, 106, 0.55);
+  --glow: rgba(216, 178, 106, 0.5);
+  --foil: linear-gradient(100deg, #b98a3c 0%, #f2d59a 28%, #a9762c 52%, #f7e3b8 74%, #b98a3c 100%);
   --font-title: 'Songti SC', 'SimSun', serif;
   --font-body: 'Songti SC', 'SimSun', serif;
+  --puppet-body-hi: #fff5e2;
+  --puppet-body: #f0dcbb;
+  --puppet-body-lo: #d6bd93;
+  --puppet-nose: #e8b9a8;
 
+  position: relative;
   min-height: 100vh;
   margin: 0;
-  padding: 24px 16px 60px;
+  padding: 26px 16px 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background:
-    radial-gradient(circle at 50% 0%, #fff8e8 0%, #efe6d2 60%, #e2d7bf 100%);
+  background: radial-gradient(circle at 50% 0%, #fff8e8 0%, #efe6d2 60%, #e2d7bf 100%);
   color: var(--ink);
   font-family: var(--font-body);
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* 底纹：每套材质一种，用 repeating-gradient 叠出来，不需要图片 */
+.invite-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--paper-tex);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.invite-page > * { position: relative; z-index: 1; }
 
 /* ---------- 四套材质 ---------- */
 
+/* 好兄弟：牛皮纸。粗糙的横向纤维 + 一点酒渍般的暖色斑 */
 .invite-page[data-theme='brother'] {
-  --paper: #f3e8d2;
-  --paper-edge: #cbb28a;
+  --paper: #f2e6cd;
+  --paper-edge: #c9b088;
   --ink: #2f2a22;
   --ink-soft: #6d6152;
   --accent: #8c1c1c;
+  --accent-2: #5e1010;
   --seal: #8c1414;
-  --seal-dark: #4d0a0a;
+  --seal-dark: #430808;
+  --foil: linear-gradient(100deg, #8c6b34, #d8bb7c 30%, #7a5a26 55%, #e2caa0 78%, #8c6b34);
   --font-title: 'Kaiti SC', 'KaiTi', serif;
   --font-body: 'Kaiti SC', 'KaiTi', serif;
-  background:
-    repeating-linear-gradient(92deg, rgba(120, 90, 50, 0.05) 0 2px, transparent 2px 6px),
-    radial-gradient(circle at 30% 20%, #f7eeda 0%, #e6d8bb 55%, #d5c3a0 100%);
+  --puppet-body-hi: #f7ead0;
+  --puppet-body: #e2cda6;
+  --puppet-body-lo: #c2a878;
+  --puppet-nose: #c98f74;
+  --paper-tex: repeating-linear-gradient(
+      88deg,
+      rgba(120, 90, 50, 0.055) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(2deg, rgba(140, 100, 50, 0.045) 0 2px, transparent 2px 7px);
+  background: radial-gradient(circle at 30% 18%, #f8efdb 0%, #e7d9bb 55%, #d3c09b 100%);
 }
 
+/* 好姐妹：珠光信笺。柔和的粉紫渐变 + 一层细腻的斜光 */
 .invite-page[data-theme='sister'] {
-  --paper: #fffafc;
-  --paper-edge: #f0d4e0;
+  --paper: #fffbfd;
+  --paper-edge: #f2d6e2;
   --ink: #4a3a42;
-  --ink-soft: #97828c;
+  --ink-soft: #977f8b;
   --accent: #b8678b;
+  --accent-2: #8e4a68;
   --seal: #c2809c;
   --seal-dark: #8e5871;
-  --glow: rgba(240, 190, 210, 0.6);
+  --glow: rgba(238, 178, 205, 0.55);
+  --foil: linear-gradient(100deg, #c79a7a, #f3dcc8 26%, #b98a86 50%, #fbe9df 74%, #c79a7a);
   --font-title: 'Kaiti SC', 'KaiTi', serif;
+  --puppet-body-hi: #fff8fb;
+  --puppet-body: #f7e3ec;
+  --puppet-body-lo: #e0c3d2;
+  --puppet-nose: #e9a8be;
+  --paper-tex: repeating-linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.75) 0 3px,
+    transparent 3px 11px
+  );
   background:
-    radial-gradient(circle at 70% 12%, #fff0f7 0%, #fbe6f0 45%, #f2d9e6 100%);
+    radial-gradient(circle at 72% 10%, #fff2f8 0%, #fbe4ef 45%, #edd3e2 100%);
 }
 
+/* 好宝宝：奶油纸。软、圆、糖果色的暖斑，底纹像云 */
 .invite-page[data-theme='baby'] {
   --paper: #fffdf6;
-  --paper-edge: #ffe4b8;
+  --paper-edge: #ffe3b4;
   --ink: #4a3f33;
   --ink-soft: #907f6b;
   --accent: #e08a3c;
+  --accent-2: #c9702a;
   --seal: #e79a4a;
   --seal-dark: #b96f28;
-  --glow: rgba(255, 214, 140, 0.7);
-  --font-title: 'ZCOOL QingKe HuangYou', 'Yuanti SC', sans-serif;
-  --font-body: 'ZCOOL QingKe HuangYou', 'Yuanti SC', sans-serif;
-  background:
-    radial-gradient(circle at 20% 10%, #fff9e8 0%, #fdf0d8 50%, #f7e3c2 100%);
+  --glow: rgba(255, 210, 130, 0.65);
+  --foil: linear-gradient(100deg, #e8a94a, #ffe6a8 30%, #d98f2c 55%, #fff0c4 78%, #e8a94a);
+  --font-title: 'ZCOOL QingKe HuangYou', 'Yuanti SC', 'PingFang SC', sans-serif;
+  --font-body: 'ZCOOL QingKe HuangYou', 'Yuanti SC', 'PingFang SC', sans-serif;
+  --puppet-body-hi: #fff8ec;
+  --puppet-body: #ffe9cd;
+  --puppet-body-lo: #f5cf9f;
+  --puppet-nose: #f5b48c;
+  --paper-tex: radial-gradient(circle at 22% 30%, rgba(255, 214, 160, 0.4) 0 9%, transparent 10%),
+    radial-gradient(circle at 78% 62%, rgba(255, 226, 180, 0.45) 0 11%, transparent 12%),
+    radial-gradient(circle at 46% 86%, rgba(255, 236, 200, 0.4) 0 8%, transparent 9%);
+  background: radial-gradient(circle at 22% 8%, #fffaea 0%, #fdf1da 52%, #f6e2c0 100%);
 }
 
+/* DAD&MUM：红头文件。冷、正、有表格线 */
 .invite-page[data-theme='dadmam'] {
   --paper: #fffef9;
-  --paper-edge: #e8dcc4;
+  --paper-edge: #e4d9c2;
   --ink: #2b2b2b;
   --ink-soft: #6f6f6f;
   --accent: #b3121b;
+  --accent-2: #8a0e15;
   --seal: #7a7a7a;
-  --seal-dark: #4a4a4a;
-  --glow: rgba(180, 180, 180, 0.5);
+  --seal-dark: #444;
+  --glow: rgba(150, 150, 150, 0.45);
+  --foil: linear-gradient(100deg, #8a8a8a, #e6e6e6 32%, #6f6f6f 56%, #f2f2f2 78%, #8a8a8a);
   --font-title: 'FangSong', 'STFangsong', serif;
   --font-body: 'FangSong', 'STFangsong', serif;
-  background: linear-gradient(#f7f5ef, #efece2);
+  --puppet-body-hi: #f6f2e8;
+  --puppet-body: #e8e2d4;
+  --puppet-body-lo: #cbc3b1;
+  --puppet-nose: #d3a894;
+  --paper-tex: repeating-linear-gradient(
+    to bottom,
+    transparent 0 27px,
+    rgba(120, 120, 120, 0.14) 27px 28px
+  );
+  background: linear-gradient(#f8f6f1, #eeebe2);
 }
 
-/* ---------- 火漆印章：落下来，蜡向四周溢开 ---------- */
+/* ---------- 光尘 ---------- */
+
+.invite-backdrop { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+.invite-mote {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--foil);
+  opacity: 0;
+  filter: blur(0.4px);
+  animation: mote-float 7s ease-in-out infinite;
+}
+
+.invite-mote-1 { left: 12%; top: 22%; animation-delay: 0.4s; }
+.invite-mote-2 { left: 82%; top: 16%; width: 5px; height: 5px; animation-delay: 1.6s; }
+.invite-mote-3 { left: 24%; top: 62%; width: 6px; height: 6px; animation-delay: 3.1s; }
+.invite-mote-4 { left: 74%; top: 74%; width: 4px; height: 4px; animation-delay: 4.4s; }
+.invite-mote-5 { left: 52%; top: 40%; width: 5px; height: 5px; animation-delay: 5.6s; }
+
+@keyframes mote-float {
+  0% { opacity: 0; transform: translateY(18px) scale(0.6); }
+  25% { opacity: 0.85; }
+  70% { opacity: 0.5; }
+  100% { opacity: 0; transform: translateY(-46px) scale(1.1); }
+}
+
+/* ---------- 火漆印章 ---------- */
 
 .invite-seal {
   position: relative;
-  width: 92px;
-  height: 92px;
-  margin-bottom: -46px;
+  width: 96px;
+  height: 96px;
+  margin-bottom: -48px;
   z-index: 3;
   pointer-events: none;
-  animation: seal-drop 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: seal-drop 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes seal-drop {
-  0% { transform: translateY(-160px) scale(1.5); opacity: 0; }
-  55% { transform: translateY(4px) scale(1); opacity: 1; }
-  70% { transform: translateY(-6px) scale(0.96); }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
+  0% { transform: translateY(-180px) scale(1.55) rotate(-12deg); opacity: 0; }
+  52% { transform: translateY(5px) scale(1) rotate(2deg); opacity: 1; }
+  68% { transform: translateY(-7px) scale(0.965) rotate(-1deg); }
+  84% { transform: translateY(2px) scale(1.02) rotate(0.5deg); }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
 }
 
-/* 蜡：一圈慢慢摊开的「溢」 */
+/* 蜡：盖下去之后向四周摊开一圈 —— 这一下最出效果 */
 .invite-seal-wax {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, var(--seal) 0%, var(--seal-dark) 78%);
+  background: radial-gradient(circle at 36% 30%, var(--seal) 0%, var(--seal-dark) 82%);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.28),
-    inset 0 -4px 10px rgba(0, 0, 0, 0.3);
-  animation: wax-spread 1.6s ease-out 0.9s both;
+    0 8px 18px rgba(0, 0, 0, 0.3),
+    inset 0 -5px 12px rgba(0, 0, 0, 0.34),
+    inset 0 4px 10px rgba(255, 255, 255, 0.18);
+  animation: wax-spread 1.8s ease-out 1s both;
 }
 
-/* 溢蜡：从印章边缘鼓出来一点，这才是"盖下去"的实感 */
 @keyframes wax-spread {
-  0% { border-radius: 50%; transform: scale(1); }
-  35% { border-radius: 46% 54% 52% 48% / 52% 47% 53% 48%; transform: scale(1.13); }
-  100% { border-radius: 50%; transform: scale(1); }
+  0% { transform: scale(1); }
+  30% { transform: scale(1.14); }
+  55% { transform: scale(1.05); }
+  100% { transform: scale(1.08); }
+}
+
+/* 溢出来的那一圈：像蜡被压出来后边缘不规则的鼓包 */
+.invite-seal-rim {
+  position: absolute;
+  inset: -7px;
+  border-radius: 47% 53% 52% 48% / 51% 46% 54% 49%;
+  background: radial-gradient(circle at 50% 50%, var(--seal) 62%, transparent 66%);
+  opacity: 0;
+  animation: wax-rim 1.8s ease-out 1.05s both;
+  filter: blur(0.6px);
+}
+
+@keyframes wax-rim {
+  0% { opacity: 0; transform: scale(0.9); }
+  35% { opacity: 0.85; transform: scale(1.04); }
+  100% { opacity: 0.6; transform: scale(1); }
 }
 
 .invite-seal-face {
@@ -139,14 +251,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38px;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
-  animation: seal-face-in 0.4s ease-out 0.85s both;
+  font-size: 40px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+  animation: seal-face-in 0.45s ease-out 0.95s both;
 }
 
 @keyframes seal-face-in {
-  from { opacity: 0; transform: scale(0.6); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.55) rotate(-8deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
 }
 
 /* ---------- 信纸 ---------- */
@@ -155,84 +267,101 @@
   position: relative;
   width: 100%;
   max-width: 520px;
-  padding: 62px 26px 34px;
-  background: var(--paper);
+  padding: 64px 26px 34px;
+  background-color: var(--paper);
   border: 1px solid var(--paper-edge);
-  border-radius: 4px;
+  border-radius: 5px;
   box-shadow:
-    0 18px 40px rgba(90, 70, 40, 0.22),
-    0 2px 0 rgba(255, 255, 255, 0.6) inset;
-  /* 信纸的"折痕"：两条极淡的横线，让它像被折过 */
+    0 20px 46px rgba(90, 70, 40, 0.24),
+    0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  /* 两条极淡的折痕，让它像被折过三次 */
   background-image: linear-gradient(
     to bottom,
-    transparent 0,
-    transparent 32.6%,
+    transparent 0 32.6%,
     var(--paper-edge) 32.7%,
-    transparent 33%,
-    transparent 66.2%,
+    transparent 33% 66.2%,
     var(--paper-edge) 66.3%,
-    transparent 66.6%,
-    transparent 100%
+    transparent 66.6% 100%
   );
-  background-blend-mode: multiply;
   transform-origin: top center;
-  animation: letter-open 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1.5s both;
+  animation: letter-open 1.15s cubic-bezier(0.22, 1, 0.36, 1) 1.55s both;
 }
 
-/* 三折展开：先压扁、再一层层弹开 */
+/* 三折展开：先压扁、弹开、再回稳 */
 @keyframes letter-open {
-  0% { transform: perspective(900px) rotateX(-64deg) scaleY(0.42); opacity: 0; }
-  45% { transform: perspective(900px) rotateX(10deg) scaleY(1.02); opacity: 1; }
-  70% { transform: perspective(900px) rotateX(-4deg) scaleY(0.99); }
-  100% { transform: perspective(900px) rotateX(0) scaleY(1); opacity: 1; }
+  0% { transform: perspective(1000px) rotateX(-66deg) scaleY(0.4); opacity: 0; }
+  46% { transform: perspective(1000px) rotateX(11deg) scaleY(1.02); opacity: 1; }
+  72% { transform: perspective(1000px) rotateX(-4deg) scaleY(0.995); }
+  100% { transform: perspective(1000px) rotateX(0) scaleY(1); opacity: 1; }
 }
 
 .invite-head { text-align: center; }
 .invite-mark { display: block; margin: 0 auto 10px; }
 
+/* 标题：像刚写完那样，从左到右"显"出来（渐变 + 背景位移） */
 .invite-title {
   margin: 0;
   font-family: var(--font-title);
-  font-size: 30px;
+  font-size: 32px;
   letter-spacing: 0.06em;
-  color: var(--accent);
+  background-image: linear-gradient(
+    100deg,
+    var(--accent) 0%,
+    var(--accent-2) 34%,
+    transparent 50%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ink-write 1.5s cubic-bezier(0.5, 0, 0.4, 1) 2.6s both;
+}
+
+@keyframes ink-write {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
 }
 
 .invite-rule {
   height: 3px;
   margin: 14px auto 0;
-  max-width: 220px;
+  max-width: 230px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.75;
+  opacity: 0.78;
+  transform-origin: left center;
+  animation: rule-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 3.4s both;
 }
 
-/* 内容逐段浮现 —— 每一段自己一段延迟，读起来像在慢慢展开 */
+@keyframes rule-grow {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 0.78; }
+}
+
+/* 内容逐段浮现 */
 .invite-greeting,
 .invite-facts,
 .invite-body,
 .invite-signature,
 .invite-answer,
 .invite-chat {
-  animation: invite-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: invite-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.invite-greeting { animation-delay: 2.5s; }
-.invite-facts { animation-delay: 2.75s; }
-.invite-body { animation-delay: 3.0s; }
-.invite-signature { animation-delay: 3.15s; }
-.invite-answer { animation-delay: 3.35s; }
-.invite-chat { animation-delay: 3.6s; }
+.invite-greeting { animation-delay: 3.0s; }
+.invite-facts { animation-delay: 3.25s; }
+.invite-body { animation-delay: 3.5s; }
+.invite-signature { animation-delay: 3.65s; }
+.invite-answer { animation-delay: 3.85s; }
+.invite-chat { animation-delay: 4.1s; }
 
 @keyframes invite-rise {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.invite-greeting {
-  margin: 22px 0 6px;
-  font-size: 19px;
-  line-height: 1.9;
-}
+.invite-greeting { margin: 22px 0 6px; font-size: 19px; line-height: 1.95; }
 
 /* ---------- 时间 / 地点 / 干嘛 ---------- */
 
@@ -243,12 +372,7 @@
   padding: 12px 0;
 }
 
-.invite-fact {
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-  padding: 5px 0;
-}
+.invite-fact { display: flex; gap: 12px; align-items: baseline; padding: 5px 0; }
 
 .invite-fact dt {
   flex: none;
@@ -258,42 +382,67 @@
   letter-spacing: 0.08em;
 }
 
-.invite-fact dd {
-  margin: 0;
-  line-height: 1.75;
-}
+.invite-fact dd { margin: 0; line-height: 1.75; }
 
-/* 时间和地点是"要记住"的信息，加重 */
+/* 时间和地点是要记住的信息，加重 + 用烫金质感 */
 .invite-fact-key {
   font-family: var(--font-title);
-  font-size: 21px;
-  color: var(--accent);
+  font-size: 22px;
   letter-spacing: 0.02em;
+  background-image: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 220% 100%;
+  animation: foil-sheen 5.5s ease-in-out infinite;
 }
 
-.invite-body {
-  margin: 18px 0 0;
-  white-space: pre-wrap;
-  line-height: 2;
-  color: var(--ink);
+@keyframes foil-sheen {
+  0%, 100% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
 }
 
-.invite-signature {
-  margin: 20px 0 4px;
-  text-align: right;
-  color: var(--ink-soft);
+.invite-body { margin: 18px 0 0; white-space: pre-wrap; line-height: 2.05; }
+.invite-signature { margin: 20px 0 4px; text-align: right; color: var(--ink-soft); }
+
+/* ---------- 舞台与按钮 ---------- */
+
+.invite-answer { margin-top: 28px; }
+.invite-stage { position: relative; }
+
+.invite-puppet-holder {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: -54px;
+  z-index: 5;
+  pointer-events: none;
+  /*
+    横向位置由 JS 量出来（站在哪个按钮正上方），滑过去要看得见过程。
+
+    纵向的 -54px 是**量出来的**，不是拍的：
+      SVG viewBox 是 160×190，小人的脚在 y≈172，底下留了约 19px 空白；
+      再加上 160px 高的 SVG 挂在"按钮上方"时天然多出来的高度。
+    第一版给 -26px，实测脚底离按钮顶还有 25px —— 看起来像悬空。
+    现在按实测值补足，脚是**踩在按钮上**的。
+  */
+  transition: transform 0.55s cubic-bezier(0.4, 1.3, 0.5, 1);
 }
 
-/* ---------- 两个按钮 ---------- */
-
-.invite-answer { margin-top: 26px; position: relative; }
+/* 坐着的时候再沉一点，像真的把体重压上去 */
+.invite-puppet-holder:has(.puppet-sit),
+.invite-puppet-holder:has(.puppet-point) {
+  margin-bottom: -62px;
+}
 
 .invite-buttons {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
 .invite-btn {
@@ -301,29 +450,37 @@
   border-radius: 999px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .invite-btn:disabled { opacity: 0.6; cursor: default; }
 
 /*
-  接受：**大而突出**。婉拒：**明显小一号**。
-  这是刻意的，不是排版偷懒 —— 这是"邀请"，气氛上就该是「来嘛」。
+  接受**大而突出**，婉拒**明显小一号**。这是刻意的、不是排版偷懒 ——
+  这是"邀请"，气氛上就该是「来嘛」。
 */
 .invite-btn-yes {
-  padding: 15px 42px;
-  font-size: 19px;
+  padding: 16px 44px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: #fff;
-  background: linear-gradient(160deg, var(--accent), var(--seal));
+  background: linear-gradient(160deg, var(--accent), var(--accent-2));
   box-shadow:
-    0 8px 20px var(--glow),
-    0 2px 0 rgba(255, 255, 255, 0.28) inset;
+    0 10px 24px var(--glow),
+    0 2px 0 rgba(255, 255, 255, 0.3) inset;
 }
 
 .invite-btn-yes:hover { transform: translateY(-2px) scale(1.03); }
 .invite-btn-yes:active { transform: translateY(0) scale(0.99); }
+
+/* 被小人拉大之后，坐在上面：稍微压扁一点，像真的坐上去 */
+.invite-btn-seated {
+  box-shadow:
+    0 4px 10px var(--glow),
+    0 2px 0 rgba(255, 255, 255, 0.3) inset;
+}
 
 .invite-btn-no {
   padding: 9px 20px;
@@ -333,7 +490,41 @@
   border-color: var(--paper-edge);
 }
 
-.invite-btn-no:hover { background: rgba(0, 0, 0, 0.04); }
+.invite-btn-no:hover { background: rgba(0, 0, 0, 0.045); }
+
+/* 被抓住、举起来 */
+.invite-btn-lifted {
+  transform: translateY(-26px) rotate(-7deg);
+  box-shadow: 0 12px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* 被团成团：缩、转、皱 */
+.invite-btn-crumpled {
+  transform: scale(0.42) rotate(24deg);
+  border-radius: 42% 58% 55% 45% / 52% 44% 56% 48%;
+  opacity: 0.85;
+}
+
+/* 抛物线扔出去 */
+.invite-btn-thrown {
+  animation: btn-thrown 1s cubic-bezier(0.25, -0.35, 0.7, 1.5) both;
+}
+
+/*
+  扔完之后就**永久消失**，不再长回来。
+  它是"被扔掉了"，不是"这一步暂时藏起来" —— class 一撤就冒出来会很出戏。
+*/
+.invite-btn-gone {
+  opacity: 0;
+  transform: scale(0.1) translateY(-200px);
+  pointer-events: none;
+}
+
+@keyframes btn-thrown {
+  0% { transform: translate(0, -26px) rotate(24deg) scale(0.42); opacity: 0.85; }
+  22% { transform: translate(-16px, -74px) rotate(90deg) scale(0.4); opacity: 1; }
+  100% { transform: translate(340px, 130px) rotate(760deg) scale(0.14); opacity: 0; }
+}
 
 .invite-btn-ghost {
   padding: 10px 22px;
@@ -343,54 +534,66 @@
   background: transparent;
 }
 
-/* 被小人扔出去 */
-.invite-btn-thrown {
-  animation: btn-thrown 0.9s cubic-bezier(0.3, -0.4, 0.7, 1.4) both;
+/* 按钮上的烫金反光 */
+.invite-btn-yes::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.42) 48%,
+    transparent 66%
+  );
+  background-size: 260% 100%;
+  animation: sheen-sweep 3.6s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes btn-thrown {
-  0% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
-  25% { transform: translate(24px, -60px) rotate(28deg) scale(0.8); opacity: 1; }
-  100% { transform: translate(320px, -180px) rotate(420deg) scale(0.15); opacity: 0; }
-}
+.invite-btn-yes { position: relative; overflow: hidden; }
 
-.invite-answered { margin-top: 26px; text-align: center; }
-.invite-answered-title {
-  margin: 0 0 6px;
-  font-family: var(--font-title);
-  font-size: 22px;
-  color: var(--accent);
+@keyframes sheen-sweep {
+  0%, 62%, 100% { background-position: 130% 0; }
+  78% { background-position: -30% 0; }
 }
-.invite-answered-hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14px; line-height: 1.8; }
 
 .invite-locked-hint {
-  margin: 18px 0 0;
+  margin: 20px 0 0;
   text-align: center;
   font-size: 13px;
   color: var(--ink-soft);
-  line-height: 1.8;
+  line-height: 1.85;
+  animation: invite-rise 0.6s ease-out 5.4s both;
 }
+
+/* ---------- 已回应 ---------- */
+
+.invite-answered { margin-top: 28px; text-align: center; }
+.invite-answered-emoji { display: block; font-size: 40px; margin-bottom: 6px; }
+
+.invite-answered-title {
+  margin: 0 0 6px;
+  font-family: var(--font-title);
+  font-size: 23px;
+  background-image: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.invite-answered-hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
 
 /* ---------- 对话区 ---------- */
 
 .invite-chat {
-  margin-top: 34px;
+  margin-top: 36px;
   border-top: 1px dashed var(--paper-edge);
   padding-top: 20px;
 }
 
-.invite-chat-title {
-  margin: 0 0 4px;
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.invite-chat-hint {
-  margin: 0 0 14px;
-  font-size: 13px;
-  color: var(--ink-soft);
-  line-height: 1.8;
-}
+.invite-chat-title { margin: 0 0 4px; font-family: var(--font-title); font-size: 19px; }
+.invite-chat-hint { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); line-height: 1.8; }
 
 .invite-chat-list {
   display: flex;
@@ -403,199 +606,322 @@
 
 .invite-chat-msg {
   max-width: 84%;
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 9px 13px;
+  border-radius: 13px;
   font-size: 15px;
   line-height: 1.75;
+  animation: invite-rise 0.4s ease-out both;
 }
 
 .invite-chat-guest { align-self: flex-end; background: rgba(0, 0, 0, 0.055); }
 .invite-chat-host { align-self: flex-start; background: var(--glow); }
-
 .invite-chat-who { display: block; font-size: 11px; color: var(--ink-soft); margin-bottom: 2px; }
 .invite-chat-text { white-space: pre-wrap; word-break: break-word; }
 .invite-chat-error { color: var(--accent); font-size: 13px; }
-
 .invite-chat-form { display: flex; gap: 8px; }
 
 .invite-chat-input {
   flex: 1;
   font: inherit;
   font-size: 15px;
-  padding: 10px 12px;
+  padding: 11px 13px;
   border: 1px solid var(--paper-edge);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.7);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.72);
   color: var(--ink);
   min-width: 0;
 }
 
 .invite-btn-send {
-  padding: 10px 20px;
+  padding: 11px 22px;
   font-size: 15px;
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(160deg, var(--accent), var(--accent-2));
 }
 
 /* ---------- 出错 / 加载 ---------- */
 
-.invite-loading,
-.invite-broken-title {
+.invite-loading, .invite-broken-title {
   font-family: var(--font-title);
   font-size: 20px;
   color: var(--accent);
 }
 
-.invite-broken {
-  max-width: 420px;
-  margin: 80px auto 0;
-  text-align: center;
+.invite-broken-emoji { display: block; font-size: 46px; margin-bottom: 10px; text-align: center; }
+.invite-broken { max-width: 420px; margin: 70px auto 0; text-align: center; }
+.invite-broken-text { font-size: 15px; line-height: 1.9; color: var(--ink-soft); }
+
+/* ==========================================================================
+   小人：零件 + 每个姿态
+   ========================================================================== */
+
+.puppet { display: block; overflow: visible; }
+
+.puppet-shadow { fill: rgba(0, 0, 0, 0.15); }
+
+/* 渐变的 stop 颜色 */
+.puppet-stop-hi { stop-color: var(--puppet-body-hi); }
+.puppet-stop-mid { stop-color: var(--puppet-body); }
+.puppet-stop-lo { stop-color: var(--puppet-body-lo); }
+
+/* 四肢和肚子用平涂（渐变留给头和身体） */
+.puppet-limb, .puppet-hoof, .puppet-paw, .puppet-ear, .puppet-thumb {
+  fill: var(--puppet-body);
 }
+.puppet-hoof, .puppet-paw { fill: var(--puppet-body-lo); }
+.puppet-belly { fill: var(--puppet-body-hi); opacity: 0.55; }
+.puppet-horn { fill: var(--puppet-body-lo); }
+.puppet-bow-wing, .puppet-bow-knot { fill: var(--accent); }
 
-.invite-broken-text {
-  font-size: 15px;
-  line-height: 1.9;
-  color: var(--ink-soft);
-}
-
-/* ---------- 小人 ---------- */
-
-.puppet { display: block; }
-
-/* 颜色跟着材质的变量走，所以四套里能"换装" */
-.puppet-shadow { fill: rgba(0, 0, 0, 0.16); }
-.puppet-body,
-.puppet-head,
-.puppet-limb,
-.puppet-ear { fill: var(--puppet-body, #f0dfc4); }
-.puppet-horn { fill: var(--puppet-horn, #d8c49c); }
-.puppet-bow-wing,
-.puppet-bow-knot { fill: var(--accent); }
-.puppet-eye,
-.puppet-nostril { fill: #3b3228; }
-.puppet-eye-closed {
+.puppet-eye { fill: #3b3228; }
+.puppet-sparkle { fill: #fff; }
+.puppet-eye-arc {
   fill: none;
   stroke: #3b3228;
-  stroke-width: 3;
+  stroke-width: 3.4;
   stroke-linecap: round;
 }
-.puppet-nose { fill: var(--puppet-nose, #e8b9a8); }
-
-/* 四套材质下的小人配色 */
-.invite-page[data-theme='brother'] { --puppet-body: #e3cfa8; --puppet-horn: #b99b6a; --puppet-nose: #c98f74; }
-.invite-page[data-theme='sister'] { --puppet-body: #fff1f6; --puppet-horn: #f0c6d8; --puppet-nose: #e9a8be; }
-.invite-page[data-theme='baby'] { --puppet-body: #ffeed8; --puppet-horn: #ffd79a; --puppet-nose: #f5b48c; }
-.invite-page[data-theme='dadmam'] { --puppet-body: #efeade; --puppet-horn: #cfc7b4; --puppet-nose: #d3a894; }
-
-/*
-  小人从**屏幕右边**走进来，最后停在**婉拒按钮那一侧**（左边）。
-  所以定位在左边、动画从 translateX(240px) 起步 ——
-  观感就是"横穿过来、站到婉拒按钮跟前"。
-*/
-.invite-puppet-stage {
-  position: relative;
-  height: 0;
+.puppet-mouth {
+  fill: none;
+  stroke: #3b3228;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.75;
 }
+.puppet-blush { fill: #f2a0a0; opacity: 0.42; }
+.puppet-nose { fill: var(--puppet-nose); }
+.puppet-nostril { fill: #3b3228; opacity: 0.7; }
+.puppet-thumb { fill: none; stroke: var(--puppet-body-lo); stroke-width: 4; stroke-linecap: round; }
 
-.invite-puppet-stage .puppet {
-  position: absolute;
-  left: 4px;
-  bottom: -6px;
-  z-index: 4;
-  pointer-events: none;
-}
+/* 默认：睁眼。坐着得意的时候换成眯眼 */
+.puppet-eyes-happy { display: none; }
+.puppet-sit .puppet-eyes-open,
+.puppet-point .puppet-eyes-open { display: none; }
+.puppet-sit .puppet-eyes-happy,
+.puppet-point .puppet-eyes-happy { display: block; }
 
-/* 走：从屏幕右边走进来 */
-.puppet-walk {
-  animation: puppet-walk-in 0.9s cubic-bezier(0.3, 1.3, 0.5, 1) both;
-}
+/* 关节的旋转中心 */
+.puppet-arm-front { transform-origin: 121px 96px; }
+.puppet-arm-back { transform-origin: 39px 96px; }
+.puppet-hand { transform-origin: 121px 140px; }
+.puppet-leg-l { transform-origin: 66px 140px; }
+.puppet-leg-r { transform-origin: 93px 140px; }
+.puppet-head-group { transform-origin: 80px 118px; }
+
+/* ---- 走：从屏幕右边走进来，手脚交替 ---- */
+.puppet-walk { animation: puppet-walk-in 1.15s cubic-bezier(0.3, 1.15, 0.45, 1) both; }
 
 @keyframes puppet-walk-in {
-  0% { transform: translateX(240px) rotate(6deg); opacity: 0; }
-  60% { transform: translateX(-14px) rotate(-3deg); opacity: 1; }
+  0% { transform: translateX(280px) rotate(7deg); opacity: 0; }
+  55% { opacity: 1; }
+  76% { transform: translateX(-12px) rotate(-3deg); }
   100% { transform: translateX(0) rotate(0); opacity: 1; }
 }
 
-/* 走路时手臂和身体上下颠 */
-.puppet-walk .puppet-arms { animation: puppet-sway 0.35s ease-in-out infinite alternate; }
-.puppet-walk .puppet-legs { animation: puppet-steps 0.35s ease-in-out infinite alternate; }
+.puppet-walk .puppet-leg-l { animation: step-a 0.32s ease-in-out infinite alternate; }
+.puppet-walk .puppet-leg-r { animation: step-b 0.32s ease-in-out infinite alternate; }
+.puppet-walk .puppet-arm-back { animation: swing-a 0.32s ease-in-out infinite alternate; }
+.puppet-walk .puppet-arm-front { animation: swing-b 0.32s ease-in-out infinite alternate; }
+.puppet-walk .puppet-head-group { animation: bob 0.32s ease-in-out infinite alternate; }
 
-@keyframes puppet-sway {
-  from { transform: rotate(-7deg); }
-  to { transform: rotate(7deg); }
+@keyframes step-a { from { transform: rotate(-17deg); } to { transform: rotate(15deg); } }
+@keyframes step-b { from { transform: rotate(15deg); } to { transform: rotate(-17deg); } }
+@keyframes swing-a { from { transform: rotate(19deg); } to { transform: rotate(-19deg); } }
+@keyframes swing-b { from { transform: rotate(-19deg); } to { transform: rotate(19deg); } }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+
+/* ---- 探手：伸过去抓 ---- */
+.puppet-reach .puppet-arm-front { animation: reach-out 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.puppet-reach .puppet-hand { animation: hand-close 0.3s ease-out 0.25s both; }
+
+@keyframes reach-out {
+  from { transform: rotate(0); }
+  to { transform: rotate(-64deg); }
 }
 
-@keyframes puppet-steps {
-  from { transform: translateY(0); }
-  to { transform: translateY(-3px); }
+@keyframes hand-close {
+  from { transform: rotate(0); }
+  to { transform: rotate(-14deg) scale(0.92); }
 }
 
-.puppet-walk .puppet-arm-reach { animation: puppet-grab 0.5s ease-in-out 0.9s infinite alternate; }
+/* ---- 抓起来、团成团、扔 ---- */
+.puppet-grab .puppet-arm-front { transform: rotate(-64deg); }
+.puppet-grab .puppet-hand { transform: rotate(-14deg) scale(0.92); }
 
-@keyframes puppet-grab {
-  from { transform: translate(0, 0) rotate(0); }
-  to { transform: translate(-22px, 4px) rotate(-34deg); }
+.puppet-throw .puppet-arm-front { animation: wind-up 0.95s cubic-bezier(0.4, 0, 0.3, 1) both; }
+.puppet-throw .puppet-hand { animation: hand-close 0.2s ease-out both; }
+.puppet-throw { animation: throw-lean 0.95s cubic-bezier(0.4, 0, 0.3, 1) both; }
+
+@keyframes wind-up {
+  0% { transform: rotate(-64deg); }
+  28% { transform: rotate(-108deg); }
+  62% { transform: rotate(38deg); }
+  100% { transform: rotate(14deg); }
 }
 
-/* 坐：一屁股坐在被拉大的按钮上，腿耷拉下来 */
-.puppet-sit {
-  animation: puppet-sit-down 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+@keyframes throw-lean {
+  0%, 100% { transform: rotate(0); }
+  28% { transform: rotate(-7deg); }
+  62% { transform: rotate(6deg); }
 }
 
-@keyframes puppet-sit-down {
-  0% { transform: translateY(-40px) scale(1); }
-  70% { transform: translateY(2px) scale(1.04, 0.94); }
+/* ---- 用力拉大接受按钮 ---- */
+.puppet-grow { animation: heave 0.75s ease-in-out both; }
+.puppet-grow .puppet-arm-front { animation: heave-arm-front 0.75s ease-in-out both; }
+.puppet-grow .puppet-arm-back { animation: heave-arm-back 0.75s ease-in-out both; }
+
+@keyframes heave {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(4px) scale(1.05, 0.95); }
+  70% { transform: translateY(-5px) scale(0.97, 1.05); }
+}
+
+@keyframes heave-arm-front {
+  0%, 100% { transform: rotate(0); }
+  40% { transform: rotate(-34deg); }
+  75% { transform: rotate(-12deg); }
+}
+
+@keyframes heave-arm-back {
+  0%, 100% { transform: rotate(0); }
+  40% { transform: rotate(28deg); }
+  75% { transform: rotate(10deg); }
+}
+
+/* ---- 一屁股坐上去，腿耷拉下来 ---- */
+.puppet-sit { animation: sit-down 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+
+@keyframes sit-down {
+  0% { transform: translateY(-52px) scale(1); }
+  68% { transform: translateY(3px) scale(1.06, 0.93); }
   100% { transform: translateY(0) scale(1); }
 }
 
-/* 坐着的时候腿是耷拉的 */
-.puppet-sit .puppet-legs {
-  transform-origin: 70px 128px;
-  animation: puppet-dangle 1.1s ease-in-out infinite alternate;
+.puppet-sit .puppet-leg-l { animation: dangle-a 1.3s ease-in-out infinite alternate; }
+.puppet-sit .puppet-leg-r { animation: dangle-b 1.3s ease-in-out infinite alternate; }
+
+@keyframes dangle-a { from { transform: rotate(-13deg); } to { transform: rotate(3deg); } }
+@keyframes dangle-b { from { transform: rotate(4deg); } to { transform: rotate(-11deg); } }
+
+/* ---- 坐着指着「同意」---- */
+.puppet-point { transform: translateY(0); }
+.puppet-point .puppet-leg-l { animation: dangle-a 1.3s ease-in-out infinite alternate; }
+.puppet-point .puppet-leg-r { animation: dangle-b 1.3s ease-in-out infinite alternate; }
+.puppet-point .puppet-arm-front { animation: point-at 1.15s ease-in-out infinite alternate; }
+.puppet-point .puppet-hand { transform: rotate(-10deg); }
+.puppet-point .puppet-head-group { animation: nod 2.2s ease-in-out infinite alternate; }
+
+@keyframes point-at {
+  from { transform: rotate(-6deg); }
+  to { transform: rotate(-30deg); }
 }
 
-@keyframes puppet-dangle {
-  from { transform: rotate(-9deg); }
-  to { transform: rotate(3deg); }
-}
-
-/* 坐着时那条手臂抬起来，指着「同意」 */
-.puppet-sit .puppet-arm-reach {
-  transform-origin: 108px 90px;
-  animation: puppet-point 1.2s ease-in-out infinite alternate;
-}
-
-@keyframes puppet-point {
-  from { transform: rotate(-8deg); }
-  to { transform: rotate(-26deg); }
+@keyframes nod {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2.5deg); }
 }
 
 /* ---------- 减少动效偏好 ----------
-   不是关掉，是**缩短**：动画本身就是内容的一部分，
-   全关掉这一页就变成一张静态图了。留一点点感觉。 */
+   不是关掉，是**缩短**：动画本身是内容的一部分，
+   全关掉这一页就变回一张静态图了。留一点意思。 */
 @media (prefers-reduced-motion: reduce) {
   .invite-seal,
   .invite-seal-wax,
+  .invite-seal-rim,
   .invite-seal-face,
   .invite-letter,
+  .invite-title,
+  .invite-rule,
   .invite-greeting,
   .invite-facts,
   .invite-body,
   .invite-signature,
   .invite-answer,
   .invite-chat,
+  .invite-locked-hint,
   .puppet-walk,
+  .puppet-reach,
+  .puppet-throw,
+  .puppet-grow,
   .puppet-sit {
-    animation-duration: 0.2s !important;
+    animation-duration: 0.22s !important;
     animation-delay: 0s !important;
   }
 
-  .invite-puppet-stage .puppet,
-  .puppet-walk .puppet-arms,
-  .puppet-walk .puppet-legs,
-  .puppet-walk .puppet-arm-reach,
-  .puppet-sit .puppet-legs,
-  .puppet-sit .puppet-arm-reach {
+  .invite-mote,
+  .puppet-walk .puppet-leg-l,
+  .puppet-walk .puppet-leg-r,
+  .puppet-walk .puppet-arm-back,
+  .puppet-walk .puppet-arm-front,
+  .puppet-walk .puppet-head-group,
+  .puppet-sit .puppet-leg-l,
+  .puppet-sit .puppet-leg-r,
+  .puppet-point .puppet-leg-l,
+  .puppet-point .puppet-leg-r,
+  .puppet-point .puppet-arm-front,
+  .puppet-point .puppet-head-group,
+  .invite-btn-yes::after {
     animation: none !important;
+  }
+}
+
+
+/* ---------- 娈佃惤涔嬮棿鐨勫皬浜鸿繃娓?----------
+   涓嬩竴娈垫槸琚畠"鎷夊嚭鏉?/ 鎺ㄥ嚭鏉?鐨勶紝涓嶆槸鑷繁娣″叆鐨勩€?   鎵€浠ュ畠鍑虹幇鍦ㄦ钀戒氦鐣屽锛屽姩浣滃拰涓嬩竴娈电殑娴幇**鍚屾椂**鍙戠敓銆?*/
+
+.holder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 -6px;
+  opacity: 0;
+  animation: holder-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.holder .puppet { width: 64px; height: 76px; flex: none; }
+
+.holder-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--paper-edge), transparent);
+}
+
+/* 銆屾媺銆嶏細鎶婁笅涓€娈垫嫿鍑烘潵 鈥斺€?寰€鍚庝话銆佸啀鎷夊洖鏉?*/
+.holder-pull {
+  animation-delay: 2.85s;
+  transform-origin: left center;
+}
+
+.holder-pull .puppet { animation: holder-heave 1.1s cubic-bezier(0.4, 0, 0.3, 1) 2.95s both; }
+
+@keyframes holder-heave {
+  0% { transform: translateY(0) rotate(0); }
+  35% { transform: translateY(5px) rotate(-11deg); }
+  72% { transform: translateY(-3px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+/* 銆屾帹銆嶏細鎶婁笅涓€娈垫帹鍑烘潵 */
+.holder-push { animation-delay: 3.9s; }
+.holder-push .puppet { animation: holder-push 0.9s cubic-bezier(0.4, 0, 0.3, 1) 4s both; }
+
+@keyframes holder-push {
+  0% { transform: translateX(26px) rotate(6deg); }
+  60% { transform: translateX(-8px) rotate(-3deg); }
+  100% { transform: translateX(0) rotate(0); }
+}
+
+@keyframes holder-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 鍑忓皯鍔ㄦ晥鏃跺畠灏卞埆鍔ㄤ簡锛屼絾**鐣欑潃** 鈥斺€?瀹冩槸鐗堥潰鐨勪竴閮ㄥ垎 */
+@media (prefers-reduced-motion: reduce) {
+  .holder,
+  .holder-pull .puppet,
+  .holder-push .puppet {
+    animation: none !important;
+    opacity: 1;
   }
 }

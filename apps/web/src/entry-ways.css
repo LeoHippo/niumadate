@@ -1,0 +1,84 @@
+/* 入口页的「两条路」。
+   默认进来先给两条路（我要约牛马 / 我的记录），想约的再进去选身份 ——
+   老用户点链接进来最想看的是「我那件事怎么样了」，不是又选一遍身份。 */
+
+.entry-shell .entry-ways {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 22px 0 8px;
+}
+
+.way-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 26px 20px 22px;
+  font: inherit;
+  text-align: center;
+  color: #3b3228;
+  background: #fffdf8;
+  border: 1px solid #e6dcc8;
+  border-radius: 14px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.3, 1.3, 0.5, 1), box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  animation: way-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.way-card-ask { animation-delay: 0.05s; }
+.way-card-mine { animation-delay: 0.15s; }
+
+@keyframes way-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.way-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(90, 70, 40, 0.16);
+}
+
+.way-card:active { transform: translateY(-1px) scale(0.995); }
+
+/* 「我要约牛马」是主路，给它红头的分量 */
+.way-card-ask {
+  border-color: #e8c9c9;
+  background: linear-gradient(180deg, #fffaf7 0%, #fff5f2 100%);
+}
+
+.way-card-ask::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #b3121b, transparent);
+  opacity: 0.8;
+}
+
+.way-emoji { font-size: 46px; line-height: 1; }
+
+.way-title {
+  font-family: 'Songti SC', 'SimSun', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.way-card-ask .way-title { color: #b3121b; }
+
+.way-sub {
+  font-size: 13px;
+  color: #8a7f6d;
+  line-height: 1.7;
+  max-width: 24em;
+}
+
+@media (max-width: 420px) {
+  .way-card { padding: 22px 16px 18px; }
+  .way-emoji { font-size: 40px; }
+  .way-title { font-size: 20px; }
+}
