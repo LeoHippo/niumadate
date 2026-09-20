@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
-import { apiError, buildDayRows, findRole, isRoleKey } from '@niumadate/shared';
+import { INVITE_CODE_PATTERN, apiError, buildDayRows, findRole, isRoleKey } from '@niumadate/shared';
 import type { CustomTime, SlotSelection } from '@niumadate/shared';
 import { SUBMIT_RULE, allow } from '../rate-limit';
 import { createSubmission, findLatestByDevice } from '../submissions';
+import { addMessage, getInviteByCode, listMessages, respondToInvite } from '../invites';
 import { getConfig } from '../settings';
 
 const MAX_NAME = 20;
@@ -10,6 +11,10 @@ const MAX_MESSAGE = 500;
 const MAX_PLACE = 200;
 const MAX_CUSTOM_TEXT = 60;
 const MAX_MEETING = 60;
+const MAX_INVITE_MESSAGE = 800;
+
+/** 邀请码都能错（猜到别人码的人也在试），所以取邀请这条单独限流。 */
+const INVITE_READ_RULE = { ...SUBMIT_RULE, max: SUBMIT_RULE.max * 3 };
 
 /** 好友端用到的公开接口。 */
 export function registerPublicRoutes(app: FastifyInstance): void {
@@ -27,6 +32,97 @@ export function registerPublicRoutes(app: FastifyInstance): void {
         return apiError('BAD_REQUEST', '缺少 deviceId 或 role');
       }
       return { submission: findLatestByDevice(deviceId, role) ?? null };
+    },
+  );
+
+  // ---------- 邀请（好友那一侧）----------
+  //
+  // 邀请码本身就是**唯一的访问凭据** —— 没有登录、没有口令，
+  // 拿到码就能看。所以码要够长（22 位），并且读取单独限流，
+  // 免得有人拿它当接口猜码。
+
+  /** 按码取邀请 + 全部留言。 */
+  app.get<{ Params: { code: string } }>('/invites/:code', async (request, reply) => {
+    const { code } = request.params;
+    if (!allow(`invite-read:${request.ip}`, INVITE_READ_RULE)) {
+      reply.code(429);
+      return apiError('RATE_LIMITED', '试得太频繁了，等一下再来。');
+    }
+    if (!INVITE_CODE_PATTERN.test(code)) {
+      request.log.warn({ code: code.slice(0, 8) }, '邀请码格式不对');
+      reply.code(404);
+      return apiError('NOT_FOUND', '这份邀请找不到了');
+    }
+    const invite = getInviteByCode(code);
+    if (invite === null) {
+      request.log.warn({ ip: request.ip, code: code.slice(0, 8) }, '邀请码查不到');
+      reply.code(404);
+      return apiError('NOT_FOUND', '这份邀请找不到了');
+    }
+    return { invite, messages: listMessages(invite.id) };
+  });
+
+  /**
+   * 好友回应。
+   *
+   * **允许改** —— 现实里会变卦，让人改比逼他微信找牛马强。
+   * 每次改都会刷新 respondedAt，所以后台看得出来「他后来改过」。
+   */
+  app.post<{ Params: { code: string }; Body: { status?: unknown } }>(
+    '/invites/:code/respond',
+    async (request, reply) => {
+      if (!allow(`invite-respond:${request.ip}`, SUBMIT_RULE)) {
+        reply.code(429);
+        return apiError('RATE_LIMITED', '点得太频繁了，等一下再试。');
+      }
+      const { status } = (request.body ?? {}) as { status?: unknown };
+      if (status !== 'accepted' && status !== 'declined') {
+        reply.code(400);
+        return apiError('BAD_REQUEST', 'status 只能是 accepted 或 declined');
+      }
+
+      const result = respondToInvite(request.params.code, status);
+      if (!result.ok) {
+        if (result.reason === 'no-decline') {
+          request.log.warn({ ip: request.ip }, '这条邀请不接受婉拒，拦掉了');
+          reply.code(403);
+          return apiError('NO_DECLINE', '这份邀请不接受婉拒 😤');
+        }
+        reply.code(404);
+        return apiError('NOT_FOUND', '这份邀请找不到了');
+      }
+
+      request.log.info({ status }, '好友回应了邀请');
+      return { invite: result.invite };
+    },
+  );
+
+  /**
+   * 好友留言。
+   *
+   * **「谁说的」由服务端定死**，不看客户端传上来的 ——
+   * 否则好友能伪装成牛马说话。
+   */
+  app.post<{ Params: { code: string }; Body: { text?: unknown } }>(
+    '/invites/:code/messages',
+    async (request, reply) => {
+      if (!allow(`invite-message:${request.ip}`, SUBMIT_RULE)) {
+        reply.code(429);
+        return apiError('RATE_LIMITED', '发得太快了，等一下。');
+      }
+      const invite = getInviteByCode(request.params.code);
+      if (invite === null) {
+        reply.code(404);
+        return apiError('NOT_FOUND', '这份邀请找不到了');
+      }
+      const { text } = (request.body ?? {}) as { text?: unknown };
+      const trimmed =
+        typeof text === 'string' ? text.trim().slice(0, MAX_INVITE_MESSAGE) : '';
+      if (trimmed === '') {
+        reply.code(400);
+        return apiError('BAD_REQUEST', '留言不能是空的');
+      }
+      return { messages: [...listMessages(invite.id), addMessage(invite.id, 'guest', trimmed)] };
     },
   );
 

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { DEFAULT_CONFIG, apiError } from '@niumadate/shared';
+import { DEFAULT_CONFIG, apiError, invitePresetFor, isRoleKey } from '@niumadate/shared';
 import type { SubmissionStatus } from '@niumadate/shared';
 import { bearerOf, issueToken, verifyToken } from '../auth';
 import { LOGIN_RULE, allow } from '../rate-limit';
@@ -12,8 +12,79 @@ import {
   listSubmissions,
   updateSubmission,
 } from '../submissions';
+import {
+  addMessage,
+  createInvite,
+  deleteInvite,
+  getInviteById,
+  listInvites,
+  listMessages,
+  updateInvite,
+} from '../invites';
 
 const STATUSES: readonly SubmissionStatus[] = ['pending', 'accepted', 'cancelled'];
+
+/** 一条留言最多这么长。够说清楚「几点到、带不带伞」，又不至于刷屏。 */
+export const MAX_INVITE_MESSAGE = 800;
+
+/**
+ * 校验邀请的请求体。
+ *
+ * 返回字符串 = 出错（字符串就是给用户看的原因）；返回对象 = 通过。
+ * 文案字段缺了就退回该身份的预设 —— 所以后台只改一两个字段也能存。
+ */
+function parseInviteBody(
+  raw: Record<string, unknown>,
+  full: boolean,
+): import('@niumadate/shared').CreateInviteInput | Partial<import('@niumadate/shared').CreateInviteInput> | string {
+  const out: Record<string, unknown> = {};
+  const str = (key: string, max: number): void => {
+    const value = raw[key];
+    if (value === undefined) return;
+    if (typeof value !== 'string') throw new Error(`${key} 应该是文字`);
+    out[key] = value.slice(0, max);
+  };
+
+  try {
+    if (raw.role !== undefined) {
+      if (!isRoleKey(raw.role)) throw new Error('身份不对');
+      out.role = raw.role;
+      // 换了身份就把没改过的文案换成新身份的预设，省得后台手动重填一遍
+      const preset = invitePresetFor(raw.role);
+      out.title ??= preset.title;
+      out.greeting ??= preset.greeting;
+      out.body ??= preset.body;
+      out.signature ??= preset.signature;
+    }
+    if (full && raw.role === undefined) throw new Error('得先选一个身份');
+
+    str('inviteeName', 40);
+    str('timeText', 40);
+    str('place', 120);
+    str('activity', 200);
+    str('title', 60);
+    str('greeting', 120);
+    str('body', 1200);
+    str('signature', 60);
+
+    if (raw.date !== undefined) {
+      if (typeof raw.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date)) {
+        throw new Error('日期格式应该是 2026-09-20 这样');
+      }
+      out.date = raw.date;
+    }
+    if (full && out.date === undefined) throw new Error('日期得填');
+
+    if (raw.noDecline !== undefined) {
+      if (typeof raw.noDecline !== 'boolean') throw new Error('noDecline 应该是真假值');
+      out.noDecline = raw.noDecline;
+    }
+  } catch (cause) {
+    return cause instanceof Error ? cause.message : '参数不对';
+  }
+
+  return out as Partial<import('@niumadate/shared').CreateInviteInput>;
+}
 
 function isStatus(value: unknown): value is SubmissionStatus {
   return typeof value === 'string' && (STATUSES as readonly string[]).includes(value);
@@ -202,6 +273,67 @@ export function registerAdminRoutes(app: FastifyInstance, config: AppConfig): vo
         }
         return { ok: true };
       });
+
+      // ---------- 邀请 ----------
+
+      admin.get('/invites', async () => ({ items: listInvites() }));
+
+      admin.post<{ Body: Record<string, unknown> }>('/invites', async (request, reply) => {
+        const parsed = parseInviteBody(request.body ?? {}, true);
+        if (typeof parsed === 'string') {
+          reply.code(400);
+          return apiError('BAD_REQUEST', parsed);
+        }
+        const created = createInvite(parsed as import('@niumadate/shared').CreateInviteInput);
+        request.log.info({ ip: request.ip, code: created.code }, '创建了一条邀请');
+        return { invite: created };
+      });
+
+      admin.patch<{ Params: { id: string }; Body: Record<string, unknown> }>(
+        '/invites/:id',
+        async (request, reply) => {
+          const parsed = parseInviteBody(request.body ?? {}, false);
+          if (typeof parsed === 'string') {
+            reply.code(400);
+            return apiError('BAD_REQUEST', parsed);
+          }
+          const updated = updateInvite(request.params.id, parsed);
+          if (updated === null) {
+            reply.code(404);
+            return apiError('NOT_FOUND', '这条邀请不存在');
+          }
+          return { invite: updated };
+        },
+      );
+
+      admin.delete<{ Params: { id: string } }>('/invites/:id', async (request, reply) => {
+        if (!deleteInvite(request.params.id)) {
+          reply.code(404);
+          return apiError('NOT_FOUND', '这条邀请不存在');
+        }
+        request.log.info({ ip: request.ip, id: request.params.id }, '删掉了一条邀请');
+        return { ok: true };
+      });
+
+      /** 后台留言：以「牛马」的身份发。 */
+      admin.post<{ Params: { id: string }; Body: { text?: unknown } }>(
+        '/invites/:id/messages',
+        async (request, reply) => {
+          const invite = getInviteById(request.params.id);
+          if (invite === null) {
+            reply.code(404);
+            return apiError('NOT_FOUND', '这条邀请不存在');
+          }
+          const body = (request.body ?? {}) as { text?: unknown };
+          const text =
+            typeof body.text === 'string' ? body.text.trim().slice(0, MAX_INVITE_MESSAGE) : '';
+          if (text === '') {
+            reply.code(400);
+            return apiError('BAD_REQUEST', '留言不能是空的');
+          }
+          return { messages: [...listMessages(invite.id), addMessage(invite.id, 'host', text)] };
+        },
+      );
     },
     { prefix: '/admin' },
   );

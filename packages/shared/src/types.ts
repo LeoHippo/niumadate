@@ -171,6 +171,27 @@ export interface AppConfig {
   place: PlaceConfig;
   copies: CopiesConfig;
   season: SeasonConfig;
+  invite: InviteConfig;
+}
+
+/**
+ * 邀请相关的**全局**设置。
+ *
+ * 注意是「全局」—— 尤其是小人：它代表**牛马本人**，
+ * 所以是男是女由牛马自己定一次，而不是每个身份一个形象。
+ * 这样它有「人格」，客户端的四套材质只是给它换衣服。
+ */
+export interface InviteConfig {
+  /**
+   * 那个会走路、会抢按钮、会坐上去的**动态小人**，是男是女。
+   *
+   * 邀请页最出彩的一段就是它：勾了「不允许拒绝」之后，
+   * 它从屏幕右边走过来，把婉拒按钮抓走团成团扔了，
+   * 再把接受按钮拉大，坐在上面指着「同意」。
+   */
+  hostGender: 'male' | 'female';
+  /** 新建邀请时，「不允许拒绝」默认勾不勾。 */
+  defaultNoDecline: boolean;
 }
 
 /** 好友勾选的一个「日期 + 时段」。 */

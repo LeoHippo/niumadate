@@ -1,6 +1,7 @@
 import type {
   AppConfig,
   CopiesConfig,
+  InviteConfig,
   RoleCopies,
   LockMode,
   PlaceConfig,
@@ -123,6 +124,11 @@ export const DEFAULT_CONFIG: AppConfig = {
   season: {
     hotMonths: [6, 7, 8],
     coldMonths: [12, 1, 2],
+  },
+  // 邀请相关的全局设定。小人代表牛马本人，所以只有一份形象。
+  invite: {
+    hostGender: 'male',
+    defaultNoDecline: false,
   },
 };
 
@@ -285,6 +291,15 @@ function normalizeSeason(raw: unknown): SeasonConfig {
   };
 }
 
+function normalizeInvite(raw: unknown): InviteConfig {
+  const input = asRecord(raw);
+  return {
+    // 只认这两个值，别的一律当 male（老配置没有这一段，也会落到这儿）
+    hostGender: input.hostGender === 'female' ? 'female' : 'male',
+    defaultNoDecline: asBoolean(input.defaultNoDecline, DEFAULT_CONFIG.invite.defaultNoDecline),
+  };
+}
+
 function normalizeCopies(raw: unknown): CopiesConfig {
   const input = asRecord(raw);
   return {
@@ -322,6 +337,7 @@ export function normalizeConfig(raw: unknown): AppConfig {
     place: normalizePlace(input.place),
     copies: normalizeCopies(input.copies),
     season: normalizeSeason(input.season),
+    invite: normalizeInvite(input.invite),
   };
 }
 

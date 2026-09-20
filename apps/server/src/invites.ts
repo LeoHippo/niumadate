@@ -95,6 +95,13 @@ export function createInvite(input: CreateInviteInput): Invite {
   const now = new Date().toISOString();
   const id = randomUUID();
 
+  /*
+    表里这些列是 NOT NULL DEFAULT ''，但**传 undefined 会整条插失败** ——
+    node:sqlite 不接受 undefined 参数，不是当成「不传」。
+    后台只填了身份和日期（文案走预设）是最常见的用法，所以这里统一兜成空串。
+  */
+  const text = (value: string | undefined): string => value ?? '';
+
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const code = makeInviteCode((size) => randomBytes(size));
     try {
@@ -110,15 +117,15 @@ export function createInvite(input: CreateInviteInput): Invite {
           id,
           code,
           input.role,
-          input.inviteeName,
+          text(input.inviteeName),
           input.date,
-          input.timeText,
-          input.place,
-          input.activity,
-          input.title,
-          input.greeting,
-          input.body,
-          input.signature,
+          text(input.timeText),
+          text(input.place),
+          text(input.activity),
+          text(input.title),
+          text(input.greeting),
+          text(input.body),
+          text(input.signature),
           input.noDecline ? 1 : 0,
           now,
           now,
@@ -159,6 +166,8 @@ export function updateInvite(id: string, patch: Partial<CreateInviteInput>): Inv
   const current = getInviteById(id);
   if (current === null) return null;
 
+  // 缺的字段一律沿用原值 —— 空串也是有效值（比如清掉名字改通用链接），
+  // 所以用 ?? 而不是 ||，别把后台故意清空的字段又填回去。
   const next = {
     role: patch.role ?? current.role,
     inviteeName: patch.inviteeName ?? current.inviteeName,
