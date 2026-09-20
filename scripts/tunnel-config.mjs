@@ -13,7 +13,9 @@
  *
  * 生成的配置默认**把后台挡在公网之外**（公网访问 /admin 直接 404），
  * 后台只在自己电脑上开 http://127.0.0.1:8787/admin 用。
- * 想让后台也能从手机公网访问，就把配置里那两条 http_status:404 删掉。
+ *
+ * 想在手机上审批就加 --open-admin —— 但那样任何人都能看到登录页，
+ * 口令是唯一一道防线，自己想清楚。
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -22,9 +24,22 @@ import { join } from 'node:path';
 
 const hostname = process.argv[2];
 if (hostname === undefined || !hostname.includes('.')) {
-  console.error('用法：node scripts/tunnel-config.mjs niuma.你的域名.com');
+  console.error('用法：node scripts/tunnel-config.mjs niuma.你的域名.com [--open-admin]');
+  console.error('');
+  console.error('  默认           后台挡在公网之外（公网访问 /admin 直接 404）');
+  console.error('  --open-admin   后台也放上公网 —— 能从手机浏览器审批，');
+  console.error('                 但任何人都能看到登录页，口令成为唯一防线');
   process.exit(1);
 }
+
+/**
+ * 后台要不要露在公网上。
+ *
+ * 默认**不露**：隧道是把整个站点原样搬出去的，不挡的话
+ * 任何人打开 https://域名/admin 都能看到后台登录页。
+ * 但有时候就是想在手机上审批，那就显式传 --open-admin。
+ */
+const openAdmin = process.argv.includes('--open-admin');
 
 const cf = join(homedir(), '.cloudflared');
 if (!existsSync(cf)) {
@@ -79,14 +94,16 @@ tunnel: ${id}
 credentials-file: ${join(cf, id + '.json')}
 
 # 规则从上往下匹配，第一条命中就结束 —— 所以屏蔽必须写在放行前面
+#
+# 传了 --open-admin 就不生成那两条屏蔽，后台跟着一起上公网。
 ingress:
-  - hostname: ${hostname}
+${openAdmin ? '' : `  - hostname: ${hostname}
     path: ^/admin
     service: http_status:404
   - hostname: ${hostname}
     path: ^/api/admin
     service: http_status:404
-  - hostname: ${hostname}
+`}  - hostname: ${hostname}
     service: http://127.0.0.1:8787
   - service: http_status:404
 `;
