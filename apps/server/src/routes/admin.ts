@@ -315,6 +315,16 @@ export function registerAdminRoutes(app: FastifyInstance, config: AppConfig): vo
         return { ok: true };
       });
 
+      /** 取某条邀请的全部留言。后台的对话区用。 */
+      admin.get<{ Params: { id: string } }>('/invites/:id/messages', async (request, reply) => {
+        const invite = getInviteById(request.params.id);
+        if (invite === null) {
+          reply.code(404);
+          return apiError('NOT_FOUND', '这条邀请不存在');
+        }
+        return { messages: listMessages(invite.id) };
+      });
+
       /** 后台留言：以「牛马」的身份发。 */
       admin.post<{ Params: { id: string }; Body: { text?: unknown } }>(
         '/invites/:id/messages',

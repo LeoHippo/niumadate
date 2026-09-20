@@ -1,6 +1,15 @@
 import { API_PREFIX } from '@niumadate/shared';
 import { safeStorage } from './lib';
-import type { AppConfig, ApiError, CreateSubmissionInput, Submission, SubmissionStatus } from '@niumadate/shared';
+import type {
+  AppConfig,
+  ApiError,
+  CreateInviteInput,
+  CreateSubmissionInput,
+  Invite,
+  InviteMessage,
+  Submission,
+  SubmissionStatus,
+} from '@niumadate/shared';
 
 /** 后端返回了结构化错误，或者响应本身就不是 2xx。 */
 export class ApiRequestError extends Error {
@@ -160,6 +169,40 @@ export const api = {
 
     exportAll: (): Promise<ExportPayload> =>
       request<ExportPayload>('/admin/submissions/export', { auth: true }),
+
+    // ---------- 邀请 ----------
+
+    listInvites: (): Promise<{ items: Invite[] }> =>
+      request<{ items: Invite[] }>('/admin/invites', { auth: true }),
+
+    createInvite: (input: CreateInviteInput): Promise<{ invite: Invite }> =>
+      request<{ invite: Invite }>('/admin/invites', { method: 'POST', body: input, auth: true }),
+
+    updateInvite: (id: string, patch: Partial<CreateInviteInput>): Promise<{ invite: Invite }> =>
+      request<{ invite: Invite }>(`/admin/invites/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: patch,
+        auth: true,
+      }),
+
+    removeInvite: (id: string): Promise<{ ok: boolean }> =>
+      request<{ ok: boolean }>(`/admin/invites/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        auth: true,
+      }),
+
+    inviteMessages: (id: string): Promise<{ messages: InviteMessage[] }> =>
+      request<{ messages: InviteMessage[] }>(
+        `/admin/invites/${encodeURIComponent(id)}/messages`,
+        { auth: true },
+      ),
+
+    /** 后台以「牛马」的身份回一句。 */
+    sendInviteMessage: (id: string, text: string): Promise<{ messages: InviteMessage[] }> =>
+      request<{ messages: InviteMessage[] }>(
+        `/admin/invites/${encodeURIComponent(id)}/messages`,
+        { method: 'POST', body: { text }, auth: true },
+      ),
   },
 };
 

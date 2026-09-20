@@ -129,6 +129,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   invite: {
     hostGender: 'male',
     defaultNoDecline: false,
+    publicBase: '',
   },
 };
 
@@ -297,6 +298,8 @@ function normalizeInvite(raw: unknown): InviteConfig {
     // 只认这两个值，别的一律当 male（老配置没有这一段，也会落到这儿）
     hostGender: input.hostGender === 'female' ? 'female' : 'male',
     defaultNoDecline: asBoolean(input.defaultNoDecline, DEFAULT_CONFIG.invite.defaultNoDecline),
+    // 去掉结尾的斜杠，拼链接时不会出现 //i/xxx
+    publicBase: asString(input.publicBase, DEFAULT_CONFIG.invite.publicBase).replace(/\/+$/, ''),
   };
 }
 

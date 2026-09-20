@@ -23,6 +23,7 @@ import type {
 } from '@niumadate/shared';
 import { api, adminToken, describeError } from '../api';
 import { NiumaMark } from '../components';
+import { InvitesPanel } from './AdminInvites';
 import { shortDate, STATUS_LABELS } from '../lib';
 
 const WEEKDAYS = [
@@ -104,7 +105,7 @@ function parseMonths(text: string): number[] {
 
 export function AdminPage() {
   const [token, setToken] = useState<string | null>(() => adminToken.get());
-  const [tab, setTab] = useState<'list' | 'config' | 'report'>('list');
+  const [tab, setTab] = useState<'list' | 'invite' | 'config' | 'report'>('list');
   const [pendingCount, setPendingCount] = useState(0);
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [siteBusy, setSiteBusy] = useState(false);
@@ -204,6 +205,14 @@ export function AdminPage() {
           </button>
           <button
             type="button"
+            className={tab === 'invite' ? 'tab tab-on' : 'tab'}
+            title="你主动约好友：定好时间地点，生成一条链接发给他"
+            onClick={() => setTab('invite')}
+          >
+            邀请
+          </button>
+          <button
+            type="button"
             className={tab === 'config' ? 'tab tab-on' : 'tab'}
             title="站名、身份、工作制、时段、冷热月份、文案……都在这里改"
             onClick={() => setTab('config')}
@@ -244,6 +253,12 @@ export function AdminPage() {
       */}
       <div className={tab === 'list' ? undefined : 'tab-panel-off'}>
         <SubmissionsPanel config={config} onPendingChange={setPendingCount} />
+      </div>
+      {/*
+        邀请面板也常驻：正在写一份邀请时切去看列表，草稿不该被丢掉。
+      */}
+      <div className={tab === 'invite' ? undefined : 'tab-panel-off'}>
+        <InvitesPanel config={config} />
       </div>
       <div className={tab === 'config' ? undefined : 'tab-panel-off'}>
         <SettingsPanel siteOpen={config?.site.open ?? true} onDirtyChange={setSettingsDirty} />

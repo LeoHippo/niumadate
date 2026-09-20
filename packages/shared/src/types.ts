@@ -192,6 +192,15 @@ export interface InviteConfig {
   hostGender: 'male' | 'female';
   /** 新建邀请时，「不允许拒绝」默认勾不勾。 */
   defaultNoDecline: boolean;
+  /**
+   * 公网地址，例如 `https://niumadate.xyz`。**复制邀请链接时要用它。**
+   *
+   * 为什么不能直接用浏览器地址栏：后台已经**只允许本机访问**了
+   * （隧道把 /admin 挡成 404），所以后台永远开在 127.0.0.1:8787 上 ——
+   * 拿地址栏拼出来的链接是 `http://127.0.0.1:8787/i/xxx`，发给好友打不开。
+   * 留空就只显示本机地址，方便自己调试。
+   */
+  publicBase: string;
 }
 
 /** 好友勾选的一个「日期 + 时段」。 */

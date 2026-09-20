@@ -1,0 +1,274 @@
+/* 后台「邀请」面板的样式。
+   刻意朴素 —— 花哨的东西留给好友那一侧的邀请页，
+   这里是干活的界面，看得清、点得准就行。 */
+
+.invite-panel {
+  padding: 16px 0 40px;
+}
+
+.invite-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.invite-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.invite-field-grow {
+  flex: 1 1 320px;
+}
+
+.invite-field-label {
+  font-size: 12px;
+  color: #8a7f6d;
+  line-height: 1.5;
+}
+
+.invite-input {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 10px;
+  border: 1px solid #d9cdb8;
+  border-radius: 6px;
+  background: #fffdf8;
+  color: #3b3228;
+  min-width: 0;
+}
+
+.invite-input:focus {
+  outline: 2px solid #d8b26a;
+  outline-offset: 1px;
+}
+
+.invite-textarea {
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.invite-flash {
+  margin: 0 0 10px;
+  color: #2f7a3f;
+  font-size: 13px;
+}
+
+.invite-error {
+  margin: 0 0 10px;
+  color: #b3121b;
+  font-size: 13px;
+}
+
+/* ---------- 编辑器 ---------- */
+
+.invite-editor {
+  border: 1px solid #e2d6c0;
+  border-radius: 10px;
+  background: #fffdf7;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.invite-editor-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.invite-roles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.invite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.invite-section {
+  margin: 18px 0 10px;
+  font-size: 13px;
+  color: #8a7f6d;
+  border-top: 1px dashed #e2d6c0;
+  padding-top: 14px;
+}
+
+.invite-check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 14px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #5a5145;
+}
+
+.invite-preview {
+  border-left: 3px solid #d8b26a;
+  background: #fffaf0;
+  padding: 10px 14px;
+  margin: 14px 0;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #4a4237;
+}
+
+.invite-preview p {
+  margin: 0;
+}
+
+.invite-preview-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 6px !important;
+}
+
+.invite-preview-key {
+  color: #b3121b;
+  font-weight: 600;
+}
+
+.invite-editor-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ---------- 列表 ---------- */
+
+.invite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.invite-row {
+  border: 1px solid #e6dcc8;
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 10px 14px;
+}
+
+.invite-row-pending { border-left-color: #d8b26a; }
+.invite-row-accepted { border-left-color: #2f7a3f; }
+.invite-row-declined { border-left-color: #b3121b; }
+
+.invite-row-main {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.invite-row-name { font-weight: 700; }
+.invite-row-when { color: #b3121b; font-weight: 600; }
+.invite-row-place { color: #6b6152; }
+
+.invite-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.invite-badge-pending { color: #a8801f; }
+.invite-badge-accepted { color: #2f7a3f; }
+.invite-badge-declined { color: #b3121b; }
+
+.invite-row-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.invite-danger { color: #b3121b; }
+
+/* ---------- 对话区 ---------- */
+
+.chat-box {
+  margin-top: 12px;
+  border-top: 1px dashed #e2d6c0;
+  padding-top: 10px;
+}
+
+.chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #6b6152;
+}
+
+.chat-empty {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #9c9182;
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.chat-msg {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 6px 10px;
+  border-radius: 8px;
+  max-width: 92%;
+}
+
+.chat-msg-host {
+  background: #fdf3e3;
+  align-self: flex-end;
+}
+
+.chat-msg-guest {
+  background: #f2f5f2;
+  align-self: flex-start;
+}
+
+.chat-who {
+  font-size: 12px;
+  color: #8a7f6d;
+  flex: none;
+}
+
+.chat-text {
+  /* 留言里的换行要原样显示 */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-time {
+  font-size: 11px;
+  color: #a89d8c;
+  flex: none;
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chat-form .invite-input {
+  flex: 1;
+}
