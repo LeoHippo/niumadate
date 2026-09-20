@@ -4,6 +4,7 @@ import { loadConfig } from './config';
 import { setLogger } from './log';
 import { initSettings } from './settings';
 import { initSubmissions } from './submissions';
+import { initInvites } from './invites';
 
 try {
   process.loadEnvFile();
@@ -20,6 +21,7 @@ setLogger(app.log);
 
 initSettings(config.dataDir);
 initSubmissions(config.dataDir);
+initInvites(config.dataDir);
 
 // 生产环境却没开 trustProxy —— 多半是前面挂了反代忘了配，
 // 症状是限流把所有人当成同一个人，很难查，所以这里主动喊一声。

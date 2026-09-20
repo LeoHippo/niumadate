@@ -42,6 +42,47 @@ export function openDatabase(dataDir: string): DatabaseSync {
     CREATE INDEX IF NOT EXISTS idx_submissions_created ON submissions (created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_submissions_device ON submissions (device_id);
     CREATE INDEX IF NOT EXISTS idx_submissions_role ON submissions (role);
+
+    /*
+      邀请：牛马创建的，一条一条独立，不像申请那样按身份归堆。
+      code 是链接里那串，也是**唯一的访问凭据** —— 拿到就能看，所以要够长。
+    */
+    CREATE TABLE IF NOT EXISTS invites (
+      id             TEXT PRIMARY KEY,
+      code           TEXT NOT NULL UNIQUE,
+      role           TEXT NOT NULL,
+      invitee_name   TEXT NOT NULL DEFAULT '',
+      date           TEXT NOT NULL,
+      time_text      TEXT NOT NULL DEFAULT '',
+      place          TEXT NOT NULL DEFAULT '',
+      activity       TEXT NOT NULL DEFAULT '',
+      title          TEXT NOT NULL DEFAULT '',
+      greeting       TEXT NOT NULL DEFAULT '',
+      body           TEXT NOT NULL DEFAULT '',
+      signature      TEXT NOT NULL DEFAULT '',
+      no_decline     INTEGER NOT NULL DEFAULT 0,
+      status         TEXT NOT NULL DEFAULT 'pending',
+      responded_at   TEXT,
+      created_at     TEXT NOT NULL,
+      updated_at     TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_invites_created ON invites (created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_invites_code ON invites (code);
+
+    /*
+      邀请里的留言。**这是这个功能的重点** ——
+      定下来之后还要来回商量，所以是一串消息，不是单条备注。
+    */
+    CREATE TABLE IF NOT EXISTS invite_messages (
+      id          TEXT PRIMARY KEY,
+      invite_id   TEXT NOT NULL,
+      sender      TEXT NOT NULL,
+      text        TEXT NOT NULL,
+      created_at  TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_invite_messages_invite ON invite_messages (invite_id, created_at);
   `);
 
   // 老库平滑升级：缺列就补，不动已有数据
