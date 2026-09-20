@@ -340,29 +340,19 @@
 }
 
 /*
-  内容逐段浮现 —— **只给「看全部」那一版（信纸长卷）**。
+  这里原来有一组「内容逐段浮现」的 animation-delay（3.0s ~ 4.1s），
+  是给旧的"信纸长卷"那一版用的。
 
-  ⚠️ 这组延迟必须限定在 .invite-all 里，不能全局生效。
-  分镜模式下每一屏自己带入場动效；再叠一层 3.85s 延迟的话，
-  按钮屏挂载后要**整整 3.85 秒**才显形 —— 期间整屏透明，
-  看起来就是「按钮和小人都不见了」。实测踩过，是探针查出 opacity:0 才定位到的。
+  **整组删掉了**，原因值得记一笔：
+  后来「看全部」改成"同一套卡片依次摊开"，复用的正是 `.invite-all` 这个类名 ——
+  于是这组延迟**诈尸**了：最后一张卡上的按钮要干等 3.85 秒才显形，
+  看起来就是"按钮不见了"。
+
+  教训：视图换了，旧视图的动画规则要跟着删。留着"反正也不冲突"，
+  等类名被复用时就会咬人。
 */
-.invite-all .invite-greeting,
-.invite-all .invite-facts,
-.invite-all .invite-body,
-.invite-all .invite-signature,
-.invite-all .invite-answer,
-.invite-all .invite-chat {
-  animation: invite-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
 
-.invite-all .invite-greeting { animation-delay: 3.0s; }
-.invite-all .invite-facts { animation-delay: 3.25s; }
-.invite-all .invite-body { animation-delay: 3.5s; }
-.invite-all .invite-signature { animation-delay: 3.65s; }
-.invite-all .invite-answer { animation-delay: 3.85s; }
-.invite-all .invite-chat { animation-delay: 4.1s; }
-
+/* 这个留给别处用（信纸长卷虽然没了，动效本身还在别的地方复用） */
 @keyframes invite-rise {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { findRole, invitePresetFor } from '@niumadate/shared';
 import type { AppConfig, CreateInviteInput, Invite, InviteMessage, RoleKey } from '@niumadate/shared';
 import { api, describeError } from '../api';
+import { Puppet } from '../puppet';
 import '../invite-admin.css';
+import '../host-pick.css';
 
 /**
  * 后台的「邀请」面板。
@@ -69,6 +71,14 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [base, setBase] = useState('');
+  /**
+   * 小人的性别**单独存一份本地状态**。
+   *
+   * 为什么不直接用 config.invite.hostGender：config 是外层 Admin 加载后传进来的那份，
+   * 保存之后外层并不会重新拉一遍 —— 于是"点了女版但界面不动"（实测踩过）。
+   * 本地存一份，点完立刻反映，也顺便当乐观更新。
+   */
+  const [gender, setGender] = useState<'male' | 'female'>('male');
 
   const load = useCallback(async () => {
     try {
@@ -87,6 +97,10 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
   useEffect(() => {
     setBase(config?.invite.publicBase ?? '');
   }, [config?.invite.publicBase]);
+
+  useEffect(() => {
+    setGender(config?.invite.hostGender ?? 'male');
+  }, [config?.invite.hostGender]);
 
   /** 一键提示，两秒后自己消失。 */
   const say = (text: string): void => {
@@ -186,6 +200,51 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
 
   return (
     <div className="invite-panel">
+      {/*
+        ---------- 邀请页上的小人 ----------
+
+        做成**并排两个、点谁选谁**，而不是一个下拉框 ——
+        因为"男的女的长什么样"正是这个设置要传达的信息，
+        光写"男/女"两个字，用户根本不知道自己在选什么（之前就是这样）。
+        所以直接把两个小人画出来给他看。
+      */}
+      <section className="host-pick">
+        <div className="host-pick-head">
+          <span className="host-pick-title">邀请页上的小人</span>
+          <span className="host-pick-hint">
+            它代表你本人，所以全局一个 —— 四套材质只是给它换装
+          </span>
+        </div>
+
+        <div className="host-pick-row">
+          {(['male', 'female'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={gender === option ? 'host-option host-option-on' : 'host-option'}
+              title={option === 'male' ? '换成男版' : '换成女版'}
+              onClick={() => {
+                if (config === null || gender === option) return;
+                // 先动界面，再发请求 —— 点一下就该立刻看到反馈
+                setGender(option);
+                void api.admin
+                  .saveConfig({ ...config, invite: { ...config.invite, hostGender: option } })
+                  .then(() => say(option === 'male' ? '小人换成男版了 ✓' : '小人换成女版了 ✓'))
+                  .catch((cause: unknown) => {
+                    setGender(gender);
+                    setError(describeError(cause));
+                  });
+              }}
+            >
+              <Puppet gender={option} mood="idle" />
+              <span className="host-option-label">
+                {option === 'male' ? '男 · 犄角 + 领巾' : '女 · 蝴蝶结 + 围裙'}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* ---------- 工具条 ---------- */}
       <div className="invite-toolbar">
         <label className="invite-field invite-field-grow">

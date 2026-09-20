@@ -1,0 +1,58 @@
+/* 后台里的「邀请页上的小人」选择器。
+   做成并排两个小人点选 —— 光写「男/女」两个字，用户不知道自己在选什么。 */
+
+.host-pick {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px solid #e6dcc8;
+  border-radius: 10px;
+  background: #fffdf7;
+}
+
+.host-pick-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.host-pick-title { font-size: 15px; font-weight: 700; color: #3b3228; }
+.host-pick-hint { font-size: 12px; color: #8a7f6d; }
+
+.host-pick-row { display: flex; gap: 14px; flex-wrap: wrap; }
+
+.host-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px 10px;
+  font: inherit;
+  background: #fff;
+  border: 2px solid #e6dcc8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s cubic-bezier(0.3, 1.3, 0.5, 1),
+    box-shadow 0.18s ease;
+}
+
+.host-option:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(90, 70, 40, 0.12); }
+
+.host-option-on {
+  border-color: #b3121b;
+  box-shadow: 0 10px 22px rgba(179, 18, 27, 0.16);
+}
+
+.host-option-label { font-size: 12px; color: #6b6152; }
+
+/* 预览里的小人缩小一点，两个并排刚好放得下 */
+.host-option .puppet { width: 96px; height: 114px; }
+
+/* 后台是浅底，给小人一组中性配色（不看邀请页的四套材质） */
+.host-option {
+  --puppet-body-hi: #fff5e2;
+  --puppet-body: #f0dcbb;
+  --puppet-body-lo: #d6bd93;
+  --puppet-nose: #e8b9a8;
+}

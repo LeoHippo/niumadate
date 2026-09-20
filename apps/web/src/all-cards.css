@@ -1,0 +1,74 @@
+/* 「看全部」：把分镜那几屏**原样摞起来**。
+   和分镜模式共用 .screen-inner，所以视觉完全一致 —— 只是不用一页页点。
+   同一个功能一套皮，只是节奏不同。 */
+
+.invite-all {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 0 40px;
+  gap: 18px;
+}
+
+.all-card {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 22px 18px;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(90, 70, 40, 0.12);
+  animation: all-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.all-card:nth-child(1) { animation-delay: 0.04s; }
+.all-card:nth-child(2) { animation-delay: 0.1s; }
+.all-card:nth-child(3) { animation-delay: 0.16s; }
+.all-card:nth-child(4) { animation-delay: 0.22s; }
+.all-card:nth-child(5) { animation-delay: 0.28s; }
+.all-card:nth-child(6) { animation-delay: 0.34s; }
+.all-card:nth-child(7) { animation-delay: 0.4s; }
+
+@keyframes all-card-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/*
+  摊开看的时候，每一屏自己的入场动效**不再重复播** ——
+  七个一起演会乱成一团。让卡片错落浮入就够了，内容安安静静地在那儿。
+*/
+.invite-all .screen-inner,
+.invite-all .screen-emoji,
+.invite-all .invite-seal,
+.invite-all .invite-seal-wax,
+.invite-all .invite-seal-face,
+.invite-all .screen-big {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/*
+  溢蜡那一圈要**单独处理**：它在 DOM 里排在最后，是画在最上层的。
+  动画版里它只到 0.6 的不透明度，所以底下的 emoji 透得出来；
+  这里要是也给它 opacity: 1，它就变成一个实心圆盘，把印章图案全盖住了
+  （实测就是"一颗橙色实心球"）。所以给它留一点透。
+*/
+.invite-all .invite-seal-rim {
+  animation: none !important;
+  opacity: 0.55 !important;
+}
+
+/* 拆信那一屏的印章在摊开版里居中放好 */
+.all-card-seal .invite-seal { margin: 0 auto 6px; }
+
+/* 最后那张卡要放得下按钮和对话 */
+.all-card-final { flex-direction: column; align-items: center; }
+.all-card-final .invite-stage { width: 100%; }
+
+/* 摊开版里小人不用撑那么大 */
+.invite-all .invite-puppet-holder { height: auto; margin-bottom: -34px; }

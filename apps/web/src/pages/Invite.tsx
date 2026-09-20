@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { fillInviteName, findRole } from '@niumadate/shared';
 import type { Invite, InviteMessage } from '@niumadate/shared';
 import { api, describeError } from '../api';
-import { NiumaMark } from '../components';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
 import { Puppet } from '../puppet';
@@ -11,6 +10,7 @@ import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
 import '../invite-flow.css';
 import '../invite-motion.css';
+import '../all-cards.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -639,7 +639,11 @@ function Chat({
 }
 
 /* ==========================================================================
-   看全部：信纸长卷（就是原来那一版，留给赶时间的人）
+   看全部：**同一套卡片依次摊开**
+   --------------------------------------------------------------------------
+   以前这里是一张「信纸长卷」，和分镜那套是两种视觉 —— 同一个功能两套皮，不统一。
+   现在改成把上面那几屏**原样摞起来**：视觉一模一样，只是不用一页页点。
+   这样「赶时间」和「慢慢看」看到的是同一个东西，只是节奏不同。
    ========================================================================== */
 
 function LetterAll({
@@ -659,53 +663,41 @@ function LetterAll({
   onMessages: (messages: InviteMessage[]) => void;
   onBack: () => void;
 }) {
+  /** 前面几屏是纯展示，直接摞起来。 */
+  const plain: Screen[] = ['seal', 'who', 'when', 'where', 'what', 'word'];
+
   return (
     <div className="invite-all">
-      <div className="invite-seal" aria-hidden="true">
-        <span className="invite-seal-wax" />
-        <span className="invite-seal-face">{roleEmoji}</span>
-        <span className="invite-seal-rim" />
-      </div>
-
-      <div className="invite-letter">
-        <header className="invite-head">
-          <NiumaMark size={40} className="invite-mark" />
-          <h1 className="invite-title">{invite.title}</h1>
-          <div className="invite-rule" />
-        </header>
-
-        <p className="invite-greeting">{fillInviteName(invite.greeting, invite.inviteeName)}</p>
-
-        <dl className="invite-facts">
-          <div className="invite-fact">
-            <dt>什么时候</dt>
-            <dd className="invite-fact-key">
-              {invite.date}
-              {invite.timeText === '' ? '' : ` ${invite.timeText}`}
-            </dd>
+      {plain.map((item) => (
+        <section key={item} className={`all-card all-card-${item}`}>
+          <div className="screen-inner">
+            <ScreenBody
+              screen={item}
+              invite={invite}
+              roleEmoji={roleEmoji}
+              hostGender={hostGender}
+              messages={messages}
+              onRespond={onRespond}
+              onMessages={onMessages}
+            />
           </div>
-          <div className="invite-fact">
-            <dt>在哪儿</dt>
-            <dd className="invite-fact-key">{invite.place || '（没写，到时候说）'}</dd>
-          </div>
-          <div className="invite-fact">
-            <dt>干嘛</dt>
-            <dd>{invite.activity || '（没写，去了就知道）'}</dd>
-          </div>
-        </dl>
+        </section>
+      ))}
 
-        {invite.body.trim() !== '' && <p className="invite-body">{invite.body}</p>}
-        <p className="invite-signature">{invite.signature}</p>
+      {/* 回答和对话放在同一张卡上：摊开看的人图省事，少翻一次 */}
+      <section className="all-card all-card-final">
+        <div className="screen-inner">
+          <p className="screen-kicker">所以，去不去？</p>
+          <Answer invite={invite} hostGender={hostGender} onAnswer={onRespond} />
+          <Chat code={invite.code} messages={messages} onSent={onMessages} />
+        </div>
+      </section>
 
-        <Answer invite={invite} hostGender={hostGender} onAnswer={onRespond} />
-        <Chat code={invite.code} messages={messages} onSent={onMessages} />
-
-        <nav className="step-nav">
-          <button type="button" className="btn btn-ghost" onClick={onBack}>
-            ← 回到一页一页看
-          </button>
-        </nav>
-      </div>
+      <nav className="step-nav">
+        <button type="button" className="btn btn-ghost" onClick={onBack}>
+          ← 回到一页一页看
+        </button>
+      </nav>
     </div>
   );
 }
