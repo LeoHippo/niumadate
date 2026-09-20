@@ -21,7 +21,13 @@ services:
     image: niumadate
     container_name: niumadate
     ports:
-      - "8787:8787"
+      # 只绑**本机回环**：同一 WiFi 下的别人（比如 192.168.0.104:8787）也访问不到。
+      #
+      # 为什么这样也够用：隧道（cloudflared）和服务器上的 Caddy / Nginx
+      # 都是从**宿主机**连 127.0.0.1:8787 的，回环地址它们够得着。
+      # 想让局域网里的手机直连调试，改成 "8787:8787" 就放开了 ——
+      # 但那样同一网络下的人也能打开后台登录页，心里有数就行。
+      - "127.0.0.1:8787:8787"
     volumes:
       - niumadate-data:/data
     restart: unless-stopped

@@ -223,3 +223,68 @@ cloudflared service uninstall
 - **别把 8787 以外的端口也穿出去**（尤其是 Docker 的 2375、或者是别的开发服务）
 - 隧道地址**知道的人就能访问**，别发到公开的地方
 - 用完就 `Ctrl+C` 停掉，别让它一直开着
+
+## 鍚庡彴涓嶈闇插湪鍏綉涓?
+**闅ч亾鏄妸鏁翠釜绔欑偣鍘熸牱鎼嚭鍘荤殑** 鈥斺€?瀹冧笉鍖哄垎銆屽ソ鍙嬮〉闈€嶅拰銆屽悗鍙般€嶃€?涓嶇鐨勮瘽锛屼换浣曚汉鎵撳紑 `https://浣犵殑鍩熷悕/admin` 閮借兘鐪嬪埌鍚庡彴鐧诲綍椤碉紝
+鍙墿鍙ｄ护涓€閬撻槻绾夸簡銆?
+### 宸茬粡榛樿鎸′綇浜?
+`scripts/tunnel-config.mjs` 鐢熸垚鐨勯厤缃噷锛?*灞忚斀瑙勫垯鍐欏湪鏀捐瑙勫垯鍓嶉潰**
+锛坈loudflared 浠庝笂寰€涓嬪尮閰嶏紝绗竴鏉″懡涓氨缁撴潫锛夛細
+
+```yaml
+ingress:
+  - hostname: niumadate.xyz
+    path: ^/admin          # 鍚庡彴椤甸潰 鈫?鍏綉 404
+    service: http_status:404
+  - hostname: niumadate.xyz
+    path: ^/api/admin      # 鍚庡彴鎺ュ彛涔熻鎸?鈥斺€?鍙尅椤甸潰涓嶆尅鎺ュ彛绛変簬娌℃尅
+    service: http_status:404
+  - hostname: niumadate.xyz
+    service: http://127.0.0.1:8787
+  - service: http_status:404
+```
+
+鑷繁鐢ㄥ悗鍙?*瀹屽叏涓嶅彈褰卞搷**锛氱洿鎺ュ紑 `http://127.0.0.1:8787/admin`銆?
+鎯宠鍚庡彴涔熻兘浠庢墜鏈哄叕缃戣闂紝鎶婁笂闈㈤偅涓ゆ潯 `http_status:404` 鍒犳帀鍐?`cloudflared tunnel run` 鍗冲彲 鈥斺€?浣嗛偅鏍风瓑浜庢妸鐧诲綍椤垫寕鍦ㄥ叕缃戜笂锛岃嚜宸辨兂娓呮銆?
+### 涓や釜蹇呴』杩欎箞鍐欑殑鍦版柟锛堥兘韪╄繃锛?
+| 鍐欐硶 | 涓轰粈涔?|
+| --- | --- |
+| `service: http://127.0.0.1:8787` | **涓嶈兘鍐?`localhost`**銆俉indows 涓?localhost 甯稿厛瑙ｆ瀽鍒?IPv6 `::1`锛岃€?compose 鐨?`127.0.0.1:8787:8787` 鍙粦浜?IPv4 鈫?闅ч亾杩炰笉涓婃簮锛?*鍏綉鍏ㄧ嚎 502**锛堝疄娴嬭俯杩囦竴娆★級 |
+| `ports: "127.0.0.1:8787:8787"` | 鍙粦**鏈満鍥炵幆**銆傝繖鏍峰悓涓€涓?WiFi 涓嬬殑鍒汉涔熸墦涓嶅紑 `192.168.x.x:8787/admin`銆傞毀閬撳拰 Caddy / Nginx 閮芥槸浠庡涓绘満杩?127.0.0.1锛岀収鏍峰寰楃潃 |
+
+### 楠岃瘉锛堝洓鏉￠兘瑕佸锛?
+```powershell
+# 鍏綉锛氬ソ鍙嬮〉闈㈤€氾紝鍚庡彴 404
+curl.exe --resolve niumadate.xyz:443:<Cloudflare鐨処P> -o NUL -s -w "%{http_code}\n" https://niumadate.xyz/
+curl.exe --resolve niumadate.xyz:443:<Cloudflare鐨処P> -o NUL -s -w "%{http_code}\n" https://niumadate.xyz/admin
+curl.exe --resolve niumadate.xyz:443:<Cloudflare鐨処P> -o NUL -s -w "%{http_code}\n" https://niumadate.xyz/api/admin/login
+
+# 鏈満锛氬悗鍙扮収甯?200
+curl.exe -o NUL -s -w "%{http_code}\n" http://127.0.0.1:8787/admin
+```
+
+鏈熸湜锛歚200` / `404` / `404` / `200`銆?
+---
+
+## 鏈湴璋冭瘯锛氫笁绉嶉渶姹傦紝涓夌鍋氭硶
+
+### 1. 鍙槸鎯崇敤鍚庡彴 鈫?鐩存帴寮€鏈満鍦板潃
+
+```
+http://127.0.0.1:8787/admin
+```
+
+涓嶅彈闅ч亾灞忚斀褰卞搷锛堝睆钄藉彧绠″叕缃戦偅鏉¤矾锛夈€?
+### 2. 鏀逛簡浠ｇ爜鎯宠瘯锛屼絾**涓嶆兂褰卞搷姝ｅ湪鐢ㄧ殑閭ｄ唤**
+
+鐢ㄦ紨缁冪幆澧冿紝**鎹釜绔彛銆佹崲涓暟鎹洰褰曘€佷唬鐮佽繕鏄悓涓€浠?*锛?
+```cmd
+pnpm -r run build
+node scripts/sandbox.mjs start      REM 璧峰湪 8788锛屾暟鎹湪 .sandbox/
+node scripts/sandbox.mjs status     REM 鐪嬪畠娲荤潃娌°€佸彛浠ゆ槸浠€涔?node scripts/sandbox.mjs stop       REM 鍋滄帀锛屾暟鎹暀鐫€
+node scripts/sandbox.mjs nuke       REM 杩炴暟鎹竴璧峰垹骞插噣
+```
+
+**8787 閭ｄ唤鐪熷疄鐨勶紙濂藉弸姝ｅ湪鐢ㄧ殑锛変竴鏍规睏姣涢兘涓嶄細鍔?* 鈥斺€?瀹冪殑搴撱€侀厤缃€佺敓鎴愮殑鍙ｄ护鍏ㄥ湪鏁版嵁鍗烽噷锛屽拰 `.sandbox/` 浜掍笉鐩稿共銆?
+### 3. 鏀瑰姩涓嶆兂涓婄嚎涓?
+- **鍏綉鐪嬪埌鐨勬槸瀹瑰櫒閲岀殑閭ｄ唤**銆備綘鍙敼鏈湴浠ｇ爜銆佷笉閲嶅缓闀滃儚锛屽叕缃戝氨涓嶄細鍙樸€?- 瑕佺湡鐨勬帹鍒板叕缃戯細`docker compose up -d --build`锛?*VPN 寰楀紑鐫€**锛屽惁鍒欐媺涓嶅埌鍩虹闀滃儚锛?- 瑕佹帹鍒?GitHub锛歚git push`锛堜笉鎺ㄥ氨鍙湪浣犳湰鏈猴級

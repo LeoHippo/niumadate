@@ -10,6 +10,10 @@
  *   node scripts/tunnel-config.mjs niuma.你的域名.com
  *
  * 前提：已经跑过 `cloudflared tunnel login` 和 `cloudflared tunnel create <名字>`
+ *
+ * 生成的配置默认**把后台挡在公网之外**（公网访问 /admin 直接 404），
+ * 后台只在自己电脑上开 http://127.0.0.1:8787/admin 用。
+ * 想让后台也能从手机公网访问，就把配置里那两条 http_status:404 删掉。
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -49,14 +53,41 @@ if (parsed.TunnelID !== undefined && parsed.TunnelID !== tunnelId) {
 
 const id = parsed.TunnelID ?? tunnelId;
 const outPath = join(cf, 'config.yml');
+/*
+  生成的配置里有三个地方是**踩过坑才这么写的**，别随手改回去：
+
+  1. service 写 127.0.0.1 而不是 localhost
+     Windows 上 localhost 常先解析到 IPv6 ::1，而 compose 的
+     "127.0.0.1:8787:8787" 只绑了 IPv4 —— 隧道连不上源，公网全线 502。
+
+  2. 两条 http_status:404 把 /admin 和 /api/admin 挡在公网之外
+     隧道是把**整个站点**原样搬出去的，不区分「好友页面」和「后台」。
+     不挡的话，任何人打开 https://域名/admin 都能看到后台登录页，
+     只剩口令一道防线。挡掉之后公网连登录页都看不到，
+     自己开 http://127.0.0.1:8787/admin 照常用。
+
+  3. 兜底规则必须最后、且不带任何过滤条件
+     少了它，cloudflared 会报 "The last ingress rule must match all URLs" 起不来。
+*/
 const yaml = `# 由 scripts/tunnel-config.mjs 生成
+#
+# protocol: http2 —— QUIC 在国内常被劣化（日志里出现过 "failed to dial to edge
+# with quic"），换成 http2 通常更稳。想用默认的 QUIC 就删掉这一行。
+protocol: http2
+
 tunnel: ${id}
 credentials-file: ${join(cf, id + '.json')}
 
+# 规则从上往下匹配，第一条命中就结束 —— 所以屏蔽必须写在放行前面
 ingress:
   - hostname: ${hostname}
-    service: http://localhost:8787
-  # 兜底：必须有，否则 cloudflared 启动会报错
+    path: ^/admin
+    service: http_status:404
+  - hostname: ${hostname}
+    path: ^/api/admin
+    service: http_status:404
+  - hostname: ${hostname}
+    service: http://127.0.0.1:8787
   - service: http_status:404
 `;
 
