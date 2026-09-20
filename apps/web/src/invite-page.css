@@ -411,21 +411,23 @@
 .invite-stage { position: relative; }
 
 .invite-puppet-holder {
-  position: absolute;
-  left: 0;
-  bottom: 100%;
+  /*
+    **占真实文档流**，不要绝对定位。
+    第一版用 absolute + bottom:100%，结果它压在上一行文案上 ——
+    而且 bottom:100% 是相对 **padding box** 的，加 padding 也推不动它
+    （试过 padding-top:148px，实测文案还是被盖住）。
+    改成跟着流走：高度就是它的高度，谁也不用迁就谁，也不用猜偏移量。
+
+    横向站位靠 JS 算出来的 translateX（**相对这一行的中线**），
+    所以窄屏宽屏都对得上，和容器留白多少无关。
+  */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: 190px;
   margin-bottom: -54px;
   z-index: 5;
   pointer-events: none;
-  /*
-    横向位置由 JS 量出来（站在哪个按钮正上方），滑过去要看得见过程。
-
-    纵向的 -54px 是**量出来的**，不是拍的：
-      SVG viewBox 是 160×190，小人的脚在 y≈172，底下留了约 19px 空白；
-      再加上 160px 高的 SVG 挂在"按钮上方"时天然多出来的高度。
-    第一版给 -26px，实测脚底离按钮顶还有 25px —— 看起来像悬空。
-    现在按实测值补足，脚是**踩在按钮上**的。
-  */
   transition: transform 0.55s cubic-bezier(0.4, 1.3, 0.5, 1);
 }
 
@@ -865,9 +867,9 @@
   }
 }
 
-
-/* ---------- 娈佃惤涔嬮棿鐨勫皬浜鸿繃娓?----------
-   涓嬩竴娈垫槸琚畠"鎷夊嚭鏉?/ 鎺ㄥ嚭鏉?鐨勶紝涓嶆槸鑷繁娣″叆鐨勩€?   鎵€浠ュ畠鍑虹幇鍦ㄦ钀戒氦鐣屽锛屽姩浣滃拰涓嬩竴娈电殑娴幇**鍚屾椂**鍙戠敓銆?*/
+/* ---------- 段落之间的小人过渡 ----------
+   下一段是被它"拉出来 / 推出来"的，不是自己淡入的。
+   所以它出现在段落交界处，动作和下一段的浮现**同时**发生。 */
 
 .holder {
   display: flex;
@@ -886,7 +888,7 @@
   background: linear-gradient(90deg, var(--paper-edge), transparent);
 }
 
-/* 銆屾媺銆嶏細鎶婁笅涓€娈垫嫿鍑烘潵 鈥斺€?寰€鍚庝话銆佸啀鎷夊洖鏉?*/
+/* 「拉」：把下一段拽出来 —— 往后仰、再拉回来 */
 .holder-pull {
   animation-delay: 2.85s;
   transform-origin: left center;
@@ -901,7 +903,7 @@
   100% { transform: translateY(0) rotate(0); }
 }
 
-/* 銆屾帹銆嶏細鎶婁笅涓€娈垫帹鍑烘潵 */
+/* 「推」：把下一段推出来 */
 .holder-push { animation-delay: 3.9s; }
 .holder-push .puppet { animation: holder-push 0.9s cubic-bezier(0.4, 0, 0.3, 1) 4s both; }
 
@@ -916,7 +918,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 鍑忓皯鍔ㄦ晥鏃跺畠灏卞埆鍔ㄤ簡锛屼絾**鐣欑潃** 鈥斺€?瀹冩槸鐗堥潰鐨勪竴閮ㄥ垎 */
+/* 减少动效时它就别动了，但**留着** —— 它是版面的一部分 */
 @media (prefers-reduced-motion: reduce) {
   .holder,
   .holder-pull .puppet,
@@ -925,3 +927,43 @@
     opacity: 1;
   }
 }
+
+/* ---------- 小人的男女零件 ----------
+   第一版只差一个蝴蝶结，等于没差 —— 用户根本看不出来。
+   现在：犄角 + 粗眉 + 领巾 ／ 大蝴蝶结 + 长睫毛 + 围裙。 */
+
+/* 男：领巾 */
+.puppet-scarf .puppet-cloth { fill: var(--accent); opacity: 0.88; }
+
+/* 女：小围裙 + 系带 */
+.puppet-apron .puppet-cloth { fill: #fff; opacity: 0.72; }
+.puppet-apron-string {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+/* 男：粗眉毛 */
+.puppet-brow {
+  fill: none;
+  stroke: #3b3228;
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+/* 女：长睫毛 */
+.puppet-lash {
+  fill: none;
+  stroke: #3b3228;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+/* 女：蝴蝶结的飘带 */
+.puppet-bow-tail { fill: var(--accent); opacity: 0.9; }
+
+/* 女版的腮红更明显一点 */
+.puppet-female .puppet-blush { opacity: 0.6; }

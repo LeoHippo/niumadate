@@ -1,0 +1,290 @@
+/* ==========================================================================
+   分镜模式：一页一页推进
+   --------------------------------------------------------------------------
+   和「信纸长卷」的区别就是这一节的全部意义：
+     长卷 → 一次看全，是**观赏**
+     分镜 → 一屏一件事，是**期待**
+
+   所以每屏占满一屏、只有一个焦点，推进的节奏交给用户的手指。
+   ========================================================================== */
+
+.invite-page.invite-flow {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: 0;
+  justify-content: stretch;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 24px 24px 116px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 按钮屏和对话屏不许「点哪都继续」 */
+.screen-answer,
+.screen-chat {
+  cursor: default;
+}
+
+.screen-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 440px;
+  animation: screen-in 0.68s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(26px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.screen-emoji {
+  font-size: 54px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+  animation: screen-emoji-in 0.8s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+}
+
+@keyframes screen-emoji-in {
+  0% { opacity: 0; transform: scale(0.4) rotate(-14deg); }
+  70% { transform: scale(1.12) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.screen-kicker {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+/* 每屏唯一的问题 —— 字号拉大，这是视线的落点 */
+.screen-question {
+  margin: 4px 0 0;
+  font-family: var(--font-title);
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* 时间 / 地点 / 干嘛：三屏的主角，给到最大 */
+.screen-big {
+  margin: 6px 0 0;
+  font-family: var(--font-title);
+  font-size: 34px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  background-image: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 220% 100%;
+  animation: foil-sheen 5.5s ease-in-out infinite;
+}
+
+.screen-hand {
+  margin: 8px 0 0;
+  font-size: 19px;
+  line-height: 1.95;
+  color: var(--ink);
+}
+
+.screen-body {
+  margin: 10px 0 0;
+  white-space: pre-wrap;
+  font-size: 17px;
+  line-height: 2.1;
+  text-align: left;
+  color: var(--ink);
+}
+
+.screen-sign {
+  margin: 18px 0 0;
+  align-self: flex-end;
+  color: var(--ink-soft);
+  font-size: 16px;
+}
+
+/* 拆信那一屏的印章单独定位（平时它是压在信纸上的，这里要居中） */
+.screen-seal .invite-seal {
+  margin: 0 auto 8px;
+  animation: seal-slam 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes seal-slam {
+  0% { transform: translateY(-260px) scale(1.7) rotate(-16deg); opacity: 0; }
+  48% { transform: translateY(6px) scale(1) rotate(3deg); opacity: 1; }
+  64% { transform: translateY(-9px) scale(0.94) rotate(-2deg); }
+  80% { transform: translateY(3px) scale(1.03) rotate(1deg); }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+
+/* ---------- 底部：进度 + 继续 + 看全部 ---------- */
+
+.screen-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 20px calc(18px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(to top, var(--paper) 30%, transparent);
+  z-index: 6;
+}
+
+.screen-dots { display: flex; gap: 7px; }
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--paper-edge);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.dot-on {
+  background: var(--accent);
+  transform: scale(1.22);
+}
+
+.screen-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.screen-skip {
+  flex: none;
+  padding: 9px 16px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  border-color: var(--paper-edge);
+  background: transparent;
+  border-radius: 999px;
+}
+
+.screen-next {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(160deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 20px var(--glow);
+  cursor: pointer;
+}
+
+/* ---------- 屏与屏之间：小人做过渡 ---------- */
+
+.move-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 8;
+  pointer-events: none;
+  background: var(--paper);
+  opacity: 0.94;
+  animation: move-stage-in 0.64s ease-out both;
+}
+
+@keyframes move-stage-in {
+  0% { opacity: 0; }
+  18% { opacity: 0.94; }
+  78% { opacity: 0.94; }
+  100% { opacity: 0; }
+}
+
+.move-word {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+/* 拉：往后仰、使大劲 */
+.puppet-pull { animation: puppet-pull 0.64s cubic-bezier(0.4, 0, 0.3, 1) both; }
+
+@keyframes puppet-pull {
+  0% { transform: translateX(120px) rotate(10deg); opacity: 0; }
+  35% { transform: translateX(-6px) rotate(-13deg); opacity: 1; }
+  70% { transform: translateX(4px) rotate(7deg); }
+  100% { transform: translateX(0) rotate(0); opacity: 1; }
+}
+
+.puppet-pull .puppet-arm-front,
+.puppet-pull .puppet-arm-back { animation: pull-arms 0.64s ease-in-out both; }
+
+@keyframes pull-arms {
+  0%, 100% { transform: rotate(0); }
+  40% { transform: rotate(-38deg); }
+  72% { transform: rotate(12deg); }
+}
+
+/* 飞：抓着下一屏一起飞过去 */
+.puppet-fly { animation: puppet-fly 0.64s cubic-bezier(0.3, 0.9, 0.4, 1) both; }
+
+@keyframes puppet-fly {
+  0% { transform: translate(-120px, 40px) rotate(-14deg) scale(0.9); opacity: 0; }
+  40% { transform: translate(0, -16px) rotate(6deg) scale(1.04); opacity: 1; }
+  100% { transform: translate(130px, -34px) rotate(16deg) scale(0.94); opacity: 0.9; }
+}
+
+.puppet-fly .puppet-arm-front,
+.puppet-fly .puppet-arm-back { animation: fly-arms 0.64s ease-in-out infinite alternate; }
+
+@keyframes fly-arms {
+  from { transform: rotate(-26deg); }
+  to { transform: rotate(20deg); }
+}
+
+/* 压：一屁股坐下去，把下一屏压出来 */
+.puppet-press { animation: puppet-press 0.64s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+
+@keyframes puppet-press {
+  0% { transform: translateY(-150px) scale(1.06); opacity: 0; }
+  45% { transform: translateY(6px) scale(1.18, 0.82); opacity: 1; }
+  72% { transform: translateY(-4px) scale(0.96, 1.06); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ---------- 「看全部」那一版 ---------- */
+
+.invite-page.invite-flat { padding: 26px 16px 64px; }
+.invite-all { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+
+/* ---------- 给"要抢按钮的小人"留出站位 ----------
+   曾经这里有一组 padding-top:148px —— 是因为小人原来用绝对定位、不占高度。
+   但它其实没生效（bottom:100% 是相对 padding box 的），文案照样被盖住。
+   现在小人自己在文档流里，这组 padding 已经删了：见 invite-page.css 的注释。 */
+.invite-answer:has(.invite-puppet-holder) .invite-stage,
+.invite-stage:has(.invite-puppet-holder) {
+  padding-top: 148px;
+}
+
+/* 小人改成占真实高度之后，这里不需要再垫东西了。
+   留个注释，免得以后有人又加回 padding-top —— 那样只会白顶出一块。 */
+.screen-answer .invite-stage {
+  padding-top: 148px;
+}

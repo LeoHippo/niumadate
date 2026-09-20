@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fillInviteName, findRole } from '@niumadate/shared';
 import type { Invite, InviteMessage } from '@niumadate/shared';
@@ -9,24 +9,40 @@ import { rememberInvite } from '../lib';
 import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
+import '../invite-flow.css';
 
 /**
  * 好友点开邀请链接看到的页面。
  *
- * 这一页和填写页的处境**完全不同**：
- *   填写页天天用、要填一堆东西 → 克制、看得清
- *   邀请页一辈子看一两次     → **放开了做**：好看、记得住、想截图
+ * **一页一页推进，不是一封信一次性展开。**
  *
- * 所以这里不复用那四套"收着"的主题，而是另做四套**材质**：
- *   好兄弟 → 牛皮纸 + 酒渍 + 深红火漆
- *   好姐妹 → 珠光信笺 + 玫瑰金烫印
- *   好宝宝 → 奶油纸 + 云 + 糖果色
- *   DAD&MUM → 红头文件 + 钢印
+ * 这两种做法差别很大：
+ *   一次性展开 → 「哇，好看」      （观赏）
+ *   一页一页   → 「然后呢？」      （**期待**）
+ *
+ * 用户要的是后者：有点神秘、有点被吊着、想看下一屏写的是什么。
+ * 所以每屏只讲一件事，中间由小人做过渡，节奏交给他自己的手指。
+ *
+ * 但**不能把人关在流程里** —— 赶时间的人点「看全部」就能一次看完（那一版是信纸长卷）。
+ *
+ * 视觉上刻意不复用填写页那四套皮：填写页天天用要克制，
+ * 这页一辈子看一两次，所以放开了做 —— 四套**材质**：
+ *   好兄弟 牛皮纸+酒渍+深红火漆 / 好姐妹 珠光信笺+玫瑰金
+ *   好宝宝 奶油纸+云+糖果色     / DAD&MUM 红头文件+钢印
  */
 
-/** 拆信的节奏。靠 CSS 的 animation-delay 串，这里只负责放行到"可交互"。 */
-const STAGE_SEAL = 1500; // 火漆落下
-const STAGE_OPEN = 2700; // 信纸展开
+type Screen = 'seal' | 'who' | 'when' | 'where' | 'what' | 'word' | 'answer' | 'chat';
+
+const SCREENS: readonly Screen[] = ['seal', 'who', 'when', 'where', 'what', 'word', 'answer', 'chat'];
+
+/** 屏与屏之间的三种过渡 —— 轮着来，别每次都一样。 */
+const MOVES = ['pull', 'fly', 'press'] as const;
+type Move = (typeof MOVES)[number];
+
+const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: 'press' };
+
+/** 过渡要放多久。太短看不见，太长让人等。 */
+const MOVE_MS = 640;
 
 export function InvitePage() {
   const config = useConfig();
@@ -35,36 +51,16 @@ export function InvitePage() {
 
   const [data, setData] = useState<{ invite: Invite; messages: InviteMessage[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [phase, setPhase] = useState<'seal' | 'open' | 'ready'>('seal');
-  const [scrollY, setScrollY] = useState(0);
-
-  /*
-    滚动视差：背景的光尘和信纸错开一点点，页面就有了纵深。
-    **幅度必须小** —— 手机上滑一下挪几十像素会晕，几像素刚好能感觉到"不是平的"。
-    用 rAF 节流，别让滚动事件把主线程压住。
-  */
-  useEffect(() => {
-    let frame = 0;
-    const onScroll = (): void => {
-      if (frame !== 0) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        setScrollY(window.scrollY);
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (frame !== 0) window.cancelAnimationFrame(frame);
-    };
-  }, []);
+  const [index, setIndex] = useState(0);
+  /** 赶时间的人：一键摊开看全部。 */
+  const [showAll, setShowAll] = useState(false);
+  const [move, setMove] = useState<Move | null>(null);
 
   const load = useCallback(async () => {
     try {
       const result = await api.invite(code);
       setData(result);
       setError(null);
-      // 记住之后，他能在「我的记录」里翻到这一份
       rememberInvite(code);
     } catch (cause) {
       setError(describeError(cause));
@@ -75,15 +71,15 @@ export function InvitePage() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (data === null) return;
-    const openAt = window.setTimeout(() => setPhase('open'), STAGE_SEAL);
-    const readyAt = window.setTimeout(() => setPhase('ready'), STAGE_OPEN);
-    return () => {
-      window.clearTimeout(openAt);
-      window.clearTimeout(readyAt);
-    };
-  }, [data]);
+  /** 前进：先让小人做一下过渡，再换屏。 */
+  const goTo = useCallback((next: number) => {
+    if (next < 0 || next >= SCREENS.length) return;
+    setMove(MOVES[next % MOVES.length] ?? 'pull');
+    window.setTimeout(() => {
+      setIndex(next);
+      setMove(null);
+    }, MOVE_MS);
+  }, []);
 
   if (error !== null) {
     return (
@@ -110,18 +106,13 @@ export function InvitePage() {
 
   const { invite } = data;
   const role = findRole(config, invite.role);
+  const screen = SCREENS[index] ?? 'seal';
+  const last = index === SCREENS.length - 1;
 
   return (
-    <main
-      className={`invite-page invite-stage-${phase}`}
-      data-theme={invite.role}
-    >
-      {/* 背景：光尘 + 材质底纹（比信纸慢一点，形成纵深） */}
-      <div
-        className="invite-backdrop"
-        aria-hidden="true"
-        style={{ transform: `translateY(${Math.round(scrollY * 0.12)}px)` }}
-      >
+    <main className="invite-page" data-theme={invite.role}>
+      {/* 背景：材质底纹 + 光尘 */}
+      <div className="invite-backdrop" aria-hidden="true">
         <span className="invite-mote invite-mote-1" />
         <span className="invite-mote invite-mote-2" />
         <span className="invite-mote invite-mote-3" />
@@ -129,62 +120,17 @@ export function InvitePage() {
         <span className="invite-mote invite-mote-5" />
       </div>
 
-      {/* 火漆印章：落下来，蜡向四周溢开（和信纸同速，别让它飘起来） */}
-      <div className="invite-seal" aria-hidden="true">
-        <span className="invite-seal-wax" />
-        <span className="invite-seal-face">{role?.emoji ?? '🐮'}</span>
-        <span className="invite-seal-rim" />
-      </div>
-
-      {/*
-        信纸**不**做视差：它身上挂着 letter-open 动画，而 CSS 动画的声明
-        优先级高于内联样式 —— 内联 transform 会被动画覆盖掉，写了也是死代码。
-        纵深交给背景那层（fixed + 位移）就够了，信纸稳稳呆着反而更清楚。
-      */}
-      <div className="invite-letter">
-        <header className="invite-head">
-          <NiumaMark size={40} className="invite-mark" />
-          {/* 标题用「墨迹书写」的观感出来：一层描边跑一遍 */}
-          <h1 className="invite-title">{invite.title}</h1>
-          <div className="invite-rule" />
-        </header>
-
-        <p className="invite-greeting">{fillInviteName(invite.greeting, invite.inviteeName)}</p>
-
-        {/*
-          **段落之间由小人过渡。**
-          不靠淡入淡出，而是让一个小人在那儿干活：把下一段"拉出来"。
-          这是整页的节奏感来源 —— 每一段都是被它拽出来的，不是自己冒出来的。
-        */}
-        <Holder gender={config.invite.hostGender} mode="pull" />
-
-        {/* 时间 / 地点 / 干嘛 —— 一行比一行沉 */}
-        <dl className="invite-facts">
-          <div className="invite-fact">
-            <dt>什么时候</dt>
-            <dd className="invite-fact-key">
-              {invite.date}
-              {invite.timeText === '' ? '' : ` ${invite.timeText}`}
-            </dd>
-          </div>
-          <div className="invite-fact">
-            <dt>在哪儿</dt>
-            <dd className="invite-fact-key">{invite.place || '（没写，到时候说）'}</dd>
-          </div>
-          <div className="invite-fact">
-            <dt>干嘛</dt>
-            <dd>{invite.activity || '（没写，去了就知道）'}</dd>
-          </div>
-        </dl>
-
-        {invite.body.trim() !== '' && <p className="invite-body">{invite.body}</p>}
-
-        <p className="invite-signature">{invite.signature}</p>
-
-        <Answer
+      {showAll ? (
+        /* ---------- 赶时间：一次看完 ---------- */
+        <LetterAll
           invite={invite}
+          roleEmoji={role?.emoji ?? '🐮'}
           hostGender={config.invite.hostGender}
-          onAnswer={(status) => {
+          messages={data.messages}
+          onMessages={(messages) =>
+            setData((current) => (current === null ? current : { invite: current.invite, messages }))
+          }
+          onRespond={(status) => {
             void api
               .respondInvite(code, status)
               .then((result) =>
@@ -194,55 +140,207 @@ export function InvitePage() {
               )
               .catch((cause: unknown) => setError(describeError(cause)));
           }}
+          onBack={() => setShowAll(false)}
         />
+      ) : (
+        <>
+          {/* ---------- 一屏 ---------- */}
+          <section
+            className={`screen screen-${screen}`}
+            key={screen}
+            onClick={() => {
+              // 只在前面的"叙述屏"上点哪都能继续；按钮屏和对话屏不许误触
+              if (screen !== 'answer' && !last) goTo(index + 1);
+            }}
+          >
+            <div className="screen-inner">
+              <ScreenBody
+                screen={screen}
+                invite={invite}
+                roleEmoji={role?.emoji ?? '🐮'}
+                hostGender={config.invite.hostGender}
+                messages={data.messages}
+                onRespond={(status) => {
+                  void api
+                    .respondInvite(code, status)
+                    .then((result) => {
+                      setData((current) =>
+                        current === null
+                          ? current
+                          : { invite: result.invite, messages: current.messages },
+                      );
+                      // 回应完自动进对话 —— 定下来之后就该商量了
+                      goTo(SCREENS.indexOf('chat'));
+                    })
+                    .catch((cause: unknown) => setError(describeError(cause)));
+                }}
+                onMessages={(messages) =>
+                  setData((current) =>
+                    current === null ? current : { invite: current.invite, messages },
+                  )
+                }
+              />
+            </div>
+          </section>
 
-        {/* 到对话区再推一把：该说话了 */}
-        <Holder gender={config.invite.hostGender} mode="push" />
+          {/* ---------- 底部：进度 + 继续 + 看全部 ---------- */}
+          <footer className="screen-bar">
+            <div className="screen-dots" aria-hidden="true">
+              {SCREENS.map((item, i) => (
+                <span key={item} className={i <= index ? 'dot dot-on' : 'dot'} />
+              ))}
+            </div>
 
-        <Chat
-          code={code}
-          messages={data.messages}
-          onSent={(messages) =>
-            setData((current) => (current === null ? current : { invite: current.invite, messages }))
-          }
-        />
-      </div>
+            <div className="screen-bar-row">
+              <button
+                type="button"
+                className="btn btn-ghost screen-skip"
+                title="不想一页页看，直接摊开"
+                onClick={() => setShowAll(true)}
+              >
+                看全部
+              </button>
+
+              {!last && screen !== 'answer' && (
+                <button
+                  type="button"
+                  className="btn btn-primary screen-next"
+                  title="看下一屏"
+                  onClick={() => goTo(index + 1)}
+                >
+                  轻点继续 →
+                </button>
+              )}
+            </div>
+          </footer>
+
+          {/* ---------- 屏与屏之间：小人做过渡 ---------- */}
+          {move !== null && (
+            <div className="move-stage" aria-hidden="true">
+              <Puppet gender={config.invite.hostGender} mood={MOVE_MOOD[move]} />
+              <span className="move-word">
+                {move === 'pull' ? '费劲地拉出来…' : move === 'fly' ? '呼 —— 飞过去！' : '一屁股压下去'}
+              </span>
+            </div>
+          )}
+        </>
+      )}
     </main>
   );
 }
 
-/**
- * 段落之间的小人。
- *
- * 不是装饰 —— 它是**过渡本身**：下一段是被它拽出来 / 推出来的，
- * 所以整页读起来有「有人在给你递东西」的节奏，而不是元素各显各的。
- *
- * 做到这个程度就够了：它只要在段落交界处露一下、动一下，
- * 眼睛就会把两段连起来。做得太重反而抢戏。
- */
-function Holder({ gender, mode }: { gender: 'male' | 'female'; mode: 'pull' | 'push' }) {
-  return (
-    <div className={`holder holder-${mode}`} aria-hidden="true">
-      <Puppet gender={gender} mood={mode === 'pull' ? 'reach' : 'grow'} />
-      <span className="holder-line" />
-    </div>
-  );
+/* ==========================================================================
+   每一屏的内容。一屏只讲一件事 —— 这是整页节奏的根基。
+   ========================================================================== */
+
+function ScreenBody({
+  screen,
+  invite,
+  roleEmoji,
+  hostGender,
+  messages,
+  onRespond,
+  onMessages,
+}: {
+  screen: Screen;
+  invite: Invite;
+  roleEmoji: string;
+  hostGender: 'male' | 'female';
+  messages: InviteMessage[];
+  onRespond: (status: 'accepted' | 'declined') => void;
+  onMessages: (messages: InviteMessage[]) => void;
+}) {
+  switch (screen) {
+    case 'seal':
+      return (
+        <>
+          <div className="invite-seal" aria-hidden="true">
+            <span className="invite-seal-wax" />
+            <span className="invite-seal-face">{roleEmoji}</span>
+            <span className="invite-seal-rim" />
+          </div>
+          <p className="screen-kicker">有一封邀请</p>
+          <h1 className="screen-question">拆开看看？</h1>
+        </>
+      );
+
+    case 'who':
+      return (
+        <>
+          <span className="screen-emoji">{roleEmoji}</span>
+          <p className="screen-kicker">这一封是给你的</p>
+          <p className="screen-hand">{fillInviteName(invite.greeting, invite.inviteeName)}</p>
+        </>
+      );
+
+    case 'when':
+      return (
+        <>
+          <span className="screen-emoji">🗓️</span>
+          <p className="screen-kicker">先把日子定下来</p>
+          <p className="screen-big">{invite.date}</p>
+          {invite.timeText !== '' && <p className="screen-hand">{invite.timeText}</p>}
+        </>
+      );
+
+    case 'where':
+      return (
+        <>
+          <span className="screen-emoji">📍</span>
+          <p className="screen-kicker">在哪儿见</p>
+          <p className="screen-big">{invite.place || '（没写，到时候说）'}</p>
+        </>
+      );
+
+    case 'what':
+      return (
+        <>
+          <span className="screen-emoji">🎯</span>
+          <p className="screen-kicker">干嘛去</p>
+          <p className="screen-big">{invite.activity || '（没写，去了就知道）'}</p>
+        </>
+      );
+
+    case 'word':
+      return (
+        <>
+          <p className="screen-kicker">还有几句话</p>
+          {invite.body.trim() !== '' && <p className="screen-body">{invite.body}</p>}
+          <p className="screen-sign">{invite.signature}</p>
+          <p className="screen-kicker">—— {invite.title}</p>
+        </>
+      );
+
+    case 'answer':
+      return (
+        <>
+          <p className="screen-kicker">所以，去不去？</p>
+          <Answer
+            invite={invite}
+            hostGender={hostGender}
+            onAnswer={onRespond}
+          />
+        </>
+      );
+
+    case 'chat':
+    default:
+      return (
+        <Chat
+          code={invite.code}
+          messages={messages}
+          onSent={onMessages}
+        />
+      );
+  }
 }
 
 /* ==========================================================================
-   「不允许拒绝」的完整编排
-   --------------------------------------------------------------------------
-   这是整个功能最有记忆点的一段，所以按**分镜**写，不是随便飘一下：
-
-     走 → 抓 → 举 → 团 → 扔 → 拉大 → 坐 → 指
-
-   每一步都有自己的时长，用 setTimeout 串起来。
-   位置靠 refs 量出来 —— 小人得真的站在那个按钮跟前，不能大概齐。
+   「不允许拒绝」的完整编排：走 → 抓 → 举 → 团 → 扔 → 拉大 → 坐 → 指
    ========================================================================== */
 
 type Act = 'idle' | 'walk' | 'reach' | 'grab' | 'crumple' | 'throw' | 'grow' | 'sit' | 'point';
 
-/** [这一步叫什么, 什么时候到这一步（毫秒）] */
 const SCRIPT: ReadonlyArray<readonly [Act, number]> = [
   ['walk', 60],
   ['reach', 1150],
@@ -254,7 +352,6 @@ const SCRIPT: ReadonlyArray<readonly [Act, number]> = [
   ['point', 5150],
 ];
 
-/** 到哪一步为止，小人该站在婉拒按钮那边。 */
 const AT_NO_BUTTON: ReadonlySet<Act> = new Set<Act>(['walk', 'reach', 'grab', 'crumple', 'throw']);
 
 function moodFor(act: Act): PuppetMood {
@@ -291,10 +388,8 @@ function Answer({
   const [pupX, setPupX] = useState(0);
   /**
    * 婉拒按钮是不是已经被扔掉了。
-   *
-   * 为什么要单独记一个：`crumpled` / `thrown` 这类 class 是**按当前这一步**挂的，
-   * 走到下一步就没了 —— 于是按钮会**自己长回来**（实测截图里它又出现了）。
-   * 扔出去就该没了，所以这个标记只进不退。
+   * 为什么要单独记：`crumpled`/`thrown` 是按**当前这一步**挂的，
+   * 走到下一步就没了 —— 按钮会自己长回来（实测真出现过）。扔出去就得永久消失。
    */
   const [gone, setGone] = useState(false);
 
@@ -304,14 +399,12 @@ function Answer({
   const timers = useRef<number[]>([]);
 
   const clearTimers = (): void => {
-    for (const id of timers.current) window.clearTimeout(id);
+    for (const timer of timers.current) window.clearTimeout(timer);
     timers.current = [];
   };
 
-  // 组件走了就别让定时器还在跑
   useEffect(() => clearTimers, []);
 
-  /** 量出「小人该站哪」—— 站在按钮正上方，脚尖对着按钮中线。 */
   const placeAt = useCallback((which: 'no' | 'yes') => {
     const stage = stageRef.current;
     const target = which === 'no' ? noRef.current : yesRef.current;
@@ -321,7 +414,7 @@ function Answer({
     setPupX(t.left - s.left + t.width / 2 - 80);
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (act === 'idle') return;
     placeAt(AT_NO_BUTTON.has(act) ? 'no' : 'yes');
   }, [act, placeAt]);
@@ -331,11 +424,9 @@ function Answer({
     for (const [step, at] of SCRIPT) {
       timers.current.push(window.setTimeout(() => setAct(step), at));
     }
-    // 扔完之后就永久消失，不再长回来
     timers.current.push(window.setTimeout(() => setGone(true), 3400));
   };
 
-  // ---------- 已经回应过了 ----------
   if (invite.status !== 'pending') {
     return (
       <div className="invite-answered">
@@ -346,9 +437,7 @@ function Answer({
           {invite.status === 'accepted' ? '好的，就这么定了' : '这次先不去了'}
         </p>
         <p className="invite-answered-hint">
-          {invite.status === 'accepted'
-            ? '到时候见。有事在这儿说一声，或者直接微信。'
-            : '想改主意的话，点下面。'}
+          {invite.status === 'accepted' ? '到时候见。' : '想改主意的话，点下面。'}
         </p>
         <button
           type="button"
@@ -367,10 +456,6 @@ function Answer({
   return (
     <div className="invite-answer">
       <div className="invite-stage" ref={stageRef}>
-        {/*
-          小人。**按钮还在，只是点不到** —— 看得见够不着才有戏，
-          所以婉拒按钮不是藏起来，是被抓走扔掉了。
-        */}
         {invite.noDecline && act !== 'idle' && (
           <div className="invite-puppet-holder" style={{ transform: `translateX(${pupX}px)` }}>
             <Puppet gender={hostGender} mood={moodFor(act)} />
@@ -389,11 +474,10 @@ function Answer({
               act === 'grab' ? 'invite-btn-lifted' : '',
               act === 'throw' ? 'invite-btn-thrown' : '',
             ]
-              .filter((c) => c !== '')
+              .filter((item) => item !== '')
               .join(' ')}
             onClick={() => {
               if (invite.noDecline) {
-                // 點得到也不让它成事 —— 小人的戏就是这么来的
                 play();
                 return;
               }
@@ -508,5 +592,77 @@ function Chat({
         </button>
       </form>
     </section>
+  );
+}
+
+/* ==========================================================================
+   看全部：信纸长卷（就是原来那一版，留给赶时间的人）
+   ========================================================================== */
+
+function LetterAll({
+  invite,
+  roleEmoji,
+  hostGender,
+  messages,
+  onRespond,
+  onMessages,
+  onBack,
+}: {
+  invite: Invite;
+  roleEmoji: string;
+  hostGender: 'male' | 'female';
+  messages: InviteMessage[];
+  onRespond: (status: 'accepted' | 'declined') => void;
+  onMessages: (messages: InviteMessage[]) => void;
+  onBack: () => void;
+}) {
+  return (
+    <div className="invite-all">
+      <div className="invite-seal" aria-hidden="true">
+        <span className="invite-seal-wax" />
+        <span className="invite-seal-face">{roleEmoji}</span>
+        <span className="invite-seal-rim" />
+      </div>
+
+      <div className="invite-letter">
+        <header className="invite-head">
+          <NiumaMark size={40} className="invite-mark" />
+          <h1 className="invite-title">{invite.title}</h1>
+          <div className="invite-rule" />
+        </header>
+
+        <p className="invite-greeting">{fillInviteName(invite.greeting, invite.inviteeName)}</p>
+
+        <dl className="invite-facts">
+          <div className="invite-fact">
+            <dt>什么时候</dt>
+            <dd className="invite-fact-key">
+              {invite.date}
+              {invite.timeText === '' ? '' : ` ${invite.timeText}`}
+            </dd>
+          </div>
+          <div className="invite-fact">
+            <dt>在哪儿</dt>
+            <dd className="invite-fact-key">{invite.place || '（没写，到时候说）'}</dd>
+          </div>
+          <div className="invite-fact">
+            <dt>干嘛</dt>
+            <dd>{invite.activity || '（没写，去了就知道）'}</dd>
+          </div>
+        </dl>
+
+        {invite.body.trim() !== '' && <p className="invite-body">{invite.body}</p>}
+        <p className="invite-signature">{invite.signature}</p>
+
+        <Answer invite={invite} hostGender={hostGender} onAnswer={onRespond} />
+        <Chat code={invite.code} messages={messages} onSent={onMessages} />
+
+        <nav className="step-nav">
+          <button type="button" className="btn btn-ghost" onClick={onBack}>
+            ← 回到一页一页看
+          </button>
+        </nav>
+      </div>
+    </div>
   );
 }
