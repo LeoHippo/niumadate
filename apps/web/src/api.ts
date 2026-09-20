@@ -112,6 +112,36 @@ export const api = {
       `/submissions/me?deviceId=${encodeURIComponent(deviceId)}&role=${encodeURIComponent(role)}`,
     ),
 
+  // ---------- 邀请（好友那一侧，不需要登录）----------
+
+  /**
+   * 按码取邀请 + 全部留言。
+   *
+   * 码本身就是访问凭据 —— 没有登录、没有口令，拿到码就能看，
+   * 所以服务端把码做得够长（22 位），并且这条读取单独限流。
+   */
+  invite: (code: string): Promise<{ invite: Invite; messages: InviteMessage[] }> =>
+    request<{ invite: Invite; messages: InviteMessage[] }>(
+      `/invites/${encodeURIComponent(code)}`,
+    ),
+
+  /** 接受或婉拒。**允许改** —— 现实里会变卦。 */
+  respondInvite: (
+    code: string,
+    status: 'accepted' | 'declined',
+  ): Promise<{ invite: Invite }> =>
+    request<{ invite: Invite }>(`/invites/${encodeURIComponent(code)}/respond`, {
+      method: 'POST',
+      body: { status },
+    }),
+
+  /** 好友留言。「谁说的」由服务端定死，客户端说了不算。 */
+  sendInviteMessage: (code: string, text: string): Promise<{ messages: InviteMessage[] }> =>
+    request<{ messages: InviteMessage[] }>(
+      `/invites/${encodeURIComponent(code)}/messages`,
+      { method: 'POST', body: { text } },
+    ),
+
   admin: {
     login: (password: string): Promise<{ token: string }> =>
       request<{ token: string }>('/admin/login', { method: 'POST', body: { password } }),

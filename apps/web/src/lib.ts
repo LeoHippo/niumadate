@@ -77,6 +77,38 @@ export function getDeviceId(): string {
   return created;
 }
 
+const OPENED_KEY = 'niumadate.openedInvites';
+
+/**
+ * 记下「这台设备点开过哪几份邀请」。
+ *
+ * 为什么需要：邀请是**牛马创建**的，服务端不知道谁会点开，
+ * 所以没法像申请那样「按设备号反查」。只能靠链接里那串码 ——
+ * 他点开一次就记住了，之后能在「我的记录」里翻到。
+ *
+ * 代价和申请一样：清缓存 / 换浏览器就丢。「我的记录」里已经解释过一遍了。
+ */
+export function rememberInvite(code: string): void {
+  if (code === '') return;
+  const list = openedInvites().filter((item) => item !== code);
+  list.unshift(code);
+  // 只留最近 30 份，别让 localStorage 无限长大
+  safeStorage.set(OPENED_KEY, JSON.stringify(list.slice(0, 30)));
+}
+
+/** 这台设备点开过的邀请码，最近的在最前。 */
+export function openedInvites(): string[] {
+  const raw = safeStorage.get(OPENED_KEY);
+  if (raw === null) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is string => typeof item === 'string');
+  } catch {
+    return [];
+  }
+}
+
 /** 一个「日期 + 时段」组合的稳定 key。 */
 export function slotKey(date: string, slot: string): string {
   return `${date}|${slot}`;

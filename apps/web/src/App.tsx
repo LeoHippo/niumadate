@@ -6,6 +6,7 @@ import { ConfigContext } from './config-context';
 import { AdminPage } from './pages/Admin';
 import { BookingPage } from './pages/Booking';
 import { EntryPage } from './pages/Entry';
+import { InvitePage } from './pages/Invite';
 import { MinePage } from './pages/Mine';
 import { StatusPage } from './pages/Status';
 
@@ -55,6 +56,11 @@ export function App() {
       <Routes>
         <Route path="/" element={<EntryPage />} />
         <Route path="/mine" element={<MinePage />} />
+        {/*
+          ⚠️ 这条必须放在兜底路由 "*" **前面**，否则会被它吃掉、落回首页。
+          邀请页不需要登录 —— 链接里那串码本身就是凭据。
+        */}
+        <Route path="/i/:code" element={<InvitePage />} />
         <Route path="/date/:role" element={<BookingPage />} />
         <Route path="/status/:role" element={<StatusPage />} />
         <Route path="/admin/*" element={<AdminPage />} />
