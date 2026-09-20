@@ -36,6 +36,28 @@ export function InvitePage() {
   const [data, setData] = useState<{ invite: Invite; messages: InviteMessage[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<'seal' | 'open' | 'ready'>('seal');
+  const [scrollY, setScrollY] = useState(0);
+
+  /*
+    滚动视差：背景的光尘和信纸错开一点点，页面就有了纵深。
+    **幅度必须小** —— 手机上滑一下挪几十像素会晕，几像素刚好能感觉到"不是平的"。
+    用 rAF 节流，别让滚动事件把主线程压住。
+  */
+  useEffect(() => {
+    let frame = 0;
+    const onScroll = (): void => {
+      if (frame !== 0) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        setScrollY(window.scrollY);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -94,8 +116,12 @@ export function InvitePage() {
       className={`invite-page invite-stage-${phase}`}
       data-theme={invite.role}
     >
-      {/* 背景：光尘 + 材质底纹 */}
-      <div className="invite-backdrop" aria-hidden="true">
+      {/* 背景：光尘 + 材质底纹（比信纸慢一点，形成纵深） */}
+      <div
+        className="invite-backdrop"
+        aria-hidden="true"
+        style={{ transform: `translateY(${Math.round(scrollY * 0.12)}px)` }}
+      >
         <span className="invite-mote invite-mote-1" />
         <span className="invite-mote invite-mote-2" />
         <span className="invite-mote invite-mote-3" />
@@ -103,13 +129,18 @@ export function InvitePage() {
         <span className="invite-mote invite-mote-5" />
       </div>
 
-      {/* 火漆印章：落下来，蜡向四周溢开 */}
+      {/* 火漆印章：落下来，蜡向四周溢开（和信纸同速，别让它飘起来） */}
       <div className="invite-seal" aria-hidden="true">
         <span className="invite-seal-wax" />
         <span className="invite-seal-face">{role?.emoji ?? '🐮'}</span>
         <span className="invite-seal-rim" />
       </div>
 
+      {/*
+        信纸**不**做视差：它身上挂着 letter-open 动画，而 CSS 动画的声明
+        优先级高于内联样式 —— 内联 transform 会被动画覆盖掉，写了也是死代码。
+        纵深交给背景那层（fixed + 位移）就够了，信纸稳稳呆着反而更清楚。
+      */}
       <div className="invite-letter">
         <header className="invite-head">
           <NiumaMark size={40} className="invite-mark" />
