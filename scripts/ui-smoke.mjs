@@ -716,19 +716,50 @@ async function main() {
       JSON.stringify(noteStyle),
     );
 
-    // 点「重新填一份」→ 回入口页 → 再选同一个身份，必须进填写页而不是又回驳回页
-    await evaluate(clickByText('重新填一份'));
-    await waitFor("document.querySelector('.id-grid')", '入口页');
-    await evaluate(clickByText('好兄弟'));
-    await waitFor("document.querySelector('.wizard-body')", '填写页');
+    /*
+      点「重新填一份」应该去哪（这一轮改过，理由见 docs/REQUIREMENTS.md）：
 
-    const backOnWizard = await evaluate("Boolean(document.querySelector('.ask'))");
-    const stillRejected = await evaluate(
-      "document.querySelector('.art-text') ? document.querySelector('.art-text').textContent : ''",
+        以前是「回入口页 → 再选一次身份」。但现在入口页只要发现本机有申请，
+        就会把人送回状态页 —— 绕一圈又回来了；而且好友明明选过身份，
+        没必要再选一遍。所以改成**直接进这个身份的表单**（带 ?again=1）。
+
+      这一段同时是**防死循环的回归测试**：
+        填写页 → 状态页   当「驳回 或 单子还有效」
+        状态页 → 填写页   当「过期 且 不是驳回」
+      两条必须严格互补，写宽了就会来回弹、把用户卡死。
+    */
+    await evaluate(clickByText('重新填一份'));
+    await waitFor("document.querySelector('.wizard-body')", '填写页');
+    const refillPath = await evaluate('location.pathname + location.search');
+    check(
+      '点「重新填一份」直接进填写页（带 again=1）',
+      refillPath.includes('/date/brother') && refillPath.includes('again=1'),
+      refillPath,
     );
-    check('驳回后点重新填一份，再选同一身份能进填写页', backOnWizard, '又回到了驳回页');
-    check('没有再次显示「这次没约上」', !stillRejected.includes('这次没约上'), stillRejected);
+    check(
+      '没有绕回入口页',
+      (await evaluate("Boolean(document.querySelector('.id-grid'))")) === false,
+      refillPath,
+    );
     await shot('ui-10-refill');
+
+    // 直接访问 /date/<身份>（不带 again）→ 必须被送回状态页，而不是又给一张空表单
+    await send('Page.navigate', { url: BASE + '/date/brother' });
+    await waitFor("document.querySelector('.art-text')", '状态页');
+    const bouncedTo = await evaluate('location.pathname');
+    check('直接访问 /date/<身份> 会被送回状态页', bouncedTo === '/status/brother', bouncedTo);
+    check(
+      '而且看得到牛马的审批意见（不再是一张空表单）',
+      (await evaluate("document.body.innerText.includes('重新填一份')")) === true,
+      '驳回页上的按钮不见了',
+    );
+
+    // 「换个身份」→ /?pick=1 → 停在入口页
+    // 没有这个逃生口的话，入口页会把人自动跳走，点回来又被跳走，观感像卡死
+    await evaluate(clickByText('换个身份'));
+    await waitFor("document.querySelector('.id-grid')", '入口页');
+    const pickPath = await evaluate('location.pathname + location.search');
+    check('「换个身份」能停在入口页（?pick=1 不被自动跳走）', pickPath.includes('pick=1'), pickPath);
   }
 
   // ---------- 暂停营业 ----------
