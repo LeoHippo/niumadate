@@ -339,22 +339,29 @@
   to { transform: scaleX(1); opacity: 0.78; }
 }
 
-/* 内容逐段浮现 */
-.invite-greeting,
-.invite-facts,
-.invite-body,
-.invite-signature,
-.invite-answer,
-.invite-chat {
+/*
+  内容逐段浮现 —— **只给「看全部」那一版（信纸长卷）**。
+
+  ⚠️ 这组延迟必须限定在 .invite-all 里，不能全局生效。
+  分镜模式下每一屏自己带入場动效；再叠一层 3.85s 延迟的话，
+  按钮屏挂载后要**整整 3.85 秒**才显形 —— 期间整屏透明，
+  看起来就是「按钮和小人都不见了」。实测踩过，是探针查出 opacity:0 才定位到的。
+*/
+.invite-all .invite-greeting,
+.invite-all .invite-facts,
+.invite-all .invite-body,
+.invite-all .invite-signature,
+.invite-all .invite-answer,
+.invite-all .invite-chat {
   animation: invite-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.invite-greeting { animation-delay: 3.0s; }
-.invite-facts { animation-delay: 3.25s; }
-.invite-body { animation-delay: 3.5s; }
-.invite-signature { animation-delay: 3.65s; }
-.invite-answer { animation-delay: 3.85s; }
-.invite-chat { animation-delay: 4.1s; }
+.invite-all .invite-greeting { animation-delay: 3.0s; }
+.invite-all .invite-facts { animation-delay: 3.25s; }
+.invite-all .invite-body { animation-delay: 3.5s; }
+.invite-all .invite-signature { animation-delay: 3.65s; }
+.invite-all .invite-answer { animation-delay: 3.85s; }
+.invite-all .invite-chat { animation-delay: 4.1s; }
 
 @keyframes invite-rise {
   from { opacity: 0; transform: translateY(18px); }
@@ -409,6 +416,9 @@
 
 .invite-answer { margin-top: 28px; }
 .invite-stage { position: relative; }
+
+/* 信纸长卷里小人不用撑那么大一块 —— 抢按钮那是分镜模式的戏 */
+.invite-all .invite-puppet-holder { height: auto; margin-bottom: -34px; }
 
 .invite-puppet-holder {
   /*

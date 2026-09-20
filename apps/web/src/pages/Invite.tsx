@@ -10,6 +10,7 @@ import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
 import '../invite-flow.css';
+import '../invite-motion.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -54,7 +55,16 @@ export function InvitePage() {
   const [index, setIndex] = useState(0);
   /** 赶时间的人：一键摊开看全部。 */
   const [showAll, setShowAll] = useState(false);
-  const [move, setMove] = useState<Move | null>(null);
+  /**
+   * 正在进行的过渡。
+   *
+   * 关键是**当前这一屏自己要走**：小人蹦出来把整屏拉走 / 推走，
+   * 而不是淡出、也不是只让旁边的小人动一下 ——
+   * 「页面被它拖走了」这个感觉，才是这个过渡的全部意义。
+   */
+  const [leaving, setLeaving] = useState<Move | null>(null);
+  /** 刚过去的那一下是什么动作 —— 决定**新进来的这一屏从哪边滑进来**。 */
+  const [enterFrom, setEnterFrom] = useState<Move | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -71,13 +81,22 @@ export function InvitePage() {
     void load();
   }, [load]);
 
-  /** 前进：先让小人做一下过渡，再换屏。 */
+  /**
+   * 前进：先让**当前这一屏**被小人拉走 / 推走，再换下一屏。
+   *
+   * 方向是「从哪边出去」：拉 = 往左拖出去，推 = 往右推出去，飞 = 往右上拽走。
+   * 下一屏从**相反方向**滑进来，接得严丝合缝 —— 观感上就是
+   * 「小人把上面那张拖走，下面这张跟着补上来」。
+   */
   const goTo = useCallback((next: number) => {
     if (next < 0 || next >= SCREENS.length) return;
-    setMove(MOVES[next % MOVES.length] ?? 'pull');
+    const picked = MOVES[next % MOVES.length] ?? 'pull';
+    setLeaving(picked);
     window.setTimeout(() => {
       setIndex(next);
-      setMove(null);
+      setLeaving(null);
+      // 新的一屏从**相反方向**补上来，接得上「被拖走」那个动作
+      setEnterFrom(picked);
     }, MOVE_MS);
   }, []);
 
@@ -120,6 +139,19 @@ export function InvitePage() {
         <span className="invite-mote invite-mote-5" />
       </div>
 
+      {/*
+        「揉成团」用的滤镜。
+        CSS 只能缩放旋转，做不出纸被揉皱的**不规则褶皱** ——
+        所以用 feTurbulence 生成噪声 + feDisplacementMap 把像素推开，
+        按钮一皱，那一"团"就真的有纸感了。
+      */}
+      <svg className="defs-only" aria-hidden="true" focusable="false">
+        <filter id="niuma-crumple">
+          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+
       {showAll ? (
         /* ---------- 赶时间：一次看完 ---------- */
         <LetterAll
@@ -149,11 +181,19 @@ export function InvitePage() {
             className={`screen screen-${screen}`}
             key={screen}
             onClick={() => {
-              // 只在前面的"叙述屏"上点哪都能继续；按钮屏和对话屏不许误触
+              // 只在前面的「叙述屏」上点哪都能继续；按钮屏和对话屏不许误触
               if (screen !== 'answer' && !last) goTo(index + 1);
             }}
           >
-            <div className="screen-inner">
+            <div
+              className={[
+                'screen-inner',
+                leaving === null ? '' : `card-leaving card-leaving-${leaving}`,
+                leaving === null && enterFrom !== null ? `card-entering card-entering-${enterFrom}` : '',
+              ]
+                .filter((item) => item !== '')
+                .join(' ')}
+            >
               <ScreenBody
                 screen={screen}
                 invite={invite}
@@ -214,13 +254,16 @@ export function InvitePage() {
             </div>
           </footer>
 
-          {/* ---------- 屏与屏之间：小人做过渡 ---------- */}
-          {move !== null && (
-            <div className="move-stage" aria-hidden="true">
-              <Puppet gender={config.invite.hostGender} mood={MOVE_MOOD[move]} />
-              <span className="move-word">
-                {move === 'pull' ? '费劲地拉出来…' : move === 'fly' ? '呼 —— 飞过去！' : '一屁股压下去'}
-              </span>
+          {/*
+            ---------- 屏与屏之间：小人把整屏拖走 ----------
+
+            它**不是**在旁边演一段动画，而是**真的抓着这一屏**：
+            蹦到屏幕边 → 抓住 → 使劲把它拖出去。
+            所以它得贴在页面上、跟着那一屏一起走，而不是飘在一层遮罩上。
+          */}
+          {leaving !== null && (
+            <div className={`puller puller-${leaving}`} aria-hidden="true">
+              <Puppet gender={config.invite.hostGender} mood={MOVE_MOOD[leaving]} />
             </div>
           )}
         </>

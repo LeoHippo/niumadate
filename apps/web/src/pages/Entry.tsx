@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { buildDocNumber } from '@niumadate/shared';
 import type { RoleConfig } from '@niumadate/shared';
 import { BigEmoji } from '../big-emoji';
 import { ClosedModal, NiumaMark, SiteClosed, Stamp } from '../components';
 import { useConfig } from '../config-context';
-import { useMySubmissions } from '../use-submission';
 import '../entry-ways.css';
 
 /**
@@ -24,9 +23,6 @@ export function EntryPage() {
   const location = useLocation();
   const [closed, setClosed] = useState<RoleConfig | null>(null);
 
-  // 钩子必须在任何提前 return 之前调用，否则钩子数量会时多时少
-  const { latest, loading } = useMySubmissions();
-
   /** 想看身份卡。 */
   const picking = new URLSearchParams(location.search).get('pick') === '1';
 
@@ -34,23 +30,12 @@ export function EntryPage() {
   if (!config.site.open) return <SiteClosed config={config} />;
 
   /*
-    已经有申请了 → **直接把好友送回他自己的状态页**。
-
-    点这种链接的人，想看的是「我那件事办得怎么样了」。
-    查询期间先显示一句话，别先闪一下再跳走 —— 那样很像页面坏了。
+    **不再自动跳转。**
+    以前这里有个「有申请就直接送回状态页」的逻辑 —— 那是主页还只有身份卡的时候定的，
+    现在主页本身就是「我要约牛马 / 我的记录」两条路，自己就能走到记录页，
+    再自动把人弹走反而像"我点错了什么"。
+    主页就老老实实是主页。
   */
-  if (!picking) {
-    if (loading) {
-      return (
-        <main className="paper">
-          <p className="boot-title">正在找你的申请……</p>
-        </main>
-      );
-    }
-    if (latest !== null && latest !== undefined) {
-      return <Navigate to={`/status/${latest.role}`} replace />;
-    }
-  }
 
   return (
     <main className="paper entry-shell">

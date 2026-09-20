@@ -1,0 +1,269 @@
+/* ==========================================================================
+   屏幕之间的动作
+   --------------------------------------------------------------------------
+   这一段是整个邀请页的**灵魂**，不是装饰。
+
+   用户的原话：「小人只是有一个动画，但他并没有对我这个屏幕内的页面做一些动作。
+   我的想法是这个小人蹦出来，然后把后面的页面整个拉走。」
+
+   所以这里的做法是：**让页面本身动**。
+   小人蹦到屏幕边 → 抓住这一屏 → 使劲把它拖出去；下一屏从反方向补上来。
+   以前那种「小人自己演一段、页面淡出」是不对的 —— 它没有"碰到"页面。
+
+   三种动作轮换，对应三种被拖走的方式：
+     pull  往左拽出去
+     push  往右推出去
+     fly   往右上甩出去
+   ========================================================================== */
+
+/* 挂着 SVG 滤镜定义，不显示 */
+.defs-only {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---------- 卡片本体：被拖走 ---------- */
+
+.screen-inner {
+  /*
+    用带一点回弹的曲线 —— 直上直下的 linear 是"程序在动"，
+    这一点点过冲才是"有东西在拽它"。
+  */
+  transition:
+    transform 0.72s cubic-bezier(0.36, 0.9, 0.3, 1),
+    opacity 0.72s ease;
+}
+
+/*
+  预备动作：真正的拖拽都有一个"先反向一沉"的瞬间。
+  少了它，动画会像是被瞬间抽走，没有重量感。
+*/
+.card-leaving {
+  animation: card-anticipate 0.14s ease-out both;
+}
+
+@keyframes card-anticipate {
+  from { transform: translate(0, 0) rotate(0); }
+  to { transform: translate(10px, 2px) rotate(1.2deg); }
+}
+
+.card-leaving-pull {
+  animation: card-pull 0.58s cubic-bezier(0.5, 0, 0.75, 0.2) 0.14s both;
+}
+
+@keyframes card-pull {
+  0% { transform: translate(10px, 2px) rotate(1.2deg); opacity: 1; }
+  25% { transform: translate(-26px, 0) rotate(-3deg); opacity: 1; }
+  100% { transform: translate(-125%, -4%) rotate(-11deg) scale(0.9); opacity: 0; }
+}
+
+.card-leaving-push {
+  animation: card-push 0.58s cubic-bezier(0.5, 0, 0.75, 0.2) 0.14s both;
+}
+
+@keyframes card-push {
+  0% { transform: translate(-10px, 2px) rotate(-1.2deg); opacity: 1; }
+  25% { transform: translate(26px, 0) rotate(3deg); opacity: 1; }
+  100% { transform: translate(125%, -4%) rotate(11deg) scale(0.9); opacity: 0; }
+}
+
+.card-leaving-fly {
+  animation: card-fly 0.62s cubic-bezier(0.4, 0, 0.7, 0.3) 0.14s both;
+}
+
+@keyframes card-fly {
+  0% { transform: translate(6px, 6px) rotate(1deg); opacity: 1; }
+  30% { transform: translate(-14px, 10px) rotate(-2deg); opacity: 1; }
+  100% { transform: translate(118%, -86%) rotate(26deg) scale(0.78); opacity: 0; }
+}
+
+/* ---------- 卡片本体：补上来 ---------- */
+
+.card-entering-pull { animation: card-enter-from-right 0.62s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.card-entering-push { animation: card-enter-from-left 0.62s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.card-entering-fly { animation: card-enter-from-below 0.62s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes card-enter-from-right {
+  from { transform: translateX(46%) rotate(5deg) scale(0.94); opacity: 0; }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
+
+@keyframes card-enter-from-left {
+  from { transform: translateX(-46%) rotate(-5deg) scale(0.94); opacity: 0; }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
+
+@keyframes card-enter-from-below {
+  from { transform: translateY(52%) rotate(-3deg) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
+}
+
+/* ---------- 拖屏的那个小人 ---------- */
+
+.puller {
+  position: fixed;
+  bottom: 14%;
+  z-index: 9;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.2));
+}
+
+/* 拉：它站在左边，身子往后仰着使劲 */
+.puller-pull {
+  left: -18px;
+  animation: puller-drag-left 0.72s cubic-bezier(0.4, 0, 0.3, 1) both;
+}
+
+@keyframes puller-drag-left {
+  0% { transform: translate(-140px, 40px) rotate(14deg); opacity: 0; }
+  22% { transform: translate(-4px, 8px) rotate(-4deg); opacity: 1; }
+  62% { transform: translate(-30px, 0) rotate(-16deg); }
+  100% { transform: translate(-190px, -14px) rotate(-24deg); opacity: 0; }
+}
+
+/* 推：它站在左边，往前推 */
+.puller-push {
+  left: -18px;
+  animation: puller-shove-right 0.72s cubic-bezier(0.4, 0, 0.3, 1) both;
+}
+
+@keyframes puller-shove-right {
+  0% { transform: translate(-150px, 30px) rotate(-10deg); opacity: 0; }
+  22% { transform: translate(-6px, 6px) rotate(8deg); opacity: 1; }
+  58% { transform: translate(26px, -2px) rotate(18deg); }
+  100% { transform: translate(-120px, 20px) rotate(6deg); opacity: 0; }
+}
+
+/* 飞：它从下面蹿上来，把这一屏甩出去 */
+.puller-fly {
+  left: 50%;
+  margin-left: -80px;
+  animation: puller-hurl-up 0.72s cubic-bezier(0.3, 0.9, 0.4, 1) both;
+}
+
+@keyframes puller-hurl-up {
+  0% { transform: translate(0, 150px) rotate(-12deg) scale(0.9); opacity: 0; }
+  26% { transform: translate(0, -6px) rotate(8deg) scale(1.06); opacity: 1; }
+  62% { transform: translate(24px, -40px) rotate(26deg) scale(0.98); }
+  100% { transform: translate(120px, -180px) rotate(52deg) scale(0.7); opacity: 0; }
+}
+
+/* 拖拽时手臂要伸出去抓 —— 三种动作共用一个"抓住"的姿势 */
+.puller .puppet-arm-front {
+  transform-origin: 121px 96px;
+  animation: grab-hard 0.72s cubic-bezier(0.4, 0, 0.3, 1) both;
+}
+
+@keyframes grab-hard {
+  0% { transform: rotate(0); }
+  22% { transform: rotate(-58deg); }
+  100% { transform: rotate(-74deg); }
+}
+
+/* 腿蹬地：拽东西的时候脚是蹬着的 */
+.puller .puppet-leg-l { animation: brace-a 0.72s ease-in-out both; }
+.puller .puppet-leg-r { animation: brace-b 0.72s ease-in-out both; }
+
+@keyframes brace-a {
+  0% { transform: rotate(0); }
+  40% { transform: rotate(-16deg); }
+  100% { transform: rotate(-22deg); }
+}
+
+@keyframes brace-b {
+  0% { transform: rotate(0); }
+  40% { transform: rotate(12deg); }
+  100% { transform: rotate(18deg); }
+}
+
+/* ---------- 「揉成团」：真的皱，不只是缩小 ---------- */
+
+.invite-btn-crumpled {
+  /*
+    用 SVG 湍流滤镜把像素推开 —— 这才是"纸被揉皱"，
+    translate/scale 只能做出"变小"，做不出褶皱。
+  */
+  filter: url(#niuma-crumple) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+  transform: scale(0.5) rotate(18deg);
+  border-radius: 44% 56% 52% 48% / 54% 46% 56% 44%;
+  opacity: 0.92;
+}
+
+/* 被抓住举起来：先往上、再微微晃一下，像真的拎在手里 */
+.invite-btn-lifted {
+  animation: btn-lift 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes btn-lift {
+  0% { transform: translateY(0) rotate(0); }
+  55% { transform: translateY(-34px) rotate(-11deg); }
+  78% { transform: translateY(-26px) rotate(-5deg); }
+  100% { transform: translateY(-30px) rotate(-8deg); }
+}
+
+/* 扔出去：走一条抛物线，而且**转得很疯**——手里那团纸就该这样 */
+.invite-btn-thrown {
+  animation: btn-hurl 1.05s cubic-bezier(0.25, -0.3, 0.7, 1.4) both;
+}
+
+@keyframes btn-hurl {
+  0% { transform: translate(0, -30px) rotate(-8deg) scale(0.5); opacity: 0.92; }
+  18% { transform: translate(-22px, -92px) rotate(120deg) scale(0.46); opacity: 1; }
+  44% { transform: translate(90px, -70px) rotate(340deg) scale(0.4); opacity: 0.95; }
+  72% { transform: translate(240px, 30px) rotate(560deg) scale(0.3); opacity: 0.7; }
+  100% { transform: translate(380px, 180px) rotate(820deg) scale(0.14); opacity: 0; }
+}
+
+/* 接受按钮被拉大：不是"变大"，是"被拽着弹大" */
+.invite-btn-yes[style*='scale'] {
+  animation: btn-drag-grow 0.62s cubic-bezier(0.3, 1.6, 0.45, 1) both;
+}
+
+@keyframes btn-drag-grow {
+  0% { transform: scale(1); }
+  38% { transform: scale(1.34, 1.22); }
+  66% { transform: scale(1.2, 1.3); }
+  100% { transform: scale(1.28); }
+}
+
+/* 坐下之后压一压，像有重量压上去 */
+.invite-btn-seated {
+  animation: btn-squash 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+@keyframes btn-squash {
+  0% { transform: scale(1.28); }
+  60% { transform: scale(1.3, 1.2); }
+  100% { transform: scale(1.28, 1.24); }
+}
+
+/* ---------- 减少动效 ----------
+   不是关掉：这些动作就是内容本身。缩短到能感知的一瞬即可。 */
+@media (prefers-reduced-motion: reduce) {
+  .screen-inner,
+  .card-leaving,
+  .card-leaving-pull,
+  .card-leaving-push,
+  .card-leaving-fly,
+  .card-entering-pull,
+  .card-entering-push,
+  .card-entering-fly,
+  .puller,
+  .puller-pull,
+  .puller-push,
+  .puller-fly,
+  .invite-btn-lifted,
+  .invite-btn-thrown,
+  .invite-btn-seated {
+    animation-duration: 0.24s !important;
+    animation-delay: 0s !important;
+  }
+
+  .puller .puppet-arm-front,
+  .puller .puppet-leg-l,
+  .puller .puppet-leg-r {
+    animation: none !important;
+  }
+}
