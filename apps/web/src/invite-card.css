@@ -175,3 +175,101 @@
   margin: 0 auto 10px;
   background: var(--paper-edge);
 }
+
+
+/* ==========================================================================
+   「存下这张请柬」：按钮 + 长按保存的面板
+   ========================================================================== */
+
+.save-poster-btn {
+  margin-top: 14px;
+  padding: 10px 22px;
+  font-size: 13.5px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  background: transparent;
+  border: 1px dashed var(--paper-edge);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-2) var(--ease),
+    color var(--dur-2) var(--ease),
+    transform var(--dur-1) var(--ease);
+}
+
+.save-poster-btn:active { transform: scale(0.97); border-color: var(--accent); }
+
+/* 面板 */
+.save-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(30, 22, 14, 0.68);
+  backdrop-filter: blur(4px);
+  animation: save-sheet-in 0.3s var(--ease-out) both;
+}
+
+@keyframes save-sheet-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.save-sheet-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-height: 100%;
+  animation: save-pop 0.42s cubic-bezier(0.34, 1.4, 0.5, 1) both;
+}
+
+@keyframes save-pop {
+  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.save-image {
+  max-width: min(86vw, 380px);
+  max-height: 68vh;
+  border-radius: 10px;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+}
+
+.save-hint {
+  margin: 0;
+  font-size: 13.5px;
+  letter-spacing: 0.1em;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.save-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.save-download,
+.save-close {
+  padding: 9px 20px;
+  font-size: 13.5px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: transparent;
+  transition: background var(--dur-2) var(--ease);
+}
+
+.save-download { background: rgba(255, 255, 255, 0.16); }
+
+.save-download:active,
+.save-close:active { background: rgba(255, 255, 255, 0.28); }
+
+/* 摊开看的时候也放得下 */
+.invite-all .save-poster-btn { margin: 0 auto 10px; display: block; }

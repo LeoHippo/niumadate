@@ -6,6 +6,7 @@ import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
 import { Atmosphere } from '../atmosphere';
+import { drawPoster } from '../poster';
 import { useCountUp } from '../count-up';
 import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
@@ -145,6 +146,14 @@ export function InvitePage() {
   const [index, setIndex] = useState(0);
   /** 赶时间的人：一键摊开看全部。 */
   const [showAll, setShowAll] = useState(false);
+  /*
+    「存下这张请柬」存下来的那张图（dataURL）。
+    ⚠️ 这个 useState **必须**和其他 state 放在一起 —— 不能放在
+    `if (config === null) return null` 之后：那样加载中只跑一部分 Hook、
+    加载完再跑全部，React 会报 #310（渲染间 Hook 数量不一致）。
+    实测踩过，页面直接白屏，错误边界显示「页面崩了」。
+  */
+  const [poster, setPoster] = useState<string | null>(null);
   /**
    * 正在进行的过渡。
    *
@@ -157,6 +166,8 @@ export function InvitePage() {
   const [enterFrom, setEnterFrom] = useState<Move | null>(null);
   /** 刚刚答应了吗 —— 只在「没回应 → 接受」那一下放爆发，回头再看不再炸。 */
   const justAcceptedRef = useRef(false);
+
+
 
   const load = useCallback(async () => {
     try {
@@ -225,7 +236,47 @@ export function InvitePage() {
   */
   const justAccepted = justAcceptedRef.current && invite.status === 'accepted';
   if (invite.status !== 'pending') justAcceptedRef.current = false;
+
+
   const screen = SCREENS[index] ?? 'seal';
+
+  /**
+   * 把请柬画成一张图（见 poster.ts）。
+   *
+   * 放在这里是因为：上面那些提前返回（error / data === null）已经走完了，
+   * 到这儿 invite、role、config 都一定在。
+   * ⚠️ 但 **useState 不能放这儿** —— Hook 必须在所有 return 之前，
+   * 否则加载中/加载完两次 render 的 Hook 数量不同，React 报 #310（实测白屏过）。
+   * 所以 poster 那个 state 在文件顶上，这里只是个普通函数。
+   */
+  const savePoster = (): void => {
+    const styles = getComputedStyle(document.documentElement);
+    const pick = (name: string, fallback: string): string =>
+      styles.getPropertyValue(name).trim() || fallback;
+
+    const canvas = drawPoster({
+      role: invite.role,
+      roleEmoji: role?.emoji ?? '🐮',
+      inviteeName: invite.inviteeName,
+      dateText: fullDate(invite.date),
+      timeText: invite.timeText,
+      place: invite.place,
+      activity: invite.activity,
+      hostName: config.invite.hostName,
+      body: invite.body,
+      days: daysUntil(invite.date),
+      palette: {
+        paper: pick('--paper', '#fffaf1'),
+        edge: pick('--paper-edge', '#e6d9c2'),
+        ink: pick('--ink', '#3a3228'),
+        inkSoft: pick('--ink-soft', '#8a7d6b'),
+        accent: pick('--accent', '#c8641e'),
+        accentDeep: pick('--accent-deep', '#8f3f0d'),
+      },
+    });
+
+    setPoster(canvas.toDataURL('image/png'));
+  };
   const last = index === SCREENS.length - 1;
 
   return (
@@ -375,6 +426,31 @@ export function InvitePage() {
             所以它得贴在页面上、跟着那一屏一起走，而不是飘在一层遮罩上。
           */}
           {/* 刚答应：满屏爆发。前面那么长的铺垫，就是为了这一下 */}
+                    {/* 请柬那一屏下面给一个"存下来"的出口 —— 可收藏本身就是向往感 */}
+          {!showAll && screen === 'card' && (
+            <button type="button" className="save-poster-btn" onClick={savePoster}>
+              存下这张请柬
+            </button>
+          )}
+
+          {/* 存图面板：手机上长按最容易，桌面上给下载 */}
+          {poster !== null && (
+            <div className="save-sheet" role="dialog" aria-label="保存请柬">
+              <div className="save-sheet-inner">
+                <img className="save-image" src={poster} alt="你的请柬" />
+                <p className="save-hint">长按图片保存到相册</p>
+                <div className="save-actions">
+                  <a className="save-download" href={poster} download="请柬.png">
+                    下载到电脑
+                  </a>
+                  <button type="button" className="save-close" onClick={() => setPoster(null)}>
+                    收起
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {justAccepted && <Burst role={invite.role} />}
 
           {leaving !== null && (
