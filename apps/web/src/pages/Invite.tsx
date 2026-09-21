@@ -25,6 +25,7 @@ import '../invite-motion.css';
   放在这里、排在它后面，关键帧重定义才会赢。
 */
 import '../puller-choreography.css';
+import '../puppet-acts.css';
 import '../all-cards.css';
 import '../invite-wow.css';
 import '../invite-card.css';
@@ -189,6 +190,48 @@ export function InvitePage() {
    * 「页面被它拖走了」这个感觉，才是这个过渡的全部意义。
    */
   const [leaving, setLeaving] = useState<Move | null>(null);
+
+  /*
+    转场里小人的**姿态**，跟着分镜的节拍一段一段换。
+
+    用户的原话：「牛马的这个动作还是不够精细……应该有那种**过程感**，
+    让人们能看到这个我精心设计的这个过程。」
+
+    之前整段只有一个姿势（`MOVE_MOOD[leaving]`）—— 位置在动，人没在演。
+    现在按节拍切：够过去 → 抓住 → 使劲；压是直接压；飞是够 → 抓 → 抛。
+
+    时点要和 puller-choreography.css 里那张时间表对齐
+    （蓄势 0~20%、抓住 24%、第 1 顿 34%、顿住 46%、第 2 顿 58%）。
+  */
+  const [acting, setActing] = useState<PuppetMood | null>(null);
+  useEffect(() => {
+    if (leaving === null) {
+      setActing(null);
+      return;
+    }
+    const plan: Record<Move, [number, PuppetMood][]> = {
+      // 拉：先举手够过去，抓住，再全身使劲
+      pull: [
+        [0, 'reach'],
+        [150, 'grab'],
+        [330, 'pull'],
+      ],
+      // 压：从上面下来就是压，不铺垫
+      press: [[0, 'press']],
+      // 飞：够 → 抓 → 拎起来抛
+      fly: [
+        [0, 'reach'],
+        [170, 'grab'],
+        [360, 'fly'],
+      ],
+    };
+    const timers = plan[leaving].map(([at, mood]) =>
+      window.setTimeout(() => setActing(mood), at),
+    );
+    return () => {
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [leaving]);
   /** 刚过去的那一下是什么动作 —— 决定**新进来的这一屏从哪边滑进来**。 */
   const [enterFrom, setEnterFrom] = useState<Move | null>(null);
   /** 刚刚答应了吗 —— 只在「没回应 → 接受」那一下放爆发，回头再看不再炸。 */
@@ -502,7 +545,11 @@ export function InvitePage() {
 
           {leaving !== null && (
             <div className={`puller puller-${leaving}`} aria-hidden="true">
-              <Puppet gender={config.invite.hostGender} mood={MOVE_MOOD[leaving]} />
+              {/* 姿态分阶段切（见上面那个 effect）—— 整段一个姿势的话，位置在动但人没在演 */}
+              <Puppet
+                gender={config.invite.hostGender}
+                mood={acting ?? MOVE_MOOD[leaving]}
+              />
             </div>
           )}
         </>

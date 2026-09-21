@@ -1,0 +1,201 @@
+/* ==========================================================================
+   「拉」和「压」的姿态 —— 之前这两个动作小人根本没有专属姿势
+   --------------------------------------------------------------------------
+   查下来的事实：
+     .puppet-reach → 手臂抬到 -64°+ 手收拢   ✓ 有
+     .puppet-grab  → 手臂 -64° + 手微收      ✓ 有
+     .puppet-pull  → **一条规则都没有**      ✗
+     .puppet-press → **一条规则都没有**      ✗
+
+   所以整段转场里它一直是**默认站姿**：位置在动，人却没在演 ——
+   看起来像"画面在滑"，不像"它在拉"。
+
+   用户的原则：「设计不让人看到就等于没设计。」
+   这两个动作是要被看到的，所以它们必须有**能认出来的身体**。
+
+   零件表（puppet.tsx）：
+     puppet-arm-front / puppet-arm-back（里面是 puppet-limb）
+     puppet-hand / puppet-leg-l / puppet-leg-r
+     puppet-body / puppet-head-group / puppet-head
+   ========================================================================== */
+
+/* ==========================================================================
+   拉：身子后仰、双手死死往回拽、两只脚蹬着地
+   —— 拉是一个"对抗"的动作，全身都在使劲，绝不只是一只手
+   ========================================================================== */
+
+.puppet-pull .puppet-arm-front,
+.puppet-pull .puppet-arm-back {
+  /* 双手朝前伸直抓住（比 reach 更靠前、更用力） */
+  transform: rotate(-74deg);
+  transform-origin: 80px 96px;
+}
+
+.puppet-pull .puppet-hand {
+  transform: rotate(-20deg) scale(0.88);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 后仰：重心往后坐下去 —— 这是"使劲"最容易被看出来的地方 */
+.puppet-pull .puppet-body,
+.puppet-pull .puppet-head-group {
+  transform: rotate(-16deg) translate(-7px, 4px);
+  transform-origin: 80px 158px;
+}
+
+/* 双脚蹬地：一前一后，像在往后撑 */
+.puppet-pull .puppet-leg-l {
+  transform: rotate(-24deg);
+  transform-origin: 66px 146px;
+}
+
+.puppet-pull .puppet-leg-r {
+  transform: rotate(13deg);
+  transform-origin: 93px 146px;
+}
+
+/* 用力的那一瞬间整个身子绷一下（一直在微微发抖，像真的在拉） */
+.puppet-pull {
+  animation: pull-strain 0.34s ease-in-out infinite alternate;
+}
+
+@keyframes pull-strain {
+  from { transform: translateX(0) rotate(-1.4deg); }
+  to { transform: translateX(-3px) rotate(-3.2deg); }
+}
+
+/* ==========================================================================
+   压：双手往下按、身子前倾压下去、膝盖微屈
+   ========================================================================== */
+
+.puppet-press .puppet-arm-front,
+.puppet-press .puppet-arm-back {
+  /* 手往下按，不是往前伸 */
+  transform: rotate(24deg);
+  transform-origin: 80px 96px;
+}
+
+.puppet-press .puppet-hand {
+  transform: rotate(12deg) scale(1.06, 0.9);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 前倾、往下沉 —— 像用全身重量压住 */
+.puppet-press .puppet-body,
+.puppet-press .puppet-head-group {
+  transform: translate(4px, 7px) rotate(9deg) scale(1.05, 0.94);
+  transform-origin: 80px 158px;
+}
+
+/* 膝盖微屈：承重 */
+.puppet-press .puppet-leg-l { transform: rotate(-8deg) scaleY(0.92); transform-origin: 66px 146px; }
+.puppet-press .puppet-leg-r { transform: rotate(8deg) scaleY(0.92); transform-origin: 93px 146px; }
+
+.puppet-press {
+  animation: press-push 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes press-push {
+  from { transform: translateY(0) scale(1, 1); }
+  to { transform: translateY(3px) scale(1.03, 0.97); }
+}
+
+/* ==========================================================================
+   接触点：让"抓住"和"压住"这两件事看得见
+   --------------------------------------------------------------------------
+   手和页面之间如果没有东西，观众只能"猜"它在用力。
+   加一点点视觉证据 —— 一道压出来的光、一圈震开的气 —— 就成立了。
+   ========================================================================== */
+
+/* 抓住的那一下：手边闪一下 */
+.puller-pull .puppet-hand::after,
+.puller-fly .puppet-hand::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 250, 235, 0.95) 0%, transparent 66%);
+  opacity: 0;
+  animation: grip-flash 1.1s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes grip-flash {
+  0%, 20% { opacity: 0; transform: scale(0.4); }
+  26% { opacity: 1; transform: scale(1.15); }
+  40% { opacity: 0.5; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* 压下去的时候：脚下一圈圈震开的气（跟着压力一波一波） */
+.puller-push::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 120px;
+  height: 26px;
+  margin-left: -60px;
+  border-radius: 50%;
+  border: 2px solid var(--accent, #c8641e);
+  opacity: 0;
+  animation: press-shock 1.1s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes press-shock {
+  /* 三次压力 = 三圈气，和分镜的三个节拍对齐（28% / 54% / 82%） */
+  0%, 22% { opacity: 0; transform: scale(0.3); }
+  28% { opacity: 0.85; transform: scale(1); }
+  40% { opacity: 0; transform: scale(1.6); }
+  54% { opacity: 0.85; transform: scale(1); }
+  66% { opacity: 0; transform: scale(1.6); }
+  82% { opacity: 0.85; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* 拉的时候：手和页面之间拉出一道"绷紧"的光 */
+.puller-pull::after {
+  content: '';
+  position: absolute;
+  left: 46%;
+  top: 52%;
+  width: 46px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 245, 220, 0.9), transparent);
+  opacity: 0;
+  animation: strain-line 1.1s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes strain-line {
+  0%, 20% { opacity: 0; transform: scaleX(0.2); transform-origin: left; }
+  30% { opacity: 0.9; transform: scaleX(1); }
+  46% { opacity: 0.35; transform: scaleX(0.8); }
+  58% { opacity: 0.9; transform: scaleX(1.15); }
+  70% { opacity: 0.35; transform: scaleX(0.9); }
+  82% { opacity: 1; transform: scaleX(1.4); }
+  100% { opacity: 0; transform: scaleX(1.8); }
+}
+
+/* ==========================================================================
+   减少动效
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .puppet-pull,
+  .puppet-press,
+  .puller-pull .puppet-hand::after,
+  .puller-push::after,
+  .puller-pull::after {
+    animation: none !important;
+  }
+  .puller-push::after,
+  .puller-pull::after { display: none; }
+}
