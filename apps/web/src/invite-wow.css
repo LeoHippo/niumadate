@@ -156,12 +156,22 @@
   color: transparent;
   background-size: 260% 100%;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5));
-  animation: foil-sweep 4.2s ease-in-out infinite;
+  /*
+    ⚠️ 原来是 `infinite` —— 每隔 4.2 秒扫一次，永远不停。
+    用户的原话：「字体是在不断地闪烁的，可能这个鎏金的动作动画太快了」。
+
+    对，**扫光是"扫一次"的动词，不是"闪"**：
+    一件东西上掠过一道光，你只会看到一次；反复掠过就变成了灯泡坏掉。
+    所以改成**进场扫一次就停**，并且放慢到 5.4 秒。
+  */
+  animation: foil-sweep 5.4s cubic-bezier(0.4, 0, 0.3, 1) 0.5s 1 both;
 }
 
 @keyframes foil-sweep {
-  0%, 55%, 100% { background-position: 0% 0; }
-  75% { background-position: 100% 0; }
+  0% { background-position: 0% 0; }
+  /* 光慢慢掠过去，然后**停在那儿**，不再折回来 —— 折回来就变成"闪"了 */
+  62% { background-position: 100% 0; }
+  100% { background-position: 100% 0; }
 }
 
 /* 兄弟那套不用烫金 —— 它的人设不需要这种闪的东西 */

@@ -213,28 +213,20 @@
     background-color var(--dur-1) var(--ease) !important;
 }
 
-/* ---------- 兄弟：把"过渡"本身也省掉 ----------
-   它不是把动画做快，而是**根本没有过渡动作** ——
-   点完就到位。这才是"别磨叽"落到手感上的样子。 */
-[data-theme='brother'] .puller { display: none !important; }
+/*
+  ⚠️ 这里原来有两条 \`[data-theme='brother'/'dadmam'] .puller { display: none }\`，
+  外加把兄弟那套的 card-leaving / card-entering 全部 \`animation: none\`。
 
-[data-theme='brother'] .card-leaving-pull,
-[data-theme='brother'] .card-leaving-push,
-[data-theme='brother'] .card-leaving-fly {
-  animation: none !important;
-  opacity: 0 !important;
-}
+  我当时的想法是"这两家的人设不需要这个过程，点完就到位"。
+  这是个**自作聪明的减法** —— 用户第一眼就发现了：
+  「之前那个牛马去换页的动画没了」。
 
-[data-theme='brother'] .card-entering-pull,
-[data-theme='brother'] .card-entering-push,
-[data-theme='brother'] .card-entering-fly {
-  animation: none !important;
-  opacity: 1 !important;
-}
+  小牛马蹦出来、抓住整屏、把它拖走 —— 这是全站**最讨喜**的一处。
+  用户从来没觉得它"不符合性格"，是我替他做了决定。
+  **讨喜的东西不要以"设计纯度"的名义砍掉。**
 
-/* ---------- DAD&MUM：过渡也是一次到位 ---------- */
-
-[data-theme='dadmam'] .puller { display: none !important; }
+  已全部恢复。兄弟那套仍然是最快的（靠 --dur-* 令牌），只是不再"没有"。
+*/
 
 /* ---------- 减少动效偏好：一律压到最短，但不取消 ---------- */
 

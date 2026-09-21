@@ -832,6 +832,15 @@ function Answer({
 }) {
   const [act, setAct] = useState<Act>('idle');
   const [pupX, setPupX] = useState(0);
+  /*
+    竖直方向的偏移。
+
+    ⚠️ 为什么要有它：退场不能靠 CSS 的 position: fixed ——
+    小人的祖先里有带 transform 的元素，而**有 transform 的祖先会成为
+    fixed 的包含块**，于是它根本到不了视口左上角（实测停在"左50 上269"）。
+    所以位置一律由 JS 量、用 transform 推，跟祖先无关。
+  */
+  const [pupY, setPupY] = useState(0);
   /**
    * 婉拒按钮是不是已经被扔掉了。
    * 为什么要单独记：`crumpled`/`thrown` 是按**当前这一步**挂的，
@@ -839,7 +848,44 @@ function Answer({
    */
   const [gone, setGone] = useState(false);
 
+  /*
+    演完之后**退场到左上角**。
+
+    用户的原话：「强制要求那个最后牛马应该坐在左上角，
+    不应该把中间的汉字给挡住。」
+
+    对 —— 它把「不去」扔了、把「同意」拉大了，然后就一直赖在正中间，
+    压着那两个字。**演完就该有分寸地退开** —— 这是角色该有的礼仪。
+    所以按钮一稳（gone 之后 2.6 秒），它就飘到左上角变小待着。
+  */
+  const [docked, setDocked] = useState(false);
+
+  /** 别忘了：这是 `Answer` 里的状态，不是外面那个组件的 —— 放错地方会找不到名字。 */
+  useEffect(() => {
+    if (!gone) return;
+    const away = window.setTimeout(() => setDocked(true), 2600);
+    return () => window.clearTimeout(away);
+  }, [gone]);
+
+  /**
+   * 退场：把小人推到**视口左上角**。
+   *
+   * 量的是"小人现在在哪、要挪多少才能到左上角"，然后用 transform 推过去 ——
+   * 这样不管祖先有没有 transform 都对。
+   */
+  useEffect(() => {
+    if (!docked) return;
+    const holder = puppetRef.current;
+    if (holder === null) return;
+    const box = holder.getBoundingClientRect();
+    // 目标：左上角留 12px 边距
+    setPupX((current) => current + (12 - box.left));
+    setPupY(14 - box.top);
+  }, [docked]);
+
   const stageRef = useRef<HTMLDivElement | null>(null);
+  /** 小人容器 —— 退场时要量它的位置。 */
+  const puppetRef = useRef<HTMLDivElement | null>(null);
   const noRef = useRef<HTMLButtonElement | null>(null);
   const yesRef = useRef<HTMLButtonElement | null>(null);
   const timers = useRef<number[]>([]);
@@ -931,8 +977,13 @@ function Answer({
     <div className="invite-answer">
       <div className="invite-stage" ref={stageRef}>
         {invite.noDecline && act !== 'idle' && (
-          <div className="invite-puppet-holder" style={{ transform: `translateX(${pupX}px)` }}>
-            <Puppet gender={hostGender} mood={moodFor(act)} />
+          <div
+            ref={puppetRef}
+            className={docked ? 'invite-puppet-holder puppet-docked' : 'invite-puppet-holder'}
+            style={{ transform: `translate(${pupX}px, ${pupY}px)` }}
+          >
+            {/* 退场之后是**坐在**左上角的 —— 用户说的就是"坐在左上角" */}
+            <Puppet gender={hostGender} mood={docked ? 'sit' : moodFor(act)} />
           </div>
         )}
 

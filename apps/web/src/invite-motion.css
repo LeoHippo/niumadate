@@ -364,3 +364,121 @@
 @media (prefers-reduced-motion: reduce) {
   .screen-veil { display: none; }
 }
+
+
+/* ==========================================================================
+   坐姿：腿要弯、要有透视、要有落地影
+   --------------------------------------------------------------------------
+   用户：「它坐呀那些的动画好像做的还不是很精美，因为坐的话肯定是腿弯起来呀什么的，
+   就是有那种 3D 的感觉。」
+
+   原先的坐是——身体降下去，两根**直立的圆柱**还插在屁股下面。那不是坐，是卡住了。
+
+   真的坐姿（卡通画法）：
+     · 大腿**朝前伸**（所以腿要转出来，几乎水平）
+     · 小腿在透视里**缩短**（近大远小，脚尖朝着观众）
+     · 脚掌**变大变圆**（离镜头更近）
+     · 身体**压扁一点**（重心落下去了）
+     · 落地影**变宽变淡**（接触面变大）
+   ========================================================================== */
+
+/* 腿转出来 —— 从"站着"变成"坐着，腿伸在前面" */
+.puppet-sit .puppet-leg-l {
+  transform: translate(7px, 3px) rotate(74deg);
+  transform-origin: 66px 146px;
+}
+
+.puppet-sit .puppet-leg-r {
+  transform: translate(-7px, 3px) rotate(74deg);
+  transform-origin: 93px 146px;
+}
+
+/* 脚掌：离镜头近，所以更大更圆 —— 这是"透视"的来源 */
+.puppet-sit .puppet-hoof {
+  transform: scale(1.2, 1.34);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 身体压扁一点：坐下去重心是往下沉的 */
+.puppet-sit .puppet-body,
+.puppet-sit .puppet-belly,
+.puppet-sit .puppet-head-group {
+  transform: translateY(5px) scale(1.04, 0.95);
+  transform-origin: 80px 150px;
+}
+
+/* 手臂搭在大腿上 —— 不然两只手会尴尬地举在半空 */
+.puppet-sit .puppet-arm-front,
+.puppet-sit .puppet-arm-back {
+  transform: rotate(28deg) translateY(4px);
+  transform-origin: 80px 96px;
+}
+
+/* 落地影：接触面变大，所以更宽更淡 */
+.puppet-sit .puppet-shadow {
+  transform: scale(1.32, 1.15);
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.72;
+}
+
+/* 坐着的时候腿和身体之间会有一条缝 —— 用一点阴影把它接上 */
+.puppet-sit .puppet-leg {
+  filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* ==========================================================================
+   收工之后退到左上角去待着
+   --------------------------------------------------------------------------
+   用户：「强制要求那个最后牛马应该坐在左上角，不应该把中间的汉字给挡住。」
+
+   对 —— 它演完之后还赖在正中间，压着「同意」那两个字。
+   演完就该**退场**：变小、飘到左上角、安安静静待着。
+   这是"角色"该有的分寸。
+   ========================================================================== */
+
+/* ⚠️ 上面那条 .puppet-docked 用的是 position: fixed —— 但它的祖先里
+   （.screen-inner / .card-entering-*）带了 transform，
+   而**有 transform 的祖先会成为 fixed 的包含块** ——
+   所以它并没有跑到视口左上角，实测停在"左50 上269"（屏幕中左）。
+
+   改成：不靠 CSS 定位，由 JS 量出"要移动多少"再用 translate 推过去。
+   位置最终由 transform 决定，和祖先有没有 transform 无关。 */
+
+.invite-puppet-holder.puppet-docked {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 96px;
+  height: 104px;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.invite-puppet-holder.puppet-docked .puppet {
+  width: 96px;
+  height: 104px;
+}
+
+@keyframes dock-in {
+  0% { opacity: 0; transform: translate(24px, 18px) scale(1.25); }
+  62% { opacity: 1; transform: translate(-2px, -3px) scale(0.94); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+
+/* 缩小之后内部的小人跟着缩 */
+.invite-puppet-holder.puppet-docked .puppet {
+  width: 96px;
+  height: 104px;
+}
+
+/* 左上角会和大编号（01/09）重叠 —— 把编号让出来 */
+.invite-page:has(.puppet-docked) .screen-step {
+  left: auto;
+  right: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invite-puppet-holder.puppet-docked { animation: none !important; }
+}
