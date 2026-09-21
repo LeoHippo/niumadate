@@ -9,6 +9,7 @@ import './selection-role.css';
 import './reveal.css';
 import './type-scale.css';
 import './motion-floor.css';
+import './screen-stage.css';
 
 /**
  * 兜底错误边界。

@@ -1,0 +1,176 @@
+/* ==========================================================================
+   每一屏的「密度」：一个巨大的焦点 + 编号 + 层次
+   --------------------------------------------------------------------------
+   用户说「不够好看、跟网易云精美的总结没关系」。我去比了一下差距在哪：
+
+     网易云那套 —— 每一屏都是**一个巨大的视觉主体**（常常占屏幕 1/3），
+     配一个大字号编号（01 / 07 那种），层次密、颜色浓，
+     **每一屏都值得单独截一张图。**
+
+     我这边 —— 一个 54px 的 emoji 浮在一大片米色空白里，内容全挤在上半屏。
+     干净是干净，但**空**。空和高级是两回事。
+
+   所以这一层做三件事：
+     ① 主体放大到 ~150px，并且在它后面垫一圈光 —— 让它"坐在"光上，不是飘着
+     ② 加一个大字号**编号**（01/08），低对比但尺寸很大 —— 这是"版面感"的来源
+     ③ 把内容在竖直方向摊开，不要挤在上半屏
+   ========================================================================== */
+
+/* ---------- 一屏的竖直节奏 ---------- */
+.screen-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  /* 上下都留出呼吸，内容就不会挤在顶上 */
+  padding-top: 26px;
+  padding-bottom: 84px;
+}
+
+/* ---------- ① 主体：放大 + 垫一圈光 ---------- */
+
+.screen-emoji {
+  position: relative;
+  font-size: 76px;
+  line-height: 1;
+  margin-bottom: 14px;
+  /* 一点点投影，让它从背景里"起"来 */
+  filter: drop-shadow(0 8px 18px rgba(120, 90, 60, 0.16));
+}
+
+/* 主体后面那圈光 —— 这是"精致感"最便宜也最有效的一招 */
+.screen-emoji::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.6em;
+  height: 2.6em;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow) 0%, transparent 68%);
+  opacity: 0.85;
+  z-index: -1;
+  animation: stage-breathe 5.2s ease-in-out infinite;
+}
+
+@keyframes stage-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.14); opacity: 1; }
+}
+
+/* 再外一圈很淡的描边圆 —— 像一枚徽章，把主体"框"住 */
+.screen-emoji::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.1em;
+  height: 2.1em;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid var(--paper-edge);
+  opacity: 0.75;
+  z-index: -1;
+}
+
+/* ---------- ② 编号：大字号、低对比 ---------- */
+
+.screen-step {
+  position: absolute;
+  top: 14px;
+  left: 22px;
+  font-family: var(--font-title);
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.16;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  /* 用等宽数字，01 02 03 的宽度才一样 */
+  font-variant-numeric: tabular-nums;
+}
+
+.screen-step-total {
+  font-size: 0.42em;
+  opacity: 0.7;
+  margin-left: 0.1em;
+  letter-spacing: 0.06em;
+}
+
+/* 编号旁边一条短竖线，像目录 */
+.screen-step::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 100%;
+  width: 2px;
+  height: 22px;
+  background: var(--accent);
+  opacity: 0.5;
+  margin-top: 6px;
+}
+
+/* ---------- ③ 层次：小标题上下都要有分量 ---------- */
+
+.screen-kicker {
+  font-size: var(--t-tiny);
+  letter-spacing: var(--ls-wider);
+  color: var(--ink-soft);
+  opacity: 0.9;
+  margin: 0 0 10px;
+  text-transform: none;
+}
+
+/* 小标题两侧各一小段线 —— 把"一句话"变成"一个有版面的标题" */
+.screen-kicker::before,
+.screen-kicker::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  vertical-align: middle;
+  background: currentColor;
+  opacity: 0.4;
+  margin: 0 9px;
+}
+
+/* 大字下面那条分隔线，中间亮两头虚 */
+.screen-big {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.screen-big::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 64px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.55;
+}
+
+/* ---------- 兄弟那套：不要这圈光，它的人设不需要 ---------- */
+.invite-page[data-theme='brother'] .screen-emoji::before { display: none; }
+.invite-page[data-theme='brother'] .screen-emoji::after { border-radius: 4px; }
+.invite-page[data-theme='brother'] .screen-kicker::before,
+.invite-page[data-theme='brother'] .screen-kicker::after { display: none; }
+
+/* ---------- 家人那套：编号用方块感，别太俏 ---------- */
+.invite-page[data-theme='dadmam'] .screen-step { font-family: var(--font-body); }
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 380px) {
+  .screen-emoji { font-size: 64px; }
+  .screen-step { font-size: 36px; }
+}
+
+/* ---------- 减少动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .screen-emoji::before { animation: none !important; }
+}

@@ -69,6 +69,9 @@ const SCREENS: readonly Screen[] = [
   'chat',
 ];
 
+/** 一共几屏 —— 编号要用（01/08 那种）。 */
+const SCREEN_TOTAL = SCREENS.length;
+
 /** 请柬上要写星期几 —— 不然收到的人不知道要不要请假。 */
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -461,6 +464,16 @@ export function InvitePage() {
             <span className="screen-veil screen-veil-reveal" aria-hidden="true" />
           )}
 
+                    {/*
+            大编号（01/08）。低对比、尺寸很大 ——
+            这是"版面感"的来源，也是网易云那套每屏都有的东西。
+            它的作用不是给人读，是让这一屏**看起来是被设计过的**。
+          */}
+          <span className="screen-step" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+            <span className="screen-step-total">/{String(SCREEN_TOTAL).padStart(2, '0')}</span>
+          </span>
+
           {justAccepted && <Burst role={invite.role} />}
 
           {leaving !== null && (
@@ -581,6 +594,7 @@ function ScreenBody({
     现在改成只看 days 有没有算出来（NaN = 日期没法解析）。
   */
   const countdownText = days === 0 ? '就是今天' : days < 0 ? '已经去过啦' : null;
+
 
   switch (screen) {
     case 'seal':
