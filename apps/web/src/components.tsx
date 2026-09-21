@@ -706,7 +706,22 @@ export function LockTip({
 }
 
 /** 向导进度：第 X 步 / 共 N 步。 */
+/**
+ * 进度指示。
+ *
+ * **同一个进度，四个身份四种读法** —— 这是「逻辑不同」而不是「长相不同」的地方：
+ *   好兄弟   「第 3 步」       —— 数字，别绕弯子
+ *   好姐妹   小圆点            —— 好看、不压迫
+ *   好宝宝   小爱心            —— 走过的每一格都是心跳
+ *   DAD&MUM  「第 3 / 6 项」   —— 像一份表单的条目编号
+ *
+ * 具体画成什么由 CSS 按 data-theme 决定，这里只把两种信息都给出去：
+ * 序号文字 + 一排小标记。
+ */
 export function WizardProgress({ index, total }: { index: number; total: number }) {
+  /** 「步」还是「项」—— 家人那边说的是流程，不是散步。 */
+  const unit = document.documentElement.dataset.theme === 'dadmam' ? '项' : '步';
+
   return (
     <div className="wizard-progress">
       <div className="wizard-dots">
@@ -715,7 +730,7 @@ export function WizardProgress({ index, total }: { index: number; total: number 
         ))}
       </div>
       <span className="wizard-count">
-        第 {index + 1} / {total} 步
+        第 {index + 1} / {total} {unit}
       </span>
     </div>
   );

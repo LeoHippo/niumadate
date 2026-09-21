@@ -1,0 +1,79 @@
+/* ==========================================================================
+   进度指示：同一个进度，四个身份四种读法
+   --------------------------------------------------------------------------
+   这不是装饰 —— 它决定「我现在在跟谁打交道」：
+
+     好兄弟   **干脆不要那排点**，只留一句「第 3 步」—— 别磨叽
+     好姐妹   小圆点，柔和不压迫
+     好宝宝   小爱心，走过的每一格都是心跳
+     DAD&MUM  小方块，配「第 3 / 6 项」—— 像一份表单的条目编号
+   ========================================================================== */
+
+.wizard-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ---------- 好兄弟：没有点，只有一个数字 ---------- */
+[data-theme='brother'] .wizard-dots { display: none; }
+
+[data-theme='brother'] .wizard-count {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- 好姐妹：圆点，柔 ---------- */
+[data-theme='sister'] .wizard-dots .dot {
+  border-radius: 50%;
+}
+
+/* ---------- 好宝宝：爱心 ----------
+   直接写字形最省事也最清楚 —— 用 CSS 拼心形在这点尺寸上反而是糊的。 */
+[data-theme='baby'] .wizard-dots .dot {
+  width: auto;
+  height: auto;
+  background: none !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  line-height: 1;
+  transition: transform var(--dur-2) var(--ease);
+}
+
+[data-theme='baby'] .wizard-dots .dot::before {
+  content: '♡';
+  color: #e6c9b4;
+}
+
+[data-theme='baby'] .wizard-dots .dot-on::before {
+  content: '♥';
+  color: var(--accent, #e08a3c);
+}
+
+/* 走到的那一格轻轻跳一下 —— 这是宝宝那套该有的小动作 */
+[data-theme='baby'] .wizard-dots .dot-on {
+  animation: dot-heartbeat 1.6s ease-in-out infinite;
+}
+
+@keyframes dot-heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.28); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.18); }
+}
+
+/* ---------- DAD&MUM：小方块 ---------- */
+[data-theme='dadmam'] .wizard-dots .dot {
+  border-radius: 1px;
+  width: 9px;
+  height: 9px;
+}
+
+[data-theme='dadmam'] .wizard-count {
+  letter-spacing: 0.14em;
+}
+
+/* ---------- 减少动效：心跳停下 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='baby'] .wizard-dots .dot-on { animation: none !important; }
+}

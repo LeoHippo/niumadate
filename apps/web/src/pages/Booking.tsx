@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { buildDayRows, buildDocNumber, copiesFor, findRole, isRoleKey } from '@niumadate/shared';
 import type { SlotCell, SlotDef } from '@niumadate/shared';
 import { api, describeError } from '../api';
+import { CELEBRATE_MS, SubmitCelebration } from '../submit-celebration';
 import {
   Calendar,
   LockTip,
@@ -75,6 +76,8 @@ export function BookingPage() {
   const [morningOpen, setMorningOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** 交完那一下的回执（四个身份四种，见 submit-celebration.tsx）。 */
+  const [celebrating, setCelebrating] = useState(false);
 
   const role = config === null || !isRoleKey(roleKey) ? undefined : findRole(config, roleKey);
 
@@ -88,10 +91,19 @@ export function BookingPage() {
    * 名字改用配置里的 nameDefault（默认「宝宝」「爸妈」）。
    */
   const asksName = role?.askName !== false;
-  const chain = useMemo(
-    () => (asksName ? CHAIN : CHAIN.filter((item) => item !== 'name')),
-    [asksName],
-  );
+  /**
+   * 步骤链**按身份不同** —— 这是「交互逻辑不一样」，不是「长相不一样」。
+   *
+   * 好兄弟少一步：「见面要求 + 留言」那一页对它来说是废话。
+   * 人设是「别磨叽」，那就别让人写小作文。
+   *
+   * 另外三个身份保持完整流程：姐妹喜欢把话说清楚、宝宝本来就要缠两句、
+   * 家人那边是照单填写 —— 少一栏反而像漏了。
+   */
+  const chain = useMemo(() => {
+    const forRole = role?.key === 'brother' ? CHAIN.filter((item) => item !== 'extras') : CHAIN;
+    return asksName ? forRole : forRole.filter((item) => item !== 'name');
+  }, [asksName, role?.key]);
 
   // 不问名号时，step 一开始就落在链子的第一页，不会闪一下名号页
   const step: Step = rawStep === 'name' && !asksName ? (chain[0] ?? 'date') : rawStep;
@@ -209,12 +221,25 @@ export function BookingPage() {
         meetingNote: draft.meetingNote.trim(),
       });
       clearDraft(role.key);
-      navigate(`/status/${role.key}`, { replace: true });
+      /*
+        交完那一下**按身份给不同回执** —— 停留多久本身就是性格：
+          兄弟 420ms（办完了，不啰嗦）
+          姐妹 900ms（有一点仪式感）
+          宝宝 1600ms（这是它最兴奋的时刻）
+          家长 700ms（收据式，留痕）
+        所以要等一会儿再跳走；跳早了这段就白做了。
+      */
+      const wait = CELEBRATE_MS[role.key];
+      setCelebrating(true);
+      window.setTimeout(() => navigate(`/status/${role.key}`, { replace: true }), wait);
     } catch (cause) {
       setError(describeError(cause));
       setBusy(false);
     }
   }
+
+  // 交完那一下先给回执 —— 放在所有钩子之后、其它提前返回之前
+  if (celebrating && role !== undefined) return <SubmitCelebration role={role.key} />;
 
   if (config === null) return null;
 

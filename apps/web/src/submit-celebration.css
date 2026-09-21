@@ -1,0 +1,159 @@
+/* 交完申请之后那一下 —— 四个身份四种回执。
+   时长由 CELEBRATE_MS 控制，这里只管样子。 */
+
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+  background: rgba(255, 253, 248, 0.94);
+  backdrop-filter: blur(3px);
+}
+
+.celebrate-emoji { font-size: 54px; line-height: 1; }
+.celebrate-title { margin: 0; font-size: 22px; font-weight: 700; }
+.celebrate-text { margin: 0; font-size: 14px; line-height: 1.8; max-width: 22em; }
+
+/* ---------- 好兄弟：一句话，四平八稳，没有任何花活 ---------- */
+.celebrate-brother .celebrate-title {
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  animation: calm-in var(--dur-2) linear both;
+}
+
+@keyframes calm-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- 好姐妹：一道光扫过 ---------- */
+.celebrate-sister .celebrate-emoji {
+  color: #c2809c;
+  animation: twinkle 0.9s ease-out both;
+}
+
+.celebrate-sister .celebrate-title { color: #b8678b; animation: rise-soft 0.6s ease-out 0.1s both; }
+.celebrate-sister .celebrate-text { color: #977f8b; animation: rise-soft 0.6s ease-out 0.28s both; }
+
+.celebrate-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 46%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.9) 42%,
+    rgba(240, 200, 220, 0.55) 55%,
+    transparent
+  );
+  animation: sweep-across 0.9s cubic-bezier(0.3, 0, 0.4, 1) both;
+}
+
+@keyframes sweep-across {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(240%); }
+}
+
+@keyframes twinkle {
+  0% { opacity: 0; transform: scale(0.4) rotate(-30deg); }
+  60% { opacity: 1; transform: scale(1.25) rotate(6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes rise-soft {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 好宝宝：撒花 + 弹跳 ---------- */
+.celebrate-baby .celebrate-emoji {
+  animation: happy-bounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes happy-bounce {
+  0% { opacity: 0; transform: scale(0.3) translateY(20px); }
+  55% { opacity: 1; transform: scale(1.4) translateY(-14px); }
+  78% { transform: scale(0.94) translateY(2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.celebrate-baby .celebrate-title { color: #e08a3c; animation: happy-bounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.18s both; }
+.celebrate-baby .celebrate-text { color: #907f6b; animation: rise-soft 0.6s ease-out 0.42s both; }
+
+.confetti { position: absolute; inset: 0; overflow: hidden; }
+
+.confetti-bit {
+  position: absolute;
+  top: -6%;
+  width: 9px;
+  height: 13px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: confetti-fall 1.5s cubic-bezier(0.3, 0.6, 0.5, 1) both;
+}
+
+/* 八种颜色、八条轨道，错开落下 —— 撒一把就是要有疏有密 */
+.confetti-bit-0 { left: 6%; background: #ffb3c7; animation-delay: 0.02s; }
+.confetti-bit-1 { left: 18%; background: #ffd59e; animation-delay: 0.14s; }
+.confetti-bit-2 { left: 31%; background: #b8e0c8; animation-delay: 0.06s; }
+.confetti-bit-3 { left: 44%; background: #c9b6f0; animation-delay: 0.2s; }
+.confetti-bit-4 { left: 57%; background: #ffc9a3; animation-delay: 0.1s; }
+.confetti-bit-5 { left: 69%; background: #a8d8f0; animation-delay: 0.24s; }
+.confetti-bit-6 { left: 81%; background: #ffd0e0; animation-delay: 0.04s; }
+.confetti-bit-7 { left: 92%; background: #ffe6a8; animation-delay: 0.18s; }
+
+@keyframes confetti-fall {
+  0% { opacity: 0; transform: translateY(0) rotate(0); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(96vh) rotate(620deg); }
+}
+
+/* ---------- DAD&MUM：一个勾，一句公文 ---------- */
+.celebrate-dadmam .celebrate-check {
+  font-size: 46px;
+  line-height: 1;
+  color: #b3121b;
+  border: 3px solid #b3121b;
+  border-radius: 50%;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: stamp-in 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes stamp-in {
+  0% { opacity: 0; transform: scale(1.6); }
+  60% { opacity: 1; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.celebrate-dadmam .celebrate-title {
+  letter-spacing: 0.14em;
+  color: #2b2b2b;
+  animation: rise-soft 0.4s ease-out 0.22s both;
+}
+
+.celebrate-dadmam .celebrate-text {
+  color: #6f6f6f;
+  letter-spacing: 0.06em;
+  animation: rise-soft 0.4s ease-out 0.34s both;
+}
+
+/* ---------- 减少动效：留住内容，去掉过程 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .celebrate *,
+  .celebrate-sweep {
+    animation-duration: 0.2s !important;
+    animation-delay: 0s !important;
+  }
+  .confetti { display: none; }
+}

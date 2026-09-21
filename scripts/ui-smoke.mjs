@@ -519,21 +519,25 @@ async function main() {
   check('躲够之后再点就认输', decided, decided ? '' : '没有出现「由你定」');
   await shot('ui-06b-place-decided');
 
-  await evaluate(clickByText('下一步'));
-  await waitFor('document.querySelector(".wizard-body input")', '见面要求 / 留言页');
+  /*
+    [7] **好兄弟少一步** —— 它没有「见面要求 + 留言」那一页。
 
-  console.log('[7] 见面要求 + 留言（合成一页了）');
-  await evaluate(typeInto('.wizard-body input', '带一朵鲜花'));
-  await evaluate(typeInto('.textarea', '别点太辣的'));
-  await shot('ui-07-meeting');
+    这是「交互逻辑按身份不同」的地方，不是漏了：
+    兄弟的人设是「别磨叽」，那就别让人写小作文。
+    （姐妹 / 宝宝 / 家人那边仍然是完整六步，那三个身份需要把话说清楚。）
+
+    所以这里断言的是**跳过** —— 点完「下一步」应该直接落到确认页。
+  */
   await evaluate(clickByText('下一步'));
   await waitFor('document.querySelector(".receipt-list")', '确认页');
+  check(
+    '好兄弟跳过了「见面要求 + 留言」那一页',
+    (await evaluate("Boolean(document.querySelector('.textarea'))")) === false,
+    '还出现了留言框',
+  );
+  console.log('[7] 好兄弟少一步：直接到确认页');
 
   console.log('[9] 确认');
-  const reviewHasMeeting = await evaluate(
-    "document.querySelector('.receipt-list').innerText.includes('带一朵鲜花')",
-  );
-  check('确认页里能看到见面要求', reviewHasMeeting);
   await shot('ui-07-review');
   await evaluate(clickByText('提交申请'));
   await waitFor('document.querySelector(".receipt")', '回执');
