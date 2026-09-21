@@ -606,7 +606,8 @@ const AT_NO_BUTTON: ReadonlySet<Act> = new Set<Act>(['walk', 'reach', 'grab', 'c
 function moodFor(act: Act): PuppetMood {
   switch (act) {
     case 'walk':
-      return 'walk';
+      // **跑**过去抢 —— 走太温吞了，和「一把抓走」这个动作不搭
+      return 'run';
     case 'reach':
     case 'grab':
       return 'reach';
@@ -654,6 +655,13 @@ function Answer({
 
   useEffect(() => clearTimers, []);
 
+  /*
+    ⚠️ 这条只在「婉拒按钮还在」时才有意义。
+    一旦它被扔掉、位置收掉，剩下的按钮一定是居中的 ——
+    那时偏移就该是 0，不要去量。
+    **能用结构保证的事，不要靠测量**：舞台宽度本身会随按钮收缩而变，
+    量的时机偏一点就对不上（实测差 95px）。
+  */
   const placeAt = useCallback((which: 'no' | 'yes') => {
     const stage = stageRef.current;
     const target = which === 'no' ? noRef.current : yesRef.current;
@@ -665,8 +673,20 @@ function Answer({
 
   useEffect(() => {
     if (act === 'idle') return;
+    /*
+      ⚠️ 这里必须**先看 gone**，两个 effect 才会说同一句话。
+
+      踩过的坑：我另写了一个"按钮收完之后归零"的 effect，
+      但这条 effect 会在 act 变化时（sit → point）重新算一遍偏移，
+      **把归零覆盖回去** —— 实测小人中心 310、按钮中心 215，差 95px。
+      两个 effect 抢同一个状态，谁后跑谁说了算，这种 bug 最难查。
+    */
+    if (gone) {
+      setPupX(0);
+      return;
+    }
     placeAt(AT_NO_BUTTON.has(act) ? 'no' : 'yes');
-  }, [act, placeAt]);
+  }, [act, gone, placeAt]);
 
   const play = (): void => {
     clearTimers();
@@ -679,6 +699,13 @@ function Answer({
   if (invite.status !== 'pending') {
     return (
       <div className="invite-answered">
+        {/*
+          答应之后它得有个反应 —— 光换一行字太冷了。
+          「不许拒绝」那条线上尤其需要：折腾了那么久把人抢过来，总得高兴一下。
+        */}
+        <div className="answered-puppet">
+          <Puppet gender={hostGender} mood="cheer" />
+        </div>
         <span className="invite-answered-emoji">
           {invite.status === 'accepted' ? '🎉' : '😔'}
         </span>

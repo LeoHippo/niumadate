@@ -490,6 +490,17 @@
   color: var(--ink-soft);
   background: transparent;
   border-color: var(--paper-edge);
+  /*
+    max-width（不是 width）—— 这样它被扔掉时能从"自然宽度"平滑收到 0。
+    width: auto 是收不动的，只能跳。
+  */
+  max-width: 220px;
+  transition:
+    max-width var(--dur-3) var(--ease),
+    padding var(--dur-3) var(--ease),
+    margin var(--dur-3) var(--ease),
+    transform var(--dur-2) var(--ease),
+    opacity var(--dur-2) var(--ease);
 }
 
 .invite-btn-no:hover { background: rgba(0, 0, 0, 0.045); }
@@ -520,6 +531,21 @@
   opacity: 0;
   transform: scale(0.1) translateY(-200px);
   pointer-events: none;
+  /*
+    **把位置也一起收掉** —— 这是"拉到正中间"的关键。
+
+    之前只写了 opacity: 0，按钮**仍然占着宽度**，
+    于是「好，我去」永远歪在右边，永远到不了正中间。
+    现在宽度、内边距、外边距一起收 —— 扔完之后剩下的那个按钮
+    会**先滑到正中间，再放大**。用户要的正是这个顺序。
+  */
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-width: 0;
+  overflow: hidden;
 }
 
 @keyframes btn-thrown {
@@ -967,3 +993,125 @@
 
 /* 女版的腮红更明显一点 */
 .puppet-female .puppet-blush { opacity: 0.6; }
+
+
+/* ==========================================================================
+   鏇村濮挎€?   --------------------------------------------------------------------------
+
+/* ==========================================================================
+   更多姿态
+   --------------------------------------------------------------------------
+   用户的原话：「所有的动作太生硬了，你设计几个不同的姿态，
+   小牛马的就比如有站立、跑动、坐着还有什么的。」
+
+   之前只有 站 / 走 / 坐 三种，而且「走」就是原地颠两下 ——
+   所以看起来"只有一个动画"。这里补齐：
+     · 站着的时候**会呼吸**（不然是张图）
+     · **跑** 是前倾的、步子大、带一点土
+     · **跳** 是高兴的时候用的
+   ========================================================================== */
+
+/* ---------- 站着：轻轻呼吸 ----------
+   幅度很小 —— 大了就变成"喘"。只要让人感觉它是活的。 */
+.puppet-idle .puppet-body,
+.puppet-idle .puppet-head-group {
+  animation: pup-breathe 3.6s ease-in-out infinite;
+  transform-origin: 80px 150px;
+}
+
+@keyframes pup-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1.5px) scale(1.012, 0.994); }
+}
+
+/* 站着的时候也眨眨眼 —— 4.8 秒一次，不抢戏 */
+.puppet-idle .puppet-eyes-open { animation: pup-blink 4.8s ease-in-out infinite; }
+
+@keyframes pup-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* ---------- 跑 ----------
+   和走的区别不只是快：**身子要前倾**，不然看着还是走。 */
+.puppet-run {
+  animation: puppet-run-in 0.85s cubic-bezier(0.25, 0.9, 0.4, 1) both;
+}
+
+@keyframes puppet-run-in {
+  0% { opacity: 0; transform: translateX(340px) rotate(9deg) scale(0.96); }
+  55% { opacity: 1; }
+  80% { transform: translateX(-14px) rotate(-6deg) scale(1.02); }
+  100% { opacity: 1; transform: translateX(0) rotate(-3deg) scale(1); }
+}
+
+/* 跑的时候整个身子往前压 */
+.puppet-run .puppet-head-group { animation: run-lean 0.22s ease-in-out infinite alternate; }
+.puppet-run .puppet-body { animation: run-body 0.22s ease-in-out infinite alternate; }
+
+@keyframes run-lean {
+  from { transform: translate(3px, 1px) rotate(4deg); }
+  to { transform: translate(5px, -2px) rotate(6deg); }
+}
+
+@keyframes run-body {
+  from { transform: translateY(0) rotate(5deg); }
+  to { transform: translateY(-4px) rotate(7deg); }
+}
+
+/* 步子比走大得多，频率也快 */
+.puppet-run .puppet-leg-l { animation: run-step-a 0.22s ease-in-out infinite alternate; }
+.puppet-run .puppet-leg-r { animation: run-step-b 0.22s ease-in-out infinite alternate; }
+.puppet-run .puppet-arm-back { animation: run-swing-a 0.22s ease-in-out infinite alternate; }
+.puppet-run .puppet-arm-front { animation: run-swing-b 0.22s ease-in-out infinite alternate; }
+
+@keyframes run-step-a { from { transform: rotate(-30deg); } to { transform: rotate(26deg); } }
+@keyframes run-step-b { from { transform: rotate(26deg); } to { transform: rotate(-30deg); } }
+@keyframes run-swing-a { from { transform: rotate(34deg); } to { transform: rotate(-30deg); } }
+@keyframes run-swing-b { from { transform: rotate(-30deg); } to { transform: rotate(34deg); } }
+
+/* 跑起来带一点土 —— 两小团，飘一下就散 */
+.puppet-run::after,
+.puppet-run::before {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  width: 16px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(150, 130, 100, 0.22);
+  animation: run-dust 0.5s ease-out infinite;
+  pointer-events: none;
+}
+
+.puppet-run::before { left: 18px; animation-delay: 0.12s; }
+.puppet-run::after { left: 34px; }
+
+@keyframes run-dust {
+  0% { opacity: 0.5; transform: translateX(0) scale(0.5); }
+  100% { opacity: 0; transform: translateX(-22px) scale(1.4); }
+}
+
+/* ---------- 跳（高兴的时候） ---------- */
+.puppet-cheer {
+  animation: pup-cheer 0.9s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes pup-cheer {
+  0% { transform: translateY(0) scale(1); }
+  22% { transform: translateY(6px) scale(1.06, 0.92); }
+  55% { transform: translateY(-42px) scale(0.96, 1.06); }
+  78% { transform: translateY(0) scale(1.05, 0.94); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.puppet-cheer .puppet-arm-front,
+.puppet-cheer .puppet-arm-back { animation: cheer-arms 0.9s ease-in-out both; }
+
+@keyframes cheer-arms {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-58deg); }
+}
+
+.puppet-cheer .puppet-eyes-open { display: none; }
+.puppet-cheer .puppet-eyes-happy { display: block; }

@@ -106,14 +106,14 @@
 .id-card[data-theme='baby'] { border-radius: 26px; }
 .id-card[data-theme='dadmam'] { border-radius: 4px; }
 
-/* 瀹濆疂閭ｅ紶鍐嶅姞涓€鍦堟煍鍜岀殑鍏夋檿锛屾氮婕劅浠?褰?鍜?鍏?涓€璧风粰 */
+/* 宝宝那张再加一圈柔和的光晕 —— 浪漫感从「形」和「光」一起给 */
 .id-card[data-theme='baby'] {
   box-shadow:
     0 0 0 1px #ffe4b8,
     0 10px 26px rgba(255, 190, 140, 0.28);
 }
 
-/* 鍏勫紵閭ｅ紶鍙嶈繃鏉ワ細纭竟銆佸共鑴嗙殑鎶曞奖锛屾病鏈変竴鐐规煍鍏?*/
+/* 兄弟那张反过来：硬边、干脆的投影，没有一点柔光 */
 .id-card[data-theme='brother'] {
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.06);
 }
@@ -126,7 +126,7 @@
 .id-card[data-theme='baby'] { border-radius: 26px !important; }
 .id-card[data-theme='dadmam'] { border-radius: 8px !important; }
 
-/* 鍏勫紵锛氬共鑴嗙殑鍋忕Щ鎶曞奖锛堢‖杈癸級锛岄厤鐩磋 */
+/* 兄弟那张反过来：硬边、干脆的投影，没有一点柔光 */
 .id-card[data-theme='brother'] {
   box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.07) !important;
 }

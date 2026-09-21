@@ -20,8 +20,10 @@
  */
 
 export type PuppetMood =
-  | 'idle'
-  | 'walk'
+  | 'idle' // 站着不动（会轻轻呼吸）
+  | 'walk' // 走
+  | 'run' // **跑** —— 身子前倾、步子更大、还带一点土
+  | 'cheer' // 高兴地跳一下
   | 'reach'
   | 'grab'
   | 'throw'

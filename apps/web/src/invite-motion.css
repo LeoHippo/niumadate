@@ -203,28 +203,55 @@
   100% { transform: translateY(-30px) rotate(-8deg); }
 }
 
-/* 扔出去：走一条抛物线，而且**转得很疯**——手里那团纸就该这样 */
+/*
+  扔出去：**斜抛 45°，而且飞得高**。
+
+  第一版是「往右下方一丢」（translate(380,180)）—— 没高度、贴着脸飞过去，
+  看起来像"放下"而不是"扔出去"。用户的原话就是「扔得不够高不够显眼」。
+  现在按真的斜抛来：先往上起，45° 斜着出去，**过顶再落**，最后出屏。
+  转数也加了很多 —— 手里那团纸就该转得疯。
+*/
 .invite-btn-thrown {
-  animation: btn-hurl 1.05s cubic-bezier(0.25, -0.3, 0.7, 1.4) both;
+  animation: btn-hurl 1.25s cubic-bezier(0.22, -0.25, 0.62, 1.35) both;
 }
 
 @keyframes btn-hurl {
   0% { transform: translate(0, -30px) rotate(-8deg) scale(0.5); opacity: 0.92; }
-  18% { transform: translate(-22px, -92px) rotate(120deg) scale(0.46); opacity: 1; }
-  44% { transform: translate(90px, -70px) rotate(340deg) scale(0.4); opacity: 0.95; }
-  72% { transform: translate(240px, 30px) rotate(560deg) scale(0.3); opacity: 0.7; }
-  100% { transform: translate(380px, 180px) rotate(820deg) scale(0.14); opacity: 0; }
+
+  /* 起手：先往上够一下（这是"使劲"的感觉，少了它就像被吸走） */
+  10% { transform: translate(-26px, -128px) rotate(70deg) scale(0.48); opacity: 1; }
+
+  /* 45° 斜上：一路往右上，冲到最高 */
+  32% { transform: translate(140px, -300px) rotate(280deg) scale(0.44); opacity: 1; }
+
+  /* 过顶：到最高点了，还在横着飞 */
+  52% { transform: translate(330px, -350px) rotate(480deg) scale(0.38); opacity: 1; }
+
+  /* 下落：抛物线该下来了，但继续往右 */
+  78% { transform: translate(540px, -140px) rotate(720deg) scale(0.28); opacity: 0.9; }
+
+  /* 出屏：从右上角飞走 */
+  100% { transform: translate(760px, 260px) rotate(980deg) scale(0.1); opacity: 0; }
 }
 
-/* 接受按钮被拉大：不是"变大"，是"被拽着弹大" */
+/*
+  接受按钮被拉大。
+
+  **顺序很重要**：先让另一个按钮把位置让出来（它已经滑到正中间了），
+  然后才是"被拽着弹大" —— 有预备（先被拉长一点）、有过冲、再回稳。
+  不是简单地"变大"：变形比放大更像有人在拽它。
+*/
 .invite-btn-yes[style*='scale'] {
-  animation: btn-drag-grow 0.62s cubic-bezier(0.3, 1.6, 0.45, 1) both;
+  animation: btn-drag-grow 0.72s cubic-bezier(0.3, 1.6, 0.45, 1) both;
 }
 
 @keyframes btn-drag-grow {
   0% { transform: scale(1); }
-  38% { transform: scale(1.34, 1.22); }
-  66% { transform: scale(1.2, 1.3); }
+  /* 先被拉长（有人往两边拽的感觉） */
+  30% { transform: scale(1.42, 1.16); }
+  /* 过冲：宽度回一点、高度弹出来 */
+  58% { transform: scale(1.18, 1.36); }
+  80% { transform: scale(1.32, 1.24); }
   100% { transform: scale(1.28); }
 }
 

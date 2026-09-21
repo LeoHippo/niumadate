@@ -143,3 +143,13 @@
   .icard-strong { font-size: 17px; }
   .icard-title { font-size: 18px; }
 }
+
+
+/* 答应之后跳一下的那个小人 */
+.answered-puppet {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.answered-puppet .puppet { width: 108px; height: 128px; }
