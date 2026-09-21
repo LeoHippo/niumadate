@@ -108,3 +108,69 @@
     animation-delay: 0ms !important;
   }
 }
+
+
+/* ==========================================================================
+   转场节奏：给足人类的反应时间
+   --------------------------------------------------------------------------
+   用户：「页面切换的动作太快了，那个牛马都看不见。动画速度我的建议是 0.6 秒左右，
+   反正就是要给足人类的反应时间。」
+
+   对。之前卡/家人是 460~470ms、姐妹 520、宝宝 620 —— 前两个确实太急，
+   小牛马刚蹦出来就没了。
+
+   现在：
+     · 卡片本身的进出 —— **600ms**（用户点名的数）
+     · **小人拖屏那一段 —— 1100ms**，比卡片长。
+       因为它是"角色表演"，不是"界面反馈"：
+       蹦进来（~350ms）→ 抓住（~300ms）→ 拖走（~450ms），得一步一步看得清。
+       表演和反馈的时间尺度本来就不一样。
+   ========================================================================== */
+
+.card-leaving-pull,
+.card-leaving-push,
+.card-leaving-fly,
+.card-entering-pull,
+.card-entering-push,
+.card-entering-fly {
+  animation-duration: 600ms !important;
+}
+
+.puller {
+  animation-duration: 1100ms !important;
+}
+
+/* 身份之间的相对快慢保留，但都在"看得清"之上 */
+.invite-page[data-theme='brother'] .card-entering-pull,
+.invite-page[data-theme='brother'] .card-entering-push,
+.invite-page[data-theme='brother'] .card-entering-fly,
+.invite-page[data-theme='brother'] .card-leaving-pull,
+.invite-page[data-theme='brother'] .card-leaving-push,
+.invite-page[data-theme='brother'] .card-leaving-fly { animation-duration: 600ms !important; }
+
+.invite-page[data-theme='dadmam'] .card-entering-pull,
+.invite-page[data-theme='dadmam'] .card-entering-push,
+.invite-page[data-theme='dadmam'] .card-entering-fly,
+.invite-page[data-theme='dadmam'] .card-leaving-pull,
+.invite-page[data-theme='dadmam'] .card-leaving-push,
+.invite-page[data-theme='dadmam'] .card-leaving-fly { animation-duration: 640ms !important; }
+
+.invite-page[data-theme='sister'] .card-entering-pull,
+.invite-page[data-theme='sister'] .card-entering-push,
+.invite-page[data-theme='sister'] .card-entering-fly,
+.invite-page[data-theme='sister'] .card-leaving-pull,
+.invite-page[data-theme='sister'] .card-leaving-push,
+.invite-page[data-theme='sister'] .card-leaving-fly { animation-duration: 700ms !important; }
+
+.invite-page[data-theme='baby'] .card-entering-pull,
+.invite-page[data-theme='baby'] .card-entering-push,
+.invite-page[data-theme='baby'] .card-entering-fly,
+.invite-page[data-theme='baby'] .card-leaving-pull,
+.invite-page[data-theme='baby'] .card-leaving-push,
+.invite-page[data-theme='baby'] .card-leaving-fly { animation-duration: 760ms !important; }
+
+/* 过渡纱也跟着放慢，不然盖得太急 */
+.screen-veil-cover { animation-duration: 600ms !important; }
+.screen-veil-reveal { animation-duration: 700ms !important; }
+
+/* 「下一秒」这种逻辑用的是 MOVE_MS，也要跟上 —— 由 JS 常量控制，见 Invite.tsx */

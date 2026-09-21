@@ -137,7 +137,19 @@ const ANSWER_WORDS: Record<RoleKey, { yes: string; no: string }> = {
 const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: 'press' };
 
 /** 过渡要放多久。太短看不见，太长让人等。 */
-const MOVE_MS = 640;
+/*
+  换屏的时点。
+
+  ⚠️ 这个数必须 **≥ CSS 里 .puller 的动画时长**（现在是 1100ms），
+  否则小人还没把屏拖走，屏幕就已经换掉了 —— 看起来就是"闪了一下"。
+  用户的原话：「页面切换的动作太快了，那个牛马都看不见。
+  动画速度我的建议是 0.6 秒左右，反正就是要给足人类的反应时间。」
+
+  所以：卡片本身 600ms（用户点名的数），
+       小人拖屏 1100ms（表演比反馈慢，得一步一步看得清）。
+  JS 这个时点跟着最长的那一段走。
+*/
+const MOVE_MS = 1100;
 
 export function InvitePage() {
   const config = useConfig();

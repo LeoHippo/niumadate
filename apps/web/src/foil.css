@@ -1,0 +1,182 @@
+/* ==========================================================================
+   鎏金：慢、无缝、而且**每一块都有金**
+   --------------------------------------------------------------------------
+   用户两条反馈，我把原因都找到了：
+
+   一、「会出现某一块没有鎏金的效果」
+       好兄弟那套的 --foil 是**银灰**渐变（#8a8a8a / #6f6f6f / #e6e6e6）。
+       灰渐变落在米色纸上，暗的那几段看起来就是"普通灰字" —— 那块就没有鎏金。
+       要鎏金就**整体是金**，明暗只在金的范围内变化，不能跑到灰里去。
+
+   二、「鎏金应该很慢，至少慢一倍」
+       原来是 5.4 秒扫一次。
+       —— 掠光这种事本来就该慢：快了像在闪，慢了才像"光从纸上走过"。
+
+   技术上的关键：**要无缝，移动距离必须是周期的整数倍**。
+   做法：background-size 300%，渐变里排**三个一模一样的循环**（周期 33.33%），
+        background-position 从 0% 走到 100% —— 正好走完 6 个周期，首尾接得上。
+   ========================================================================== */
+
+/* 一个"金"的循环单元，重复三遍 —— 这样任何时刻窗口里都有金，且永远接得上 */
+.invite-page {
+  --foil: linear-gradient(
+    100deg,
+    #a9762c 0%, #f7e3b8 8.33%, #c9973b 16.66%,
+    #a9762c 33.33%, #f7e3b8 41.66%, #c9973b 50%,
+    #a9762c 66.66%, #f7e3b8 74.99%, #c9973b 83.33%,
+    #a9762c 100%
+  );
+}
+
+/* 每套只是把"金"换成自己色系里的"贵重色"，但**都是亮暗同一个色系** */
+.invite-page[data-theme='brother'] {
+  /* 牛皮纸那套：深红金 —— 原来是银灰，那是"某块没鎏金"的元凶 */
+  --foil: linear-gradient(
+    100deg,
+    #7a4a1c 0%, #e8c88a 8.33%, #9c6a2c 16.66%,
+    #7a4a1c 33.33%, #e8c88a 41.66%, #9c6a2c 50%,
+    #7a4a1c 66.66%, #e8c88a 74.99%, #9c6a2c 83.33%,
+    #7a4a1c 100%
+  );
+}
+
+.invite-page[data-theme='sister'] {
+  --foil: linear-gradient(
+    100deg,
+    #a9708c 0%, #ffe3ee 8.33%, #c98aa8 16.66%,
+    #a9708c 33.33%, #ffe3ee 41.66%, #c98aa8 50%,
+    #a9708c 66.66%, #ffe3ee 74.99%, #c98aa8 83.33%,
+    #a9708c 100%
+  );
+}
+
+.invite-page[data-theme='baby'] {
+  --foil: linear-gradient(
+    100deg,
+    #c47a1e 0%, #ffe9b0 8.33%, #e0a03a 16.66%,
+    #c47a1e 33.33%, #ffe9b0 41.66%, #e0a03a 50%,
+    #c47a1e 66.66%, #ffe9b0 74.99%, #e0a03a 83.33%,
+    #c47a1e 100%
+  );
+}
+
+.invite-page[data-theme='dadmam'] {
+  --foil: linear-gradient(
+    100deg,
+    #8a6a3a 0%, #ddd0b4 8.33%, #a58452 16.66%,
+    #8a6a3a 33.33%, #ddd0b4 41.66%, #a58452 50%,
+    #8a6a3a 66.66%, #ddd0b4 74.99%, #a58452 83.33%,
+    #8a6a3a 100%
+  );
+}
+
+/* ---------- 慢、无缝地走 ---------- */
+
+.invite-page .screen-question,
+.invite-page .invite-title,
+.invite-page .screen-big,
+.invite-page .icard-strong {
+  background-image: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* 300% + 三个循环 = 走完正好 6 个周期，首尾接得上，永远不会"缺一块" */
+  background-size: 300% 100%;
+  background-repeat: repeat;
+  /*
+    12 秒走一轮 —— 原来 5.4 秒还只扫一次就停，现在改成**永远慢慢走**。
+    因为图案是周期性的、移动是周期整数倍，所以接缝处看不出任何跳变：
+    它看起来就是"纸上的光在缓缓移动"，没有起点也没有终点。
+  */
+  animation: foil-drift 12s linear infinite;
+}
+
+@keyframes foil-drift {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+
+/* 兄弟那套再慢一点 —— 它本来就更沉 */
+.invite-page[data-theme='brother'] .screen-question,
+.invite-page[data-theme='brother'] .invite-title,
+.invite-page[data-theme='brother'] .screen-big {
+  animation-duration: 14s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invite-page .screen-question,
+  .invite-page .invite-title,
+  .invite-page .screen-big,
+  .invite-page .icard-strong {
+    animation: none !important;
+    background-position: 0 0;
+  }
+}
+
+
+/* ==========================================================================
+   两处修正
+   ========================================================================== */
+
+/*
+  ① 时长必须加 !important。
+
+  motion-floor.css 里有一条
+    .screen-inner > * { animation-duration: 420ms !important }
+  它是为了让"逐句浮现"有个看得清的地板 —— 但它**无差别地**盖住了
+  所有子元素的动画时长，包括鎏金。结果鎏金被钉成 420ms，飞快地循环，
+  读起来就是"一直在闪"（实测：animationDuration 读出来是 0.42s，不是 12s）。
+
+  地板是给"入场"用的，不是给"常驻氛围"用的。所以这里用 !important 顶回去。
+*/
+.invite-page .screen-question,
+.invite-page .invite-title,
+.invite-page .screen-big,
+.invite-page .icard-strong {
+  animation-duration: 12s !important;
+  animation-iteration-count: infinite !important;
+  animation-timing-function: linear !important;
+}
+
+.invite-page[data-theme='brother'] .screen-question,
+.invite-page[data-theme='brother'] .invite-title,
+.invite-page[data-theme='brother'] .screen-big {
+  animation-duration: 14s !important;
+}
+
+/*
+  ② 金色要够亮。
+
+  第二版给的深色档太深（#7a4a1c），截图里读出来是"暗褐"，不是金。
+  鎏金的"金"靠的是**亮部足够亮、暗部不要发黑**，
+  暗部一黑就变成"一块没鎏金"——正是用户第一条反馈说的那个现象。
+*/
+.invite-page[data-theme='brother'] {
+  --foil: linear-gradient(
+    100deg,
+    #c08a34 0%, #ffeec2 8.33%, #d8a844 16.66%,
+    #c08a34 33.33%, #ffeec2 41.66%, #d8a844 50%,
+    #c08a34 66.66%, #ffeec2 74.99%, #d8a844 83.33%,
+    #c08a34 100%
+  );
+}
+
+.invite-page[data-theme='baby'] {
+  --foil: linear-gradient(
+    100deg,
+    #d99226 0%, #fff2c6 8.33%, #eab04a 16.66%,
+    #d99226 33.33%, #fff2c6 41.66%, #eab04a 50%,
+    #d99226 66.66%, #fff2c6 74.99%, #eab04a 83.33%,
+    #d99226 100%
+  );
+}
+
+.invite-page[data-theme='dadmam'] {
+  --foil: linear-gradient(
+    100deg,
+    #b08a4e 0%, #f2e6cc 8.33%, #c6a468 16.66%,
+    #b08a4e 33.33%, #f2e6cc 41.66%, #c6a468 50%,
+    #b08a4e 66.66%, #f2e6cc 74.99%, #c6a468 83.33%,
+    #b08a4e 100%
+  );
+}
