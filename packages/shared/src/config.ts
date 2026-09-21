@@ -130,6 +130,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     hostGender: 'male',
     defaultNoDecline: false,
     publicBase: '',
+    hostName: '牛马',
   },
 };
 
@@ -300,6 +301,8 @@ function normalizeInvite(raw: unknown): InviteConfig {
     defaultNoDecline: asBoolean(input.defaultNoDecline, DEFAULT_CONFIG.invite.defaultNoDecline),
     // 去掉结尾的斜杠，拼链接时不会出现 //i/xxx
     publicBase: asString(input.publicBase, DEFAULT_CONFIG.invite.publicBase).replace(/\/+$/, ''),
+    // 留空就退回「牛马」—— 请柬上不能没有邀请人
+    hostName: asString(input.hostName, DEFAULT_CONFIG.invite.hostName).trim() || DEFAULT_CONFIG.invite.hostName,
   };
 }
 

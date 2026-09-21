@@ -56,3 +56,15 @@
   --puppet-body-lo: #d6bd93;
   --puppet-nose: #e8b9a8;
 }
+
+
+/* 「邀请人」输入框：和小人选择器同一块，放在它上面 */
+.host-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.host-name-field .invite-input { max-width: 260px; }
+

@@ -79,6 +79,8 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
    * 本地存一份，点完立刻反映，也顺便当乐观更新。
    */
   const [gender, setGender] = useState<'male' | 'female'>('male');
+  /** 邀请人写谁 —— 和性别一样，本地存一份，保存后立刻反映。 */
+  const [hostName, setHostName] = useState('牛马');
 
   const load = useCallback(async () => {
     try {
@@ -101,6 +103,10 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
   useEffect(() => {
     setGender(config?.invite.hostGender ?? 'male');
   }, [config?.invite.hostGender]);
+
+  useEffect(() => {
+    setHostName(config?.invite.hostName ?? '牛马');
+  }, [config?.invite.hostName]);
 
   /** 一键提示，两秒后自己消失。 */
   const say = (text: string): void => {
@@ -215,6 +221,34 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
             它代表你本人，所以全局一个 —— 四套材质只是给它换装
           </span>
         </div>
+
+        {/*
+          「邀请人」—— 请柬上「人物」那一栏。
+          不填就用「牛马」（站点人设名）；填了就是「张三 敬邀」。
+          一张请柬不写邀请人是谁，收到的人会不知道在跟谁打交道。
+        */}
+        <label className="host-name-field">
+          <span className="invite-field-label">
+            邀请人写谁（留空就是「牛马」）—— 这是请柬上「邀请」那一栏
+          </span>
+          <input
+            className="invite-input"
+            value={hostName}
+            placeholder="牛马"
+            maxLength={20}
+            onChange={(event) => setHostName(event.target.value)}
+            onBlur={() => {
+              const next = hostName.trim() === '' ? '牛马' : hostName.trim();
+              setHostName(next);
+              if (config !== null && next !== config.invite.hostName) {
+                void api.admin
+                  .saveConfig({ ...config, invite: { ...config.invite, hostName: next } })
+                  .then(() => say('邀请人改好了 ✓'))
+                  .catch((cause: unknown) => setError(describeError(cause)));
+              }
+            }}
+          />
+        </label>
 
         <div className="host-pick-row">
           {(['male', 'female'] as const).map((option) => (

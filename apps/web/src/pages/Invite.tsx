@@ -13,6 +13,7 @@ import '../invite-flow.css';
 import '../invite-motion.css';
 import '../all-cards.css';
 import '../invite-wow.css';
+import '../invite-card.css';
 import '../invite-shape.css';
 
 /**
@@ -35,9 +36,46 @@ import '../invite-shape.css';
  *   好宝宝 奶油纸+云+糖果色     / DAD&MUM 红头文件+钢印
  */
 
-type Screen = 'seal' | 'who' | 'when' | 'where' | 'what' | 'word' | 'answer' | 'chat';
+type Screen =
+  | 'seal'
+  | 'who'
+  | 'when'
+  | 'where'
+  | 'what'
+  | 'word'
+  /** 收拢成一张正式的请柬：时间 / 地点 / 事由 / 邀请人，一眼看全。 */
+  | 'card'
+  | 'answer'
+  | 'chat';
 
-const SCREENS: readonly Screen[] = ['seal', 'who', 'when', 'where', 'what', 'word', 'answer', 'chat'];
+/*
+  屏的顺序是**故意的**：
+    先把悬念一页页铺开（谁请你 → 什么时候 → 在哪 → 干嘛 → 几句话），
+    **最后收拢成一张能看全、能存下来的请柬**，再问去不去。
+  这就是收到纸质请柬的过程 —— 拆信封、一张张看、最后拿到那张卡片。
+  「信息量明确」和「有悬念」不矛盾，顺序对了就都有。
+*/
+const SCREENS: readonly Screen[] = [
+  'seal',
+  'who',
+  'when',
+  'where',
+  'what',
+  'word',
+  'card',
+  'answer',
+  'chat',
+];
+
+/** 请柬上要写星期几 —— 不然收到的人不知道要不要请假。 */
+const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+/** 把 `2026-09-20` 写成请柬上的样子：2026 年 9 月 20 日（周日）。 */
+function fullDate(date: string): string {
+  const parsed = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return `${parsed.getFullYear()} 年 ${parsed.getMonth() + 1} 月 ${parsed.getDate()} 日（${WEEKDAYS[parsed.getDay()] ?? ''}）`;
+}
 
 /** 屏与屏之间的三种过渡 —— 轮着来，别每次都一样。 */
 const MOVES = ['pull', 'fly', 'press'] as const;
@@ -196,6 +234,7 @@ export function InvitePage() {
         <LetterAll
           invite={invite}
           roleEmoji={role?.emoji ?? '🐮'}
+          hostName={config.invite.hostName}
           hostGender={config.invite.hostGender}
           messages={data.messages}
           onMessages={(messages) =>
@@ -237,6 +276,7 @@ export function InvitePage() {
                 screen={screen}
                 invite={invite}
                 roleEmoji={role?.emoji ?? '🐮'}
+                hostName={config.invite.hostName}
                 hostGender={config.invite.hostGender}
                 messages={data.messages}
                 onRespond={(status) => {
@@ -398,6 +438,7 @@ function ScreenBody({
   screen,
   invite,
   roleEmoji,
+  hostName,
   hostGender,
   messages,
   onRespond,
@@ -406,6 +447,8 @@ function ScreenBody({
   screen: Screen;
   invite: Invite;
   roleEmoji: string;
+  /** 请柬上「邀请」那一栏写谁。 */
+  hostName: string;
   hostGender: 'male' | 'female';
   messages: InviteMessage[];
   onRespond: (status: 'accepted' | 'declined') => void;
@@ -439,7 +482,8 @@ function ScreenBody({
         <>
           <span className="screen-emoji">🗓️</span>
           <p className="screen-kicker">先把日子定下来</p>
-          <p className="screen-big">{invite.date}</p>
+          {/* 带星期 —— 请柬一定写，不然收的人不知道该不该请假 */}
+          <p className="screen-big">{fullDate(invite.date)}</p>
           {invite.timeText !== '' && <p className="screen-hand">{invite.timeText}</p>}
         </>
       );
@@ -470,6 +514,50 @@ function ScreenBody({
           <p className="screen-sign">{invite.signature}</p>
           <p className="screen-kicker">—— {invite.title}</p>
         </>
+      );
+
+    case 'card':
+      /*
+        一张正式的请柬。
+        前面几屏是**吊着看**（一页一件事），这一屏是**收拢** ——
+        时间 / 地点 / 事由 / 邀请人四样齐了，收到的人一眼就知道：
+        什么事、什么时候、在哪儿、谁请的。这是「信息量明确」那一半。
+      */
+      return (
+        <article className="icard">
+          <header className="icard-head">
+            <span className="icard-mark">{roleEmoji}</span>
+            <span className="icard-title">邀 请 函</span>
+            <span className="icard-rule" />
+          </header>
+
+          <dl className="icard-rows">
+            <div className="icard-row">
+              <dt>时间</dt>
+              <dd className="icard-strong">
+                {fullDate(invite.date)}
+                {invite.timeText === '' ? '' : ` ${invite.timeText}`}
+              </dd>
+            </div>
+            <div className="icard-row">
+              <dt>地点</dt>
+              <dd className="icard-strong">{invite.place || '（没写，到时候说）'}</dd>
+            </div>
+            <div className="icard-row">
+              <dt>事由</dt>
+              <dd>{invite.activity || '（没写，去了就知道）'}</dd>
+            </div>
+            <div className="icard-row">
+              <dt>邀请</dt>
+              <dd>{hostName}</dd>
+            </div>
+          </dl>
+
+          <footer className="icard-foot">
+            <span className="icard-foot-text">届时恭候，不见不散</span>
+            <span className="icard-sign">{hostName} 敬邀</span>
+          </footer>
+        </article>
       );
 
     case 'answer':
@@ -770,6 +858,7 @@ function Chat({
 function LetterAll({
   invite,
   roleEmoji,
+  hostName,
   hostGender,
   messages,
   onRespond,
@@ -778,6 +867,7 @@ function LetterAll({
 }: {
   invite: Invite;
   roleEmoji: string;
+  hostName: string;
   hostGender: 'male' | 'female';
   messages: InviteMessage[];
   onRespond: (status: 'accepted' | 'declined') => void;
@@ -785,6 +875,7 @@ function LetterAll({
   onBack: () => void;
 }) {
   /** 前面几屏是纯展示，直接摞起来。 */
+  // 摊开看的时候不含「请柬」那一屏 —— 它是收拢，和上面几张重复
   const plain: Screen[] = ['seal', 'who', 'when', 'where', 'what', 'word'];
 
   return (
@@ -796,6 +887,7 @@ function LetterAll({
               screen={item}
               invite={invite}
               roleEmoji={roleEmoji}
+              hostName={hostName}
               hostGender={hostGender}
               messages={messages}
               onRespond={onRespond}
