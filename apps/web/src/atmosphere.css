@@ -1,0 +1,167 @@
+/* ==========================================================================
+   空气层：飘在背景里的东西
+   --------------------------------------------------------------------------
+   这一层的存在就是为了「惊艳」。
+   在此之前页面是"静态的精美"——材质、形状、排版都对，但**空气是死的**。
+   同类产品（婚礼电子请柬）几乎都用纯 CSS 的飘落物 + 发光来解决这件事。
+
+   规则：
+     · 只动 transform / opacity —— 这两个能走合成层，手机上才不卡
+     · 粒子数封顶 18（宝宝最多）
+     · 兄弟和家人只飘几粒极淡的尘埃 —— **不飘什么也是性格**
+     · prefers-reduced-motion 下整层关掉
+   ========================================================================== */
+
+.atmo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.atmo-bit {
+  position: absolute;
+  top: -8%;
+  display: block;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: atmo-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* ---------- 九条轨道：横向位置与节奏错开，看起来才不是一排 ---------- */
+.atmo-i0 { left: 4%; }
+.atmo-i1 { left: 15%; }
+.atmo-i2 { left: 26%; }
+.atmo-i3 { left: 37%; }
+.atmo-i4 { left: 48%; }
+.atmo-i5 { left: 59%; }
+.atmo-i6 { left: 70%; }
+.atmo-i7 { left: 81%; }
+.atmo-i8 { left: 92%; }
+
+/* 每条轨道的时长/延迟都不一样 —— 整齐地下落是最假的 */
+.atmo-i0 { animation-duration: 13s; animation-delay: -1.2s; }
+.atmo-i1 { animation-duration: 17s; animation-delay: -6.4s; }
+.atmo-i2 { animation-duration: 11s; animation-delay: -3.1s; }
+.atmo-i3 { animation-duration: 19s; animation-delay: -9.8s; }
+.atmo-i4 { animation-duration: 15s; animation-delay: -0.4s; }
+.atmo-i5 { animation-duration: 21s; animation-delay: -12.6s; }
+.atmo-i6 { animation-duration: 12s; animation-delay: -5.2s; }
+.atmo-i7 { animation-duration: 18s; animation-delay: -8.1s; }
+.atmo-i8 { animation-duration: 14s; animation-delay: -2.7s; }
+
+/* 落下来的时候一边飘一边转 —— 直线掉下来像下雨，不像花瓣 */
+@keyframes atmo-fall {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); }
+  8% { opacity: var(--atmo-ink, 0.75); }
+  50% { transform: translate3d(36px, 52vh, 0) rotate(180deg); }
+  88% { opacity: var(--atmo-ink, 0.75); }
+  100% { opacity: 0; transform: translate3d(-22px, 108vh, 0) rotate(400deg); }
+}
+
+/* ---------- 飘什么 ---------- */
+
+/* 花瓣：一片椭圆的纸，一头尖 */
+.atmo-petal {
+  width: 11px;
+  height: 14px;
+  border-radius: 60% 0 60% 0;
+  background: linear-gradient(140deg, #ffd9e4, #ffb1c8);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --atmo-ink: 0.8;
+}
+
+/* 玫瑰：换个色系的花瓣，显得有层次 */
+.atmo-rose {
+  width: 13px;
+  height: 15px;
+  border-radius: 60% 0 60% 0;
+  background: linear-gradient(140deg, #ffc9d6, #ef8fae);
+  --atmo-ink: 0.78;
+}
+
+/* 爱心：直接用字形，比 CSS 拼的干净 */
+.atmo-heart {
+  width: auto;
+  height: auto;
+  font-size: 13px;
+  line-height: 1;
+  color: #ff9dbb;
+  --atmo-ink: 0.85;
+}
+
+.atmo-heart::before { content: '♥'; }
+
+/* 星光：小十字闪光 */
+.atmo-spark {
+  width: 10px;
+  height: 10px;
+  --atmo-ink: 0.9;
+  background:
+    linear-gradient(transparent 42%, #ffe6a8 42% 58%, transparent 58%),
+    linear-gradient(90deg, transparent 42%, #ffe6a8 42% 58%, transparent 58%);
+  animation-name: atmo-fall, atmo-twinkle;
+  animation-duration: 16s, 2.4s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+@keyframes atmo-twinkle {
+  0%, 100% { filter: brightness(0.7) drop-shadow(0 0 0 rgba(255, 220, 140, 0)); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 6px rgba(255, 220, 140, 0.9)); }
+}
+
+/* 珠光：姐妹那边的细闪 */
+.atmo-pearl {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff, #f0c6d8 70%, #d79fb8);
+  box-shadow: 0 0 6px rgba(240, 200, 220, 0.7);
+  --atmo-ink: 0.72;
+}
+
+/* 火星：兄弟那边仅有的一点动静 —— 极淡、偏冷，像烟头灰 */
+.atmo-ember {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #d8b26a;
+  box-shadow: 0 0 4px rgba(216, 178, 106, 0.8);
+  --atmo-ink: 0.35;
+}
+
+/* 尘埃：家人那边 —— 正式场合不撒花，只有一点浮尘 */
+.atmo-mote {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b9b0a1;
+  --atmo-ink: 0.28;
+}
+
+/* ---------- 四套的氛围强度 ----------
+   兄弟和家人几乎不飘：那两家的人设就不该满天飞东西。 */
+.invite-page[data-theme='brother'] .atmo { opacity: 0.55; }
+.invite-page[data-theme='dadmam'] .atmo { opacity: 0.5; }
+.invite-page[data-theme='sister'] .atmo { opacity: 0.9; }
+.invite-page[data-theme='baby'] .atmo { opacity: 1; }
+
+/* 摊开看（长列表）时别飘 —— 边滚边飘会晕 */
+.invite-all ~ .atmo,
+.invite-page.invite-flat .atmo { display: none; }
+
+/* ---------- 低端机 / 减少动效：整层关掉 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .atmo { display: none; }
+}
+
+/* 屏幕小、粒子多的时候减一半 —— 手机上 18 个粒子并排会糊成一片 */
+@media (max-width: 380px) {
+  .atmo-i3,
+  .atmo-i6,
+  .atmo-i8 { display: none; }
+}

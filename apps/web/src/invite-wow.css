@@ -1,0 +1,242 @@
+/* ==========================================================================
+   惊艳层
+   --------------------------------------------------------------------------
+   在此之前页面是「静态的精美」：材质、形状、排版都对，但**空气是死的、光是平的**。
+   这一层补的就是那两个东西 —— **空气**（atmosphere.css）和**光**（这里）。
+
+   同类产品（婚礼电子请柬）几乎都用纯 CSS 解决，不引第三方库 ——
+   我们也是。参考做法见 docs/EXPERIENCE.md。
+   ========================================================================== */
+
+/* ==========================================================================
+   一、答应的那一下：满屏爆发
+   --------------------------------------------------------------------------
+   前面那么长的铺垫就是为了这一下，所以它得真的炸。
+   ========================================================================== */
+
+.burst {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.burst-bit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 16px;
+  border-radius: 60% 0 60% 0;
+  opacity: 0;
+  animation: burst-out 1.7s cubic-bezier(0.15, 0.7, 0.3, 1) both;
+}
+
+/* 十条方向 —— 撒得开才像炸，不像漏斗 */
+.burst-bit-0 { --dx: -300px; --dy: -360px; --rot: 420deg; background: #ffb3c7; }
+.burst-bit-1 { --dx: 60px; --dy: -420px; --rot: -380deg; background: #ffd59e; animation-delay: 0.04s; }
+.burst-bit-2 { --dx: 320px; --dy: -300px; --rot: 460deg; background: #c9b6f0; animation-delay: 0.02s; }
+.burst-bit-3 { --dx: 380px; --dy: 40px; --rot: -420deg; background: #a8d8f0; animation-delay: 0.06s; }
+.burst-bit-4 { --dx: 240px; --dy: 320px; --rot: 500deg; background: #ffc9a3; animation-delay: 0.03s; }
+.burst-bit-5 { --dx: -120px; --dy: 380px; --rot: -460deg; background: #b8e0c8; animation-delay: 0.07s; }
+.burst-bit-6 { --dx: -340px; --dy: 240px; --rot: 400deg; background: #ffd0e0; animation-delay: 0.05s; }
+.burst-bit-7 { --dx: -400px; --dy: -80px; --rot: -500deg; background: #ffe6a8; animation-delay: 0.01s; }
+.burst-bit-8 { --dx: -180px; --dy: -400px; --rot: 440deg; background: #ff9dbb; animation-delay: 0.08s; }
+.burst-bit-9 { --dx: 180px; --dy: -180px; --rot: -360deg; background: #fff0c4; animation-delay: 0.05s; }
+
+@keyframes burst-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.15) rotate(0deg); }
+  10% { opacity: 1; }
+  70% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1) rotate(var(--rot));
+  }
+}
+
+/* 兄弟：爆的是**火花**不是花瓣 —— 干脆、短促、带尖 */
+.burst-brother .burst-bit {
+  width: 4px;
+  height: 26px;
+  border-radius: 2px;
+  background: linear-gradient(#fff2c8, #d8b26a) !important;
+  animation-duration: 1s;
+}
+
+/* 姐妹：珠光雨 —— 多飘一会儿 */
+.burst-sister .burst-bit {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  animation-duration: 1.9s;
+}
+
+/* 宝宝：花瓣 + 爱心 + 星光，最密最久 */
+.burst-baby .burst-bit:nth-child(3n) {
+  border-radius: 0;
+  background: none !important;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.burst-baby .burst-bit:nth-child(3n)::before { content: '♥'; color: #ff8fb0; }
+
+.burst-baby .burst-bit:nth-child(4n) {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #fff, #ffe6a8 70%, #e8b34a) !important;
+  box-shadow: 0 0 10px rgba(255, 214, 140, 0.95);
+}
+
+.burst-baby .burst-bit { animation-duration: 2.1s; }
+
+/* 家人：不撒花 —— 一个方方正正的红印压下来 */
+.burst-stamp {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  padding: 14px 30px;
+  font-family: 'FangSong', 'STFangsong', serif;
+  font-size: 30px;
+  letter-spacing: 0.32em;
+  color: #b3121b;
+  border: 4px solid #b3121b;
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(-8deg) scale(2.6);
+  opacity: 0;
+  animation: stamp-slam 0.75s cubic-bezier(0.2, 0, 0, 1) both;
+  box-shadow: 0 0 0 2px rgba(179, 18, 27, 0.15);
+}
+
+@keyframes stamp-slam {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-14deg) scale(2.8); }
+  55% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(0.94); }
+  75% { transform: translate(-50%, -50%) rotate(-8deg) scale(1.03); }
+  100% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
+}
+
+/* ==========================================================================
+   二、光：印章的光晕、烫金的强反光
+   ========================================================================== */
+
+/* 印章下面垫一层光 —— 它就不像贴上去的，像"压在那儿" */
+.invite-seal {
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28));
+}
+
+/* 印章周围的一圈辉光（按材质取色） */
+.invite-seal::after {
+  content: '';
+  position: absolute;
+  inset: -22px;
+  border-radius: inherit;
+  background: radial-gradient(circle, var(--glow) 0%, transparent 68%);
+  opacity: 0.75;
+  z-index: -1;
+  animation: seal-halo 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes seal-halo {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.09); }
+}
+
+/* 标题的烫金：比之前亮得多，而且反光会真的扫过去 */
+.invite-page .screen-question,
+.invite-page .invite-title,
+.invite-page .screen-big {
+  background-image: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 260% 100%;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5));
+  animation: foil-sweep 4.2s ease-in-out infinite;
+}
+
+@keyframes foil-sweep {
+  0%, 55%, 100% { background-position: 0% 0; }
+  75% { background-position: 100% 0; }
+}
+
+/* 兄弟那套不用烫金 —— 它的人设不需要这种闪的东西 */
+.invite-page[data-theme='brother'] .screen-question,
+.invite-page[data-theme='brother'] .invite-title {
+  background-image: none;
+  color: var(--accent);
+  filter: none;
+  animation: none;
+}
+
+/* ==========================================================================
+   三、信纸：做出厚度
+   --------------------------------------------------------------------------
+   一层投影是不够的 —— 真正的纸有几层叠影，近处实、远处散。
+   ========================================================================== */
+
+.invite-letter,
+.all-card {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 2px 4px rgba(90, 70, 40, 0.06),
+    0 10px 22px rgba(90, 70, 40, 0.1),
+    0 28px 56px rgba(90, 70, 40, 0.14);
+}
+
+/* 信纸边缘压一道很淡的暗，像被手指捏过 */
+.invite-letter::after,
+.all-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.035), inset 0 -18px 30px -22px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   四、火漆：一滴蜡
+   ========================================================================== */
+
+.invite-seal-wax::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  bottom: -7px;
+  width: 15px;
+  height: 19px;
+  border-radius: 50% 50% 46% 46% / 34% 34% 66% 66%;
+  background: radial-gradient(circle at 40% 22%, var(--seal) 0%, var(--seal-dark) 85%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.22);
+  animation: wax-drip 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes wax-drip {
+  0%, 78%, 100% { transform: scaleY(0.75) translateY(0); opacity: 0.9; }
+  88% { transform: scaleY(1.25) translateY(4px); opacity: 1; }
+}
+
+/* ==========================================================================
+   五、性能与偏好
+   ========================================================================== */
+
+/* 屏幕小的时候把辉光收一点 —— 手机上光晕太大会糊 */
+@media (max-width: 420px) {
+  .invite-seal::after { inset: -14px; }
+  .burst-bit { width: 11px; height: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst { display: none; }
+  .invite-seal::after { animation: none; opacity: 0.6; }
+  .invite-seal-wax::after { animation: none; }
+  .invite-page .screen-question,
+  .invite-page .invite-title,
+  .invite-page .screen-big { animation: none; background-position: 0 0; }
+}

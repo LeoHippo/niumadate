@@ -5,12 +5,14 @@ import type { Invite, InviteMessage, RoleKey } from '@niumadate/shared';
 import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
+import { Atmosphere } from '../atmosphere';
 import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
 import '../invite-flow.css';
 import '../invite-motion.css';
 import '../all-cards.css';
+import '../invite-wow.css';
 import '../invite-shape.css';
 
 /**
@@ -83,6 +85,8 @@ export function InvitePage() {
   const [leaving, setLeaving] = useState<Move | null>(null);
   /** 刚过去的那一下是什么动作 —— 决定**新进来的这一屏从哪边滑进来**。 */
   const [enterFrom, setEnterFrom] = useState<Move | null>(null);
+  /** 刚刚答应了吗 —— 只在「没回应 → 接受」那一下放爆发，回头再看不再炸。 */
+  const justAcceptedRef = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -143,6 +147,14 @@ export function InvitePage() {
 
   const { invite } = data;
   const role = findRole(config, invite.role);
+
+  /*
+    刚刚答应那一刻：铺一层**满屏爆发**。
+    只在「从没回应 → 接受」那一下放 —— 回头再访问不该又炸一次，
+    那样就变成了噪音。
+  */
+  const justAccepted = justAcceptedRef.current && invite.status === 'accepted';
+  if (invite.status !== 'pending') justAcceptedRef.current = false;
   const screen = SCREENS[index] ?? 'seal';
   const last = index === SCREENS.length - 1;
 
@@ -153,6 +165,9 @@ export function InvitePage() {
         兄弟几乎不摆东西，宝宝摆得最多 —— 这比换配色更能拉开差别。
       */}
       <ShapeDecor role={invite.role} />
+
+      {/* 空气层：四套不同的飘落物 —— 这一层是「惊艳」的来源 */}
+      <Atmosphere role={invite.role} />
 
       {/* 背景：材质底纹 + 光尘 */}
       <div className="invite-backdrop" aria-hidden="true">
@@ -225,6 +240,8 @@ export function InvitePage() {
                 hostGender={config.invite.hostGender}
                 messages={data.messages}
                 onRespond={(status) => {
+                  // 答应那一下要放爆发 —— 先记下来，等数据回来再渲染
+                  if (status === 'accepted') justAcceptedRef.current = true;
                   void api
                     .respondInvite(code, status)
                     .then((result) => {
@@ -285,6 +302,9 @@ export function InvitePage() {
             蹦到屏幕边 → 抓住 → 使劲把它拖出去。
             所以它得贴在页面上、跟着那一屏一起走，而不是飘在一层遮罩上。
           */}
+          {/* 刚答应：满屏爆发。前面那么长的铺垫，就是为了这一下 */}
+          {justAccepted && <Burst role={invite.role} />}
+
           {leaving !== null && (
             <div className={`puller puller-${leaving}`} aria-hidden="true">
               <Puppet gender={config.invite.hostGender} mood={MOVE_MOOD[leaving]} />
@@ -305,6 +325,27 @@ export function InvitePage() {
  * 好姐妹是缎带和珠光（克制但有质感），
  * DAD&MUM 摆的全是**正式图形**（表格线、方框、文号），没有一件是装饰性的花。
  */
+function Burst({ role }: { role: RoleKey }) {
+  // 家人不撒花 —— 盖一个方正的红印压下来，比什么都正式
+  if (role === 'dadmam') {
+    return (
+      <div className="burst burst-dadmam" aria-hidden="true">
+        <span className="burst-stamp">同意</span>
+      </div>
+    );
+  }
+
+  const bits = role === 'brother' ? 10 : role === 'sister' ? 16 : 26;
+
+  return (
+    <div className={`burst burst-${role}`} aria-hidden="true">
+      {Array.from({ length: bits }, (_, i) => (
+        <span key={i} className={`burst-bit burst-bit-${i % 10}`} />
+      ))}
+    </div>
+  );
+}
+
 function ShapeDecor({ role }: { role: RoleKey }) {
   // 直白 —— 一个装饰都不加。空着本身就是态度。
   if (role === 'brother') return null;
