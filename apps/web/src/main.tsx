@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import './styles.css';
 import './progress-role.css';
+import './selection-role.css';
 
 /**
  * 兜底错误边界。

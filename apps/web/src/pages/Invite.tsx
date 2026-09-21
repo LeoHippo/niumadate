@@ -41,6 +41,23 @@ const SCREENS: readonly Screen[] = ['seal', 'who', 'when', 'where', 'what', 'wor
 const MOVES = ['pull', 'fly', 'press'] as const;
 type Move = (typeof MOVES)[number];
 
+/**
+ * 两个按钮的**说法**也按身份不同。
+ *
+ * 这是最便宜、也最能说明「我在跟谁说话」的一处 ——
+ * 同一句「接受」，兄弟说「行，就这么定」，宝宝说「好！我去！」，
+ * 家人说「同意」。**动词就是人设。**
+ *
+ * 婉拒那边也一样：家人的「不同意」正式得像在盖章，
+ * 宝宝的「那天不行嘛」是在撒娇。
+ */
+const ANSWER_WORDS: Record<RoleKey, { yes: string; no: string }> = {
+  brother: { yes: '行，就这么定', no: '不去' },
+  sister: { yes: '好呀～', no: '那天不太行' },
+  baby: { yes: '好！我去！', no: '那天不行嘛' },
+  dadmam: { yes: '同意', no: '不同意' },
+};
+
 const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: 'press' };
 
 /** 过渡要放多久。太短看不见，太长让人等。 */
@@ -547,7 +564,9 @@ function Answer({
           className="invite-btn invite-btn-ghost"
           onClick={() => onAnswer(invite.status === 'accepted' ? 'declined' : 'accepted')}
         >
-          改成{invite.status === 'accepted' ? '「那天不行」' : '「好，我去」'}
+          改成{invite.status === 'accepted'
+            ? `「${ANSWER_WORDS[invite.role].no}」`
+            : `「${ANSWER_WORDS[invite.role].yes}」`}
         </button>
       </div>
     );
@@ -587,7 +606,7 @@ function Answer({
               onAnswer('declined');
             }}
           >
-            那天不行
+            {ANSWER_WORDS[invite.role].no}
           </button>
 
           <button
@@ -597,14 +616,15 @@ function Answer({
             style={act === 'grow' || seated ? { transform: 'scale(1.28)' } : undefined}
             onClick={() => onAnswer('accepted')}
           >
-            好，我去 →
+            {ANSWER_WORDS[invite.role].yes} →
           </button>
         </div>
       </div>
 
       {invite.noDecline && (
         <p className="invite-locked-hint">
-          这份邀请<strong>不接受婉拒</strong> —— 小牛马已经把「那天不行」抓走扔了。
+          这份邀请<strong>不接受婉拒</strong> —— 小牛马已经把「
+          {ANSWER_WORDS[invite.role].no}」抓走扔了。
         </p>
       )}
     </div>

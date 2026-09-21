@@ -1,0 +1,116 @@
+/* ==========================================================================
+   选中的那一刻：四个身份四种反应
+   --------------------------------------------------------------------------
+   这是「交互反馈按身份不同」里最常被摸到的一处 ——
+   好友要选好几天、好几个时段，每次点下去都会看到这几百毫秒。
+
+     好兄弟   变深就完了，**没有动画** —— 选个日期要什么特效
+     好姐妹   轻轻放大 + 一圈柔光 —— 有回应，但不吵
+     好宝宝   **弹一下**，并且冒出一颗小爱心
+     DAD&MUM  **一个勾**，像在表格里打钩
+
+   时长全部走令牌（见 motion-tokens.css），所以节奏也跟着身份变。
+   ========================================================================== */
+
+/* ---------- 好兄弟：没有动画 ---------- */
+[data-theme='brother'] .cal-day-on,
+[data-theme='brother'] .slot-card-on {
+  animation: none !important;
+}
+
+/* ---------- 好姐妹：柔柔地放大一下 ---------- */
+[data-theme='sister'] .cal-day-on {
+  animation: sel-soft var(--dur-2) var(--ease) both;
+}
+
+[data-theme='sister'] .slot-card-on {
+  animation: sel-soft var(--dur-2) var(--ease) both;
+}
+
+@keyframes sel-soft {
+  0% { transform: scale(0.94); }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 好宝宝：弹一下 + 冒一颗心 ---------- */
+[data-theme='baby'] .cal-day-on,
+[data-theme='baby'] .slot-card-on {
+  animation: sel-bounce var(--dur-3) var(--ease) both;
+}
+
+@keyframes sel-bounce {
+  0% { transform: scale(0.8); }
+  45% { transform: scale(1.18); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+/* 冒心：只挂一次，不循环 —— 循环会变成干扰 */
+[data-theme='baby'] .cal-day-on::after,
+[data-theme='baby'] .slot-card-on::after {
+  content: '♥';
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  font-size: 13px;
+  color: #ff8fb0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  animation: heart-pop var(--dur-3) var(--ease-out) both;
+  pointer-events: none;
+}
+
+@keyframes heart-pop {
+  0% { opacity: 0; transform: scale(0.2) translateY(6px); }
+  40% { opacity: 1; transform: scale(1.25) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ---------- DAD&MUM：一个勾 ---------- */
+[data-theme='dadmam'] .cal-day-on,
+[data-theme='dadmam'] .slot-card-on {
+  animation: none !important;
+}
+
+[data-theme='dadmam'] .cal-day-on::after,
+[data-theme='dadmam'] .slot-card-on::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  animation: stamp-check var(--dur-2) var(--ease) both;
+  pointer-events: none;
+}
+
+@keyframes stamp-check {
+  0% { opacity: 0; transform: scale(1.7); }
+  70% { opacity: 1; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 好姐妹也想要个轻一点的记号：一道细细的高光扫过，不是勾 */
+[data-theme='sister'] .cal-day-on {
+  box-shadow: 0 6px 16px rgba(200, 140, 170, 0.28);
+}
+
+/* 定位上下文：::after 要贴着格子角 */
+.cal-day,
+.slot-card {
+  position: relative;
+}
+
+/* ---------- 减少动效：留住记号，去掉弹跳 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='sister'] .cal-day-on,
+  [data-theme='sister'] .slot-card-on,
+  [data-theme='baby'] .cal-day-on,
+  [data-theme='baby'] .slot-card-on,
+  [data-theme='baby'] .cal-day-on::after,
+  [data-theme='baby'] .slot-card-on::after,
+  [data-theme='dadmam'] .cal-day-on::after,
+  [data-theme='dadmam'] .slot-card-on::after {
+    animation-duration: 0.18s !important;
+  }
+}
