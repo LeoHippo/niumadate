@@ -4,6 +4,7 @@ import type { AppConfig } from '@niumadate/shared';
 import { api, describeError } from './api';
 import { ConfigContext } from './config-context';
 import './theme-shapes.css';
+import './motion-tokens.css';
 import { AdminPage } from './pages/Admin';
 import { BookingPage } from './pages/Booking';
 import { EntryPage } from './pages/Entry';
