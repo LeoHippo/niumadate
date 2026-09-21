@@ -11,6 +11,16 @@ import './type-scale.css';
 import './motion-floor.css';
 import './screen-stage.css';
 import './foil.css';
+/*
+  ⚠️ puller-choreography.css **不在这里**导入。
+
+  它是分镜（关键帧重定义），必须排在 invite-motion.css **之后**才生效；
+  而 invite-motion.css 是 pages/Invite.tsx 导入的 —— 打包后组件样式
+  排在 main.tsx 的样式之后。我第一版就放在这里，结果旧分镜把它盖掉了：
+  实测页面位移是一条平滑加速曲线，完全没有"顿住"的平台期，
+  精心设计的分镜根本没让人看到（用户那句"设计不让人看到就等于没设计"）。
+  现在改到 Invite.tsx 里、紧跟在 invite-motion.css 后面导入。
+*/
 
 /**
  * 兜底错误边界。

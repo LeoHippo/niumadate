@@ -1,0 +1,196 @@
+/* ==========================================================================
+   拖屏的分镜
+   --------------------------------------------------------------------------
+   用户的原话：
+     「牛马的这个动作还是不够精细。你应该有那种**拉** —— 就是双手举起来，
+       然后把这个页面整个拉出来，**一点一点拉出来**；
+       然后**压**的话就是牛马从上面压下去。就是有那种**过程感**，
+       让人们能看到这个我精心设计的这个过程。
+       **因为你的设计如果不让人们看到的话，那就等于没设计。**」
+
+   这句话是设计原则，不只是意见。
+
+   之前的问题有两个：
+     ① 页面的拉是**一条连续缓动**（0.58s 一次到底）—— 没有过程，只有结果。
+     ② 页面和小人**各演各的**（0.58s vs 0.72s）—— 节拍对不上，
+        看起来像小人在旁边打哑剧，不是它在拉。
+     ③ JS 等 1100ms，但两个动画 0.72s 就演完了 —— 后面 380ms 是空的。
+
+   所以这里把它们**绑成同一套节拍**：总长 1100ms（= MOVE_MS），
+   页面和小人共用一张时间表：
+
+     0%    小人从屏外探进来         页面还在原位
+     12%   站定、**双手举起**        页面纹丝不动（先蓄势）
+     22%   抓住屏边                 页面**轻轻一颤**（被抓住的反馈）
+     34%   第 1 顿：拉出 18%        小人身子后仰
+     46%   **顿住**（几乎不动）       小人稳住
+     58%   第 2 顿：拉到 48%        再使劲
+     70%   **顿住**                  稳住
+     82%   第 3 顿：拉到 78%        最后一把
+     100%  整个拽出屏                小人跟着出去
+
+   「顿住」是关键 —— 有顿挫才像在拉，一路匀速滑出去那是"自己飞走的"。
+   ========================================================================== */
+
+/* ==========================================================================
+   拉：一点一点拉出来
+   ========================================================================== */
+
+.card-leaving-pull {
+  animation: card-pull 1100ms linear both !important;
+}
+
+@keyframes card-pull {
+  /* 蓄势：小人还在举手，页面不动 —— 先让观众看清"它要拉了" */
+  0%, 20% { transform: translate(0, 0) rotate(0deg); }
+  /* 被抓住：轻轻一颤 */
+  24% { transform: translate(-7px, 1px) rotate(-1.1deg); }
+  /* 第 1 顿 */
+  34% { transform: translate(13%, -1%) rotate(2.4deg); }
+  /* 顿住 —— 拉不动了，停一下（这一步是"顿挫感"的全部来源） */
+  46% { transform: translate(15%, -1%) rotate(2.6deg); }
+  /* 第 2 顿 */
+  58% { transform: translate(48%, -3%) rotate(5deg); }
+  /* 又顿住 */
+  70% { transform: translate(51%, -3%) rotate(5.2deg); }
+  /* 第 3 顿：最后一把拽出去 */
+  82% { transform: translate(84%, -4%) rotate(7.4deg) scale(0.97); }
+  100% { transform: translate(132%, -5%) rotate(11deg) scale(0.9); opacity: 0.15; }
+}
+
+/* 小人跟着同一张表走 —— 它有**举手的蓄势**，然后一顿一顿地后仰 */
+.puller-pull {
+  animation: puller-drag-left 1100ms linear both !important;
+}
+
+@keyframes puller-drag-left {
+  /* 从屏外探进来 */
+  0% { transform: translateX(-90px) rotate(-6deg); opacity: 0; }
+  8% { opacity: 1; }
+  /* 站定、双手举起（蓄势） */
+  12%, 20% { transform: translateX(0) rotate(0deg) scale(1); }
+  /* 抓住，第一次使劲（身子后仰） */
+  34% { transform: translateX(-4px) rotate(-9deg) scale(1.02); }
+  /* 顿住 */
+  46% { transform: translateX(6px) rotate(3deg) scale(1); }
+  /* 第二次使劲，后仰更多 */
+  58% { transform: translateX(-8px) rotate(-13deg) scale(1.04); }
+  /* 又顿住 */
+  70% { transform: translateX(8px) rotate(4deg) scale(1); }
+  /* 最后一把：整个人往后坐下去把它拽出来 */
+  82% { transform: translateX(-14px) rotate(-17deg) scale(1.06); }
+  100% { transform: translateX(-46px) rotate(-22deg) scale(0.96); opacity: 0.2; }
+}
+
+/* ==========================================================================
+   压：从上面压下去
+   ========================================================================== */
+
+.card-leaving-push {
+  animation: card-push 1100ms linear both !important;
+}
+
+@keyframes card-push {
+  /* 它还在上面往下落，页面先不动 */
+  0%, 18% { transform: translate(0, 0) scale(1, 1); }
+  /* 压住顶边：整页被压得**扁一点** */
+  28% { transform: translate(0, 9px) scale(1.015, 0.972); }
+  /* 顿住 */
+  40% { transform: translate(0, 11px) scale(1.018, 0.968); }
+  /* 再压：下沉更多、更扁 */
+  54% { transform: translate(0, 46px) scale(1.03, 0.9); }
+  /* 又顿住 */
+  66% { transform: translate(0, 50px) scale(1.032, 0.896); }
+  /* 最后一把压到底 */
+  82% { transform: translate(0, 120px) scale(1.05, 0.78); }
+  100% { transform: translate(0, 230px) scale(1.06, 0.6); opacity: 0; }
+}
+
+.puller-push {
+  animation: puller-shove-right 1100ms linear both !important;
+}
+
+@keyframes puller-shove-right {
+  /* 从**屏幕上方**落下来（不是从左边）—— 用户要的就是"从上面压下去" */
+  0% { transform: translate(6px, -180px) rotate(4deg); opacity: 0; }
+  10% { opacity: 1; }
+  /* 落到页面上方，稳住 */
+  20% { transform: translate(0, -22px) rotate(0deg); }
+  /* 压住 */
+  28% { transform: translate(0, 6px) rotate(0deg) scale(1.06, 0.94); }
+  /* 顿住 */
+  40% { transform: translate(0, 8px) rotate(0deg) scale(1.06, 0.94); }
+  /* 再压 */
+  54% { transform: translate(0, 30px) rotate(0deg) scale(1.1, 0.88); }
+  /* 又顿住 */
+  66% { transform: translate(0, 33px) rotate(0deg) scale(1.1, 0.88); }
+  /* 压到底 */
+  82% { transform: translate(0, 78px) rotate(0deg) scale(1.14, 0.8); }
+  100% { transform: translate(0, 168px) rotate(0deg) scale(1.16, 0.72); opacity: 0.2; }
+}
+
+/* 「压」的时候小人得**在上方**，不能在左下角 */
+.puller-push {
+  bottom: auto;
+  top: 6%;
+  left: 50%;
+  margin-left: -48px;
+}
+
+/* ==========================================================================
+   飞：抬起来抛出去（保留，但同样给足节拍）
+   ========================================================================== */
+
+.card-leaving-fly {
+  animation: card-fly 1100ms linear both !important;
+}
+
+@keyframes card-fly {
+  0%, 18% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  /* 被拎起来：先离地 */
+  28% { transform: translate(3%, -16px) rotate(2deg) scale(1.01); }
+  /* 顿一下（在手里晃了晃） */
+  40% { transform: translate(3%, -20px) rotate(2deg) scale(1.01); }
+  /* 抡起来 */
+  62% { transform: translate(26%, -64px) rotate(10deg) scale(0.97); }
+  82% { transform: translate(78%, -104px) rotate(20deg) scale(0.9); }
+  100% { transform: translate(122%, -150px) rotate(30deg) scale(0.8); opacity: 0.1; }
+}
+
+.puller-fly {
+  animation: puller-hurl-up 1100ms linear both !important;
+}
+
+@keyframes puller-hurl-up {
+  0% { transform: translate(-70px, 40px) rotate(12deg); opacity: 0; }
+  10% { opacity: 1; }
+  /* 伸手抓住 */
+  24% { transform: translate(-4px, 4px) rotate(-3deg); }
+  /* 拎起来（自己先站直） */
+  34% { transform: translate(0, -10px) rotate(-6deg) scale(1.03); }
+  /* 顿住、蓄力 */
+  44% { transform: translate(0, -12px) rotate(-6deg) scale(1.03); }
+  /* 甩出去 */
+  70% { transform: translate(-16px, -22px) rotate(-16deg) scale(1.05); }
+  100% { transform: translate(-52px, 10px) rotate(-26deg) scale(0.94); opacity: 0.2; }
+}
+
+/* 小人在「飞」这一支里得**跟着页面往上走**一点，不然页面飞了它还杵着 */
+.puller-fly {
+  bottom: 22%;
+}
+
+/* ==========================================================================
+   减少动效：分镜不要了，直接换
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .card-leaving-pull,
+  .card-leaving-push,
+  .card-leaving-fly,
+  .puller-pull,
+  .puller-push,
+  .puller-fly {
+    animation-duration: 200ms !important;
+  }
+}

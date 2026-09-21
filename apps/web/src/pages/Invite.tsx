@@ -13,6 +13,18 @@ import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
 import '../invite-flow.css';
 import '../invite-motion.css';
+/*
+  ⚠️ 这一行**必须**紧跟在 invite-motion.css 之后，而且必须**在这里**导入。
+
+  我第一版把它放在 main.tsx 里 —— 但 invite-motion.css 是**组件**导入的，
+  打包后组件样式排在 main.tsx 的样式之后，于是旧的分镜把我的覆盖掉了：
+  实测页面的位移是一条平滑加速曲线（0 4 11 33 73 145 245 360 427），
+  完全没有"顿住"的平台期 —— 设计出来的分镜根本没让人看到。
+  （用户那句"设计不让人看到就等于没设计"说的就是这个。）
+
+  放在这里、排在它后面，关键帧重定义才会赢。
+*/
+import '../puller-choreography.css';
 import '../all-cards.css';
 import '../invite-wow.css';
 import '../invite-card.css';
