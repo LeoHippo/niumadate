@@ -6,6 +6,7 @@ import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
 import { Atmosphere } from '../atmosphere';
+import { useCountUp } from '../count-up';
 import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
 import '../invite-page.css';
@@ -71,6 +72,37 @@ const SCREENS: readonly Screen[] = [
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 /** 把 `2026-09-20` 写成请柬上的样子：2026 年 9 月 20 日（周日）。 */
+/**
+ * 倒计时：还有几天。
+ *
+ * 网易云那套的招牌就是**数字滚动增长** —— 它的作用不是好看，是**引导视线**：
+ * 静止的数字一眼扫过，正在涨的数字你会盯着它涨完。
+ * 而且它没有"喧宾夺主"的问题 —— 它就是主角。
+ */
+function CountUp({ target, unit }: { target: number; unit?: string }) {
+  const shown = useCountUp(target);
+  return (
+    <span className="count-up">
+      {shown}
+      {unit === undefined ? null : <span className="count-unit">{unit}</span>}
+    </span>
+  );
+}
+
+/** 还有几天（按本地零点算，不受时区影响）。 */
+function daysUntil(date: string): number {
+  const target = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(target.getTime())) return Number.NaN;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
+/** 地点点一下跳到高德去搜 —— 收到请柬的人真正需要的是这个。 */
+function mapSearchUrl(place: string): string {
+  return `https://uri.amap.com/search?keyword=${encodeURIComponent(place)}&src=niumadate`;
+}
+
 function fullDate(date: string): string {
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return date;
@@ -454,6 +486,16 @@ function ScreenBody({
   onRespond: (status: 'accepted' | 'declined') => void;
   onMessages: (messages: InviteMessage[]) => void;
 }) {
+  /** 还有几天 —— 用来做倒计时。 */
+  const days = daysUntil(invite.date);
+  /*
+    ⚠️ 这里踩过一次：我原本写成"未来(还没到)时 countdownText = null"，
+    然后又用 countdownText === null 去判断要不要渲染整个倒计时块 ——
+    结果**最该显示的那一屏反而不显示**（未来才是常态）。
+    现在改成只看 days 有没有算出来（NaN = 日期没法解析）。
+  */
+  const countdownText = days === 0 ? '就是今天' : days < 0 ? '已经去过啦' : null;
+
   switch (screen) {
     case 'seal':
       return (
@@ -493,8 +535,31 @@ function ScreenBody({
           <span className="screen-emoji">🗓️</span>
           <p className="screen-kicker">先把日子定下来</p>
           {/* 带星期 —— 请柬一定写，不然收的人不知道该不该请假 */}
-          <p className="screen-big">{fullDate(invite.date)}</p>
-          {invite.timeText !== '' && <p className="screen-hand">{invite.timeText}</p>}
+          <p className="screen-big reveal-line">{fullDate(invite.date)}</p>
+          {invite.timeText !== '' && <p className="screen-hand reveal-line">{invite.timeText}</p>}
+
+          {/*
+            **倒计时**，而且数字是滚上去的。
+            这是网易云年度总结的招牌 —— 作用不是好看，是**引导视线**：
+            静止的数字一眼扫过，正在涨的数字你会盯着它涨完。
+          */}
+          {Number.isNaN(days) ? null : (
+            <div className={days < 0 ? 'countdown countdown-past reveal-line' : 'countdown reveal-line'}>
+              {days > 0 ? (
+                <>
+                  <span className="countdown-num">
+                    <CountUp target={days} unit="天" />
+                  </span>
+                  <span className="countdown-label">距见面还有</span>
+                </>
+              ) : (
+                <>
+                  <span className="countdown-num">{countdownText}</span>
+                  <span className="countdown-label">{days === 0 ? '就是今天' : '这一天已经过去了'}</span>
+                </>
+              )}
+            </div>
+          )}
         </>
       );
 
@@ -503,7 +568,20 @@ function ScreenBody({
         <>
           <span className="screen-emoji">📍</span>
           <p className="screen-kicker">在哪儿见</p>
-          <p className="screen-big">{invite.place || '（没写，到时候说）'}</p>
+          {/*
+            地点做成**可点**的，跳高德搜这个地址。
+            收到请柬的人真正需要的不是"看见地名"，是"怎么去" ——
+            这既是实用，也是真实感：它不只是一张图，是能用的。
+          */}
+          {invite.place === '' ? (
+            <p className="screen-big">（还没定）</p>
+          ) : (
+            <p className="screen-big">
+              <a className="place-link" href={mapSearchUrl(invite.place)} target="_blank" rel="noreferrer">
+                {invite.place}
+              </a>
+            </p>
+          )}
         </>
       );
 
@@ -551,7 +629,15 @@ function ScreenBody({
             </div>
             <div className="icard-row">
               <dt>地点</dt>
-              <dd className="icard-strong">{invite.place || '（没写，到时候说）'}</dd>
+              <dd className="icard-strong">
+                {invite.place === '' ? (
+                  '（没写，到时候说）'
+                ) : (
+                  <a className="place-link" href={mapSearchUrl(invite.place)} target="_blank" rel="noreferrer">
+                    {invite.place}
+                  </a>
+                )}
+              </dd>
             </div>
             <div className="icard-row">
               <dt>事由</dt>

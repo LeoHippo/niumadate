@@ -6,6 +6,7 @@ import { App } from './App';
 import './styles.css';
 import './progress-role.css';
 import './selection-role.css';
+import './reveal.css';
 
 /**
  * 兜底错误边界。

@@ -305,3 +305,21 @@
 
 /* 兄弟那套的对比光弱一点 —— 它不该浪漫 */
 .invite-page[data-theme='brother'] .aurora-d { opacity: 0.3; }
+
+/* ---------- 极光的色相流动 ----------
+   用户点名要的第四条。位移之外再加**变色**，光才像活的。
+   filter 比 transform 贵，所以只挂在整层 .atmo 上（一个节点），
+   周期给到 34 秒 —— 够慢，不必每帧重绘。 */
+.atmo {
+  animation: hue-drift 34s linear infinite;
+}
+
+@keyframes hue-drift {
+  0% { filter: hue-rotate(0deg) saturate(1); }
+  50% { filter: hue-rotate(14deg) saturate(1.12); }
+  100% { filter: hue-rotate(0deg) saturate(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmo { animation: none !important; filter: none !important; }
+}
