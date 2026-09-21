@@ -1,0 +1,190 @@
+/* ==========================================================================
+   四套「形状语言」
+   --------------------------------------------------------------------------
+   用户的原话：「所有元素是一样的 —— 有一个圆，四个里面都有一个圆。」
+
+   这句话点破了我做浅的地方：我只换了**字体和颜色**，没换**形状**。
+   但形状才是身份感最强的部分 ——
+   圆形 / 方形 / 爱心 之间的差别，比 红色 / 粉色 有力得多。
+
+   所以每个身份给它一套**形态**，而不只是一套配色：
+
+     好兄弟   正方形、直角、几乎没有装饰      → 直白、不花哨
+     好姐妹   圆角、椭圆、缎带花边            → 柔、偏女性化
+     好宝宝   爱心、玫瑰、星光，装饰密度最高  → 浪漫
+     DAD&MUM  正圆、方框、表格线、文号        → 正式、像公文
+
+   一条贯穿的原则：**装饰的多少本身也是性格** ——
+   兄弟几乎不摆东西，宝宝摆得最多。
+   ========================================================================== */
+
+/* ---------- 火漆印章：四个身份四种形状 ---------- */
+
+.invite-seal {
+  /* 让圆角/裁切真的把里面的蜡和图案一起裁掉 */
+  overflow: hidden;
+}
+
+/* 兄弟：正方形。**直角**，一点圆都不留 —— 就是干脆利落。 */
+.invite-page[data-theme='brother'] .invite-seal {
+  border-radius: 4px;
+  clip-path: none;
+}
+
+.invite-page[data-theme='brother'] .invite-seal-wax {
+  border-radius: 4px;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.34),
+    inset 0 -5px 12px rgba(0, 0, 0, 0.38);
+  animation: none;
+}
+
+/* 姐妹：边缘是圆的 —— 圆角很足的方，接近椭圆 */
+.invite-page[data-theme='sister'] .invite-seal {
+  border-radius: 38% 42% 40% 44% / 42% 38% 44% 40%;
+}
+
+.invite-page[data-theme='sister'] .invite-seal-wax {
+  border-radius: 38% 42% 40% 44% / 42% 38% 44% 40%;
+}
+
+/* 宝宝：爱心。整块蜡就是一个心形。 */
+.invite-page[data-theme='baby'] .invite-seal {
+  clip-path: path('M48 90 C8 60 4 34 20 20 C32 9 46 15 48 30 C50 15 64 9 76 20 C92 34 88 60 48 90 Z');
+  border-radius: 0;
+}
+
+.invite-page[data-theme='baby'] .invite-seal-wax {
+  border-radius: 0;
+}
+
+/* 父母：正圆 —— 最正常、最没有个性的那个形状 */
+.invite-page[data-theme='dadmam'] .invite-seal {
+  border-radius: 50%;
+}
+
+.invite-page[data-theme='dadmam'] .invite-seal-wax {
+  border-radius: 50%;
+}
+
+/* 溢蜡那一圈的形状要跟着走，不然会露出圆角 */
+.invite-page[data-theme='brother'] .invite-seal-rim { border-radius: 4px; }
+.invite-page[data-theme='sister'] .invite-seal-rim { border-radius: 40%; }
+.invite-page[data-theme='baby'] .invite-seal-rim { border-radius: 0; opacity: 0.45 !important; }
+.invite-page[data-theme='dadmam'] .invite-seal-rim { border-radius: 50%; }
+
+/* ---------- 卡片（每一屏、以及摊开版的每一张）---------- */
+
+.invite-page[data-theme='brother'] .screen-inner,
+.invite-page[data-theme='brother'] .all-card { border-radius: 2px; }
+
+.invite-page[data-theme='sister'] .screen-inner,
+.invite-page[data-theme='sister'] .all-card { border-radius: 26px; }
+
+.invite-page[data-theme='baby'] .screen-inner,
+.invite-page[data-theme='baby'] .all-card { border-radius: 20px; }
+
+.invite-page[data-theme='dadmam'] .screen-inner,
+.invite-page[data-theme='dadmam'] .all-card { border-radius: 4px; }
+
+/* ---------- 按钮 ---------- */
+
+.invite-page[data-theme='brother'] .invite-btn-yes { border-radius: 6px; }
+.invite-page[data-theme='brother'] .invite-btn-no { border-radius: 6px; }
+.invite-page[data-theme='brother'] .invite-chat-input { border-radius: 4px; }
+
+.invite-page[data-theme='sister'] .invite-btn-yes { border-radius: 999px; }
+.invite-page[data-theme='sister'] .invite-btn-no { border-radius: 999px; }
+
+.invite-page[data-theme='baby'] .invite-btn-yes { border-radius: 30px 30px 30px 30px; }
+.invite-page[data-theme='baby'] .invite-btn-no { border-radius: 22px; }
+
+.invite-page[data-theme='dadmam'] .invite-btn-yes { border-radius: 2px; }
+.invite-page[data-theme='dadmam'] .invite-btn-no { border-radius: 2px; }
+.invite-page[data-theme='dadmam'] .invite-chat-input { border-radius: 2px; }
+
+/* ---------- 装饰层：多少本身也是性格 ---------- */
+
+.decor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.decor span { position: absolute; }
+
+/* 好兄弟：**几乎不摆东西**。直白的人不搞这些。 */
+.decor-brother { display: none; }
+
+/* 好姐妹：缎带 + 花边 + 几粒珠光 —— 克制但有质感 */
+.decor-sister .decor-ribbon {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+}
+
+.decor-sister .decor-bow { font-size: 22px; opacity: 0.75; }
+.decor-sister .decor-bow-a { top: 7%; right: 9%; transform: rotate(14deg); }
+.decor-sister .decor-bow-b { bottom: 12%; left: 8%; transform: rotate(-12deg); }
+
+.decor-sister .decor-pearl {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff, var(--accent) 82%);
+  opacity: 0.5;
+}
+
+.decor-sister .decor-pearl-a { top: 24%; left: 10%; }
+.decor-sister .decor-pearl-b { top: 62%; right: 12%; }
+.decor-sister .decor-pearl-c { top: 40%; left: 16%; }
+
+/* 好宝宝：**装饰最多** —— 爱心、玫瑰、星光撒一层。浪漫就靠这个。 */
+.decor-baby span { opacity: 0.62; }
+.decor-baby .d-heart-a { top: 8%; left: 9%; font-size: 25px; transform: rotate(-14deg); }
+.decor-baby .d-heart-b { top: 30%; right: 8%; font-size: 19px; transform: rotate(12deg); }
+.decor-baby .d-heart-c { bottom: 22%; left: 7%; font-size: 22px; transform: rotate(8deg); }
+.decor-baby .d-heart-d { bottom: 9%; right: 11%; font-size: 17px; transform: rotate(-9deg); }
+.decor-baby .d-rose-a { top: 17%; right: 19%; font-size: 23px; transform: rotate(8deg); }
+.decor-baby .d-rose-b { bottom: 33%; right: 15%; font-size: 20px; transform: rotate(-12deg); }
+.decor-baby .d-spark-a { top: 47%; left: 12%; font-size: 15px; }
+.decor-baby .d-spark-b { top: 68%; right: 20%; font-size: 13px; }
+.decor-baby .d-rose-c { top: 55%; left: 20%; font-size: 18px; transform: rotate(16deg); }
+
+/* DAD&MUM：没有花哨的，但**正式图形**很多 —— 表格线、方框、文号 */
+.decor-dadmam .decor-rule {
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgba(120, 120, 120, 0.22) 0 6px, transparent 6px 12px);
+}
+
+.decor-dadmam .decor-rule-a { top: 13%; }
+.decor-dadmam .decor-rule-b { bottom: 16%; }
+
+.decor-dadmam .decor-frame {
+  top: 20%;
+  left: 14px;
+  right: 14px;
+  bottom: 22%;
+  border: 1px solid rgba(120, 120, 120, 0.2);
+}
+
+.decor-dadmam .decor-doc {
+  top: 9%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'FangSong', 'STFangsong', serif;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: rgba(90, 90, 90, 0.5);
+}
+
+/* 摊开看的时候装饰跟着卡片走，别飘在滚动中出现奇怪的重影 */
+.invite-all .decor { display: none; }

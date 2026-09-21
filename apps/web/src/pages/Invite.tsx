@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fillInviteName, findRole } from '@niumadate/shared';
-import type { Invite, InviteMessage } from '@niumadate/shared';
+import { buildDocNumber, fillInviteName, findRole } from '@niumadate/shared';
+import type { Invite, InviteMessage, RoleKey } from '@niumadate/shared';
 import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
@@ -11,6 +11,7 @@ import '../invite-page.css';
 import '../invite-flow.css';
 import '../invite-motion.css';
 import '../all-cards.css';
+import '../invite-shape.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -130,6 +131,12 @@ export function InvitePage() {
 
   return (
     <main className="invite-page" data-theme={invite.role}>
+      {/*
+        装饰层：**多少本身也是性格**。
+        兄弟几乎不摆东西，宝宝摆得最多 —— 这比换配色更能拉开差别。
+      */}
+      <ShapeDecor role={invite.role} />
+
       {/* 背景：材质底纹 + 光尘 */}
       <div className="invite-backdrop" aria-hidden="true">
         <span className="invite-mote invite-mote-1" />
@@ -269,6 +276,59 @@ export function InvitePage() {
         </>
       )}
     </main>
+  );
+}
+
+/**
+ * 每个身份的装饰。
+ *
+ * 体现的是「**装饰的多少也是性格**」：
+ * 好兄弟几乎什么都不摆（直白的人不搞这些），
+ * 好宝宝摆得最满（爱心、玫瑰、星光），
+ * 好姐妹是缎带和珠光（克制但有质感），
+ * DAD&MUM 摆的全是**正式图形**（表格线、方框、文号），没有一件是装饰性的花。
+ */
+function ShapeDecor({ role }: { role: RoleKey }) {
+  // 直白 —— 一个装饰都不加。空着本身就是态度。
+  if (role === 'brother') return null;
+
+  if (role === 'sister') {
+    return (
+      <div className="decor decor-sister" aria-hidden="true">
+        <span className="decor-ribbon" />
+        <span className="decor-pearl decor-pearl-a" />
+        <span className="decor-pearl decor-pearl-b" />
+        <span className="decor-pearl decor-pearl-c" />
+        <span className="decor-bow decor-bow-a">🎀</span>
+        <span className="decor-bow decor-bow-b">🎀</span>
+      </div>
+    );
+  }
+
+  if (role === 'baby') {
+    return (
+      <div className="decor decor-baby" aria-hidden="true">
+        <span className="d-heart-a">💗</span>
+        <span className="d-heart-b">💕</span>
+        <span className="d-heart-c">💖</span>
+        <span className="d-heart-d">💘</span>
+        <span className="d-rose-a">🌹</span>
+        <span className="d-rose-b">🌷</span>
+        <span className="d-rose-c">🌸</span>
+        <span className="d-spark-a">✨</span>
+        <span className="d-spark-b">✨</span>
+      </div>
+    );
+  }
+
+  // DAD&MUM：正式图形，没有一件是花
+  return (
+    <div className="decor decor-dadmam" aria-hidden="true">
+      <span className="decor-doc">{buildDocNumber()}</span>
+      <span className="decor-rule decor-rule-a" />
+      <span className="decor-frame" />
+      <span className="decor-rule decor-rule-b" />
+    </div>
   );
 }
 

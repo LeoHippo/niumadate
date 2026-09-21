@@ -1,0 +1,178 @@
+/* ==========================================================================
+   申请那一侧：四套主题的**形状语言**
+   --------------------------------------------------------------------------
+   用户的原话：「所有元素是一样的……对我想要的效果是：兄弟更直白、花里胡哨更少，
+   姐妹更偏女性化，好宝宝更浪漫（浪漫元素更多），家人更正式一些。
+   兄弟就是正方形，姐妹就是边缘是圆的，好宝宝可能是爱心形或者小玫瑰，家长就是最正常的图形。」
+
+   这一段补的就是这个：**光换字体和颜色不够，形状才是身份感最强的部分**。
+   方形 / 圆角 / 爱心 / 正圆 之间的差别，比 红 / 粉 有力得多。
+
+   对申请那一侧来说，形状主要落在四类元素上：
+     身份卡 .id-card   填写纸 .wizard-body   按钮 .btn   日历格 .cal-day / .slot-card
+   ========================================================================== */
+
+/* ---------- 好兄弟：方形。直角，一点圆都不留 ---------- */
+[data-theme='brother'] .id-card,
+[data-theme='brother'] .wizard-body,
+[data-theme='brother'] .btn,
+[data-theme='brother'] .btn-dodge,
+[data-theme='brother'] .cal-day,
+[data-theme='brother'] .slot-card,
+[data-theme='brother'] .ask,
+[data-theme='brother'] .field input,
+[data-theme='brother'] .field textarea {
+  border-radius: 3px;
+}
+
+/* 兄弟的印章也换成方的 —— 圆的太"客气"了 */
+[data-theme='brother'] .stamp { border-radius: 3px; }
+[data-theme='brother'] .stamp::after { border-radius: 2px; }
+
+/* ---------- 好姐妹：边缘是圆的，柔 ---------- */
+[data-theme='sister'] .id-card,
+[data-theme='sister'] .wizard-body,
+[data-theme='sister'] .ask { border-radius: 28px; }
+
+[data-theme='sister'] .cal-day,
+[data-theme='sister'] .slot-card { border-radius: 20px; }
+
+[data-theme='sister'] .btn,
+[data-theme='sister'] .btn-dodge { border-radius: 999px; }
+
+[data-theme='sister'] .field input,
+[data-theme='sister'] .field textarea { border-radius: 16px; }
+
+/* 姐妹的印章：椭圆，不那么方正 */
+[data-theme='sister'] .stamp {
+  border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%;
+}
+
+/* ---------- 好宝宝：大圆角 + 心形角标 + 更多浪漫装饰 ---------- */
+[data-theme='baby'] .id-card,
+[data-theme='baby'] .wizard-body,
+[data-theme='baby'] .ask { border-radius: 26px; }
+
+[data-theme='baby'] .cal-day,
+[data-theme='baby'] .slot-card { border-radius: 22px; }
+
+[data-theme='baby'] .btn,
+[data-theme='baby'] .btn-dodge { border-radius: 999px; }
+
+[data-theme='baby'] .field input,
+[data-theme='baby'] .field textarea { border-radius: 18px; }
+
+/* 宝宝的印章：正圆，但边上加一圈小心心 */
+[data-theme='baby'] .stamp {
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px rgba(255, 200, 215, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/*
+  浪漫元素更多：纸上淡淡一层暖色光斑（不是纯色背景）。
+  这一层只在宝宝那套上加 —— 兄弟那套一个装饰都不加，空着本身就是态度。
+*/
+[data-theme='baby'] .paper {
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(255, 205, 220, 0.22) 0 7%, transparent 8%),
+    radial-gradient(circle at 84% 24%, rgba(255, 226, 180, 0.24) 0 6%, transparent 7%),
+    radial-gradient(circle at 26% 78%, rgba(255, 214, 200, 0.2) 0 8%, transparent 9%),
+    radial-gradient(circle at 78% 86%, rgba(255, 236, 210, 0.22) 0 6%, transparent 7%);
+}
+
+/* ---------- DAD&MUM：最正常的图形。正圆、方框、没有个性 ---------- */
+[data-theme='dadmam'] .id-card,
+[data-theme='dadmam'] .wizard-body,
+[data-theme='dadmam'] .ask { border-radius: 4px; }
+
+[data-theme='dadmam'] .btn,
+[data-theme='dadmam'] .btn-dodge,
+[data-theme='dadmam'] .cal-day,
+[data-theme='dadmam'] .slot-card,
+[data-theme='dadmam'] .field input,
+[data-theme='dadmam'] .field textarea { border-radius: 2px; }
+
+[data-theme='dadmam'] .stamp { border-radius: 50%; }
+
+/* ---------- 减少动效 / 窄屏都不受影响：这里只动形状，不碰布局 ---------- */
+
+
+/* ---------- 韬唤鍗¤鎸?*鑷繁韬笂**鐨?data-theme 鍙樺舰鐘?----------
+   涓婇潰閭ｄ簺閫夋嫨鍣ㄦ槸銆岀鍏堝甫涓婚銆嶏紝閫傜敤浜庡～鍐欓〉锛堜富棰樻寕鍦?<html> 涓婏級銆?   浣?*鍏ュ彛椤?*鏄洓寮犲崱鍚勮嚜甯?data-theme銆佺鍏堟病鏈変富棰?鈥斺€?   鎵€浠ラ偅鍥涘紶鍗″緱鍗曠嫭鎸夎嚜宸辩殑涓婚鏉ワ紝鍚﹀垯瀹冧滑杩樻槸涓€妯′竴鏍风殑鍦嗚銆?   杩欎篃鏄繖涓€鏁村涓滆タ鏈€璇ヨ鐪嬭鐨勫湴鏂癸細鍥涘紶鍗″苟鎺掞紝褰㈢姸涓嶅悓锛屼竴鐪煎氨鍒嗗緱鍑烘潵銆?*/
+
+.id-card[data-theme='brother'] { border-radius: 3px; }
+.id-card[data-theme='sister'] { border-radius: 28px; }
+.id-card[data-theme='baby'] { border-radius: 26px; }
+.id-card[data-theme='dadmam'] { border-radius: 4px; }
+
+/* 瀹濆疂閭ｅ紶鍐嶅姞涓€鍦堟煍鍜岀殑鍏夋檿锛屾氮婕劅浠?褰?鍜?鍏?涓€璧风粰 */
+.id-card[data-theme='baby'] {
+  box-shadow:
+    0 0 0 1px #ffe4b8,
+    0 10px 26px rgba(255, 190, 140, 0.28);
+}
+
+/* 鍏勫紵閭ｅ紶鍙嶈繃鏉ワ細纭竟銆佸共鑴嗙殑鎶曞奖锛屾病鏈変竴鐐规煍鍏?*/
+.id-card[data-theme='brother'] {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+
+/* ---------- 宸窛瑕佸ぇ鍒颁竴鐪艰兘璁ゅ嚭鏉?----------
+   绗竴鐗堢粰鐨勬槸 3 / 28 / 26 / 4px锛屽疄娴嬪嚭鏉ユ槸 5 / 18 / 26 / 0 鈥斺€?   鍘熸湁鐨?.id-card 瑙勫垯璧簡涓€閮ㄥ垎锛岀粨鏋滃厔寮熷拰瀹堕暱鍑犱箮鐪嬩笉鍑哄尯鍒€?   鐜板湪**鏄庣‘鍐?!important 鎶婂樊璺濇媺寮€**锛屽苟涓旈噸鏂板垎閰嶏細
+
+     濂藉厔寮? 0      鐩磋鏂瑰舰 鈥斺€?骞茶剢銆佷笉瀹㈡皵
+     濂藉濡? 34px   寰堝渾 鈥斺€?杈圭紭鏄渾鐨勶紝鏌?     濂藉疂瀹? 26px + 鍏夋檿 + 鐖卞績瑙掓爣 鈥斺€?鍦嗚€岃蒋锛岃繕鏈夎姳
+     DAD&MUM 8px   **鏈€鏅€?*鐨勫渾瑙?鈥斺€?涓嶅亸涓嶅€氾紝灏辨槸涓€寮犳甯稿崱鐗?
+   涓轰粈涔堝闀夸笉鏄?0锛? 鍜屽厔寮熸挒浜嗐€傜敤鎴疯鐨勬槸"鏈€姝ｅ父鐨勫浘褰?锛?   涔熷氨鏄?*鏍囧噯鍦嗚鍗＄墖**閭ｄ釜鏍峰瓙 鈥斺€?瀹冭窡"鍒绘剰鍋氭垚鏂圭殑"鏄袱鍥炰簨銆?*/
+
+.id-card[data-theme='brother'] { border-radius: 0 !important; }
+.id-card[data-theme='sister'] { border-radius: 34px !important; }
+.id-card[data-theme='baby'] { border-radius: 26px !important; }
+.id-card[data-theme='dadmam'] { border-radius: 8px !important; }
+
+/* 鍏勫紵锛氬共鑴嗙殑鍋忕Щ鎶曞奖锛堢‖杈癸級锛岄厤鐩磋 */
+.id-card[data-theme='brother'] {
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.07) !important;
+}
+
+/* 濮愬锛氫竴鍦堝緢缁嗙殑鐝犲厜杈?+ 鏌斿厜 */
+.id-card[data-theme='sister'] {
+  box-shadow:
+    0 0 0 2px rgba(240, 200, 218, 0.55),
+    0 12px 28px rgba(210, 150, 180, 0.22) !important;
+}
+
+/* 瀹濆疂锛氭殩鑹插厜鏅曪紝鏈€杞殑涓€妗?*/
+.id-card[data-theme='baby'] {
+  box-shadow:
+    0 0 0 2px #ffe0b8,
+    0 14px 32px rgba(255, 185, 135, 0.3) !important;
+}
+
+/* 瀹堕暱锛氭渶鏅€氱殑鎶曞奖锛屾病鏈変换浣曚釜鎬?*/
+.id-card[data-theme='dadmam'] {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---------- 濉啓椤甸偅涓€渚у悓鏍锋媺寮€ ---------- */
+
+[data-theme='brother'] .wizard-body,
+[data-theme='brother'] .cal-day,
+[data-theme='brother'] .slot-card,
+[data-theme='brother'] .btn { border-radius: 0 !important; }
+
+[data-theme='sister'] .wizard-body { border-radius: 30px !important; }
+[data-theme='sister'] .cal-day,
+[data-theme='sister'] .slot-card { border-radius: 22px !important; }
+
+[data-theme='baby'] .wizard-body { border-radius: 26px !important; }
+[data-theme='baby'] .cal-day,
+[data-theme='baby'] .slot-card { border-radius: 24px !important; }
+
+[data-theme='dadmam'] .wizard-body { border-radius: 8px !important; }
+[data-theme='dadmam'] .cal-day,
+[data-theme='dadmam'] .slot-card { border-radius: 6px !important; }
+[data-theme='dadmam'] .btn { border-radius: 4px !important; }

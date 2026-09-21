@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import type { AppConfig } from '@niumadate/shared';
 import { api, describeError } from './api';
 import { ConfigContext } from './config-context';
+import './theme-shapes.css';
 import { AdminPage } from './pages/Admin';
 import { BookingPage } from './pages/Booking';
 import { EntryPage } from './pages/Entry';
