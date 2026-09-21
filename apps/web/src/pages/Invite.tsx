@@ -474,6 +474,16 @@ function ScreenBody({
           <span className="screen-emoji">{roleEmoji}</span>
           <p className="screen-kicker">这一封是给你的</p>
           <p className="screen-hand">{fillInviteName(invite.greeting, invite.inviteeName)}</p>
+          {/*
+            专属感 —— 而且**只在填了名字时才说**。
+
+            没填名字的就是通用链接（谁点都能看），那时候说"只写给你"是骗人。
+            我们只讲真话：这一条的真假完全取决于 inviteeName 有没有值。
+            （依据见 docs/EXPERIENCE.md「心理学」那一节。）
+          */}
+          {invite.inviteeName.trim() !== '' && (
+            <p className="screen-exclusive">这一封只写给你一个人</p>
+          )}
         </>
       );
 

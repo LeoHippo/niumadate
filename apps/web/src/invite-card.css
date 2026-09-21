@@ -153,3 +153,25 @@
 }
 
 .answered-puppet .puppet { width: 108px; height: 128px; }
+
+
+/* 「这一封只写给你一个人」—— 专属感。
+   做得很轻：小字、低对比、居右一点，像一句附言，不像广告。
+   只在填了名字时才渲染（见 Invite.tsx 的注释）。 */
+.screen-exclusive {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
+/* 前面加一条很短的分隔线，像请柬上的小注 */
+.screen-exclusive::before {
+  content: '';
+  display: block;
+  width: 26px;
+  height: 1px;
+  margin: 0 auto 10px;
+  background: var(--paper-edge);
+}
