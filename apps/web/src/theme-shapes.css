@@ -99,8 +99,7 @@
 /* ---------- 减少动效 / 窄屏都不受影响：这里只动形状，不碰布局 ---------- */
 
 
-/* ---------- 韬唤鍗¤鎸?*鑷繁韬笂**鐨?data-theme 鍙樺舰鐘?----------
-   涓婇潰閭ｄ簺閫夋嫨鍣ㄦ槸銆岀鍏堝甫涓婚銆嶏紝閫傜敤浜庡～鍐欓〉锛堜富棰樻寕鍦?<html> 涓婏級銆?   浣?*鍏ュ彛椤?*鏄洓寮犲崱鍚勮嚜甯?data-theme銆佺鍏堟病鏈変富棰?鈥斺€?   鎵€浠ラ偅鍥涘紶鍗″緱鍗曠嫭鎸夎嚜宸辩殑涓婚鏉ワ紝鍚﹀垯瀹冧滑杩樻槸涓€妯′竴鏍风殑鍦嗚銆?   杩欎篃鏄繖涓€鏁村涓滆タ鏈€璇ヨ鐪嬭鐨勫湴鏂癸細鍥涘紶鍗″苟鎺掞紝褰㈢姸涓嶅悓锛屼竴鐪煎氨鍒嗗緱鍑烘潵銆?*/
+/* 形状语言：见文件开头那段总的说明 */
 
 .id-card[data-theme='brother'] { border-radius: 3px; }
 .id-card[data-theme='sister'] { border-radius: 28px; }
@@ -120,13 +119,7 @@
 }
 
 
-/* ---------- 宸窛瑕佸ぇ鍒颁竴鐪艰兘璁ゅ嚭鏉?----------
-   绗竴鐗堢粰鐨勬槸 3 / 28 / 26 / 4px锛屽疄娴嬪嚭鏉ユ槸 5 / 18 / 26 / 0 鈥斺€?   鍘熸湁鐨?.id-card 瑙勫垯璧簡涓€閮ㄥ垎锛岀粨鏋滃厔寮熷拰瀹堕暱鍑犱箮鐪嬩笉鍑哄尯鍒€?   鐜板湪**鏄庣‘鍐?!important 鎶婂樊璺濇媺寮€**锛屽苟涓旈噸鏂板垎閰嶏細
-
-     濂藉厔寮? 0      鐩磋鏂瑰舰 鈥斺€?骞茶剢銆佷笉瀹㈡皵
-     濂藉濡? 34px   寰堝渾 鈥斺€?杈圭紭鏄渾鐨勶紝鏌?     濂藉疂瀹? 26px + 鍏夋檿 + 鐖卞績瑙掓爣 鈥斺€?鍦嗚€岃蒋锛岃繕鏈夎姳
-     DAD&MUM 8px   **鏈€鏅€?*鐨勫渾瑙?鈥斺€?涓嶅亸涓嶅€氾紝灏辨槸涓€寮犳甯稿崱鐗?
-   涓轰粈涔堝闀夸笉鏄?0锛? 鍜屽厔寮熸挒浜嗐€傜敤鎴疯鐨勬槸"鏈€姝ｅ父鐨勫浘褰?锛?   涔熷氨鏄?*鏍囧噯鍦嗚鍗＄墖**閭ｄ釜鏍峰瓙 鈥斺€?瀹冭窡"鍒绘剰鍋氭垚鏂圭殑"鏄袱鍥炰簨銆?*/
+/* 形状语言：见文件开头那段总的说明 */
 
 .id-card[data-theme='brother'] { border-radius: 0 !important; }
 .id-card[data-theme='sister'] { border-radius: 34px !important; }
@@ -145,24 +138,24 @@
     0 12px 28px rgba(210, 150, 180, 0.22) !important;
 }
 
-/* 瀹濆疂锛氭殩鑹插厜鏅曪紝鏈€杞殑涓€妗?*/
+/* 形状语言：见文件开头那段总的说明 */
 .id-card[data-theme='baby'] {
   box-shadow:
     0 0 0 2px #ffe0b8,
     0 14px 32px rgba(255, 185, 135, 0.3) !important;
 }
 
-/* 瀹堕暱锛氭渶鏅€氱殑鎶曞奖锛屾病鏈変换浣曚釜鎬?*/
+/* 形状语言：见文件开头那段总的说明 */
 .id-card[data-theme='dadmam'] {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* ---------- 濉啓椤甸偅涓€渚у悓鏍锋媺寮€ ---------- */
+/* 形状语言：见文件开头那段总的说明 */
 
 [data-theme='brother'] .wizard-body,
 [data-theme='brother'] .cal-day,
 [data-theme='brother'] .slot-card,
-[data-theme='brother'] .btn { border-radius: 0 !important; }
+[data-theme='brother'] .btn { border-radius: 4px !important; }
 
 [data-theme='sister'] .wizard-body { border-radius: 30px !important; }
 [data-theme='sister'] .cal-day,
