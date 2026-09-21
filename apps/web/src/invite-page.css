@@ -251,7 +251,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
+  font-size: var(--t-hero);
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
   animation: seal-face-in 0.45s ease-out 0.95s both;
 }
@@ -302,7 +302,7 @@
 .invite-title {
   margin: 0;
   font-family: var(--font-title);
-  font-size: 32px;
+  font-size: var(--t-display);
   letter-spacing: 0.06em;
   background-image: linear-gradient(
     100deg,
@@ -358,7 +358,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.invite-greeting { margin: 22px 0 6px; font-size: 19px; line-height: 1.95; }
+.invite-greeting { margin: 22px 0 6px; font-size: var(--t-lead); line-height: 1.95; }
 
 /* ---------- 时间 / 地点 / 干嘛 ---------- */
 
@@ -374,7 +374,7 @@
 .invite-fact dt {
   flex: none;
   width: 62px;
-  font-size: 13px;
+  font-size: var(--t-small);
   color: var(--ink-soft);
   letter-spacing: 0.08em;
 }
@@ -384,7 +384,7 @@
 /* 时间和地点是要记住的信息，加重 + 用烫金质感 */
 .invite-fact-key {
   font-family: var(--font-title);
-  font-size: 22px;
+  font-size: var(--t-title);
   letter-spacing: 0.02em;
   background-image: var(--foil);
   -webkit-background-clip: text;
@@ -464,7 +464,7 @@
 */
 .invite-btn-yes {
   padding: 16px 44px;
-  font-size: 20px;
+  font-size: var(--t-lead);
   font-weight: 700;
   letter-spacing: 0.06em;
   color: #fff;
@@ -486,7 +486,7 @@
 
 .invite-btn-no {
   padding: 9px 20px;
-  font-size: 14px;
+  font-size: var(--t-small);
   color: var(--ink-soft);
   background: transparent;
   border-color: var(--paper-edge);
@@ -556,7 +556,7 @@
 
 .invite-btn-ghost {
   padding: 10px 22px;
-  font-size: 15px;
+  font-size: var(--t-body);
   color: var(--accent);
   border-color: currentColor;
   background: transparent;
@@ -589,7 +589,7 @@
 .invite-locked-hint {
   margin: 20px 0 0;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--t-small);
   color: var(--ink-soft);
   line-height: 1.85;
   animation: invite-rise 0.6s ease-out 5.4s both;
@@ -598,19 +598,19 @@
 /* ---------- 已回应 ---------- */
 
 .invite-answered { margin-top: 28px; text-align: center; }
-.invite-answered-emoji { display: block; font-size: 40px; margin-bottom: 6px; }
+.invite-answered-emoji { display: block; font-size: var(--t-hero); margin-bottom: 6px; }
 
 .invite-answered-title {
   margin: 0 0 6px;
   font-family: var(--font-title);
-  font-size: 23px;
+  font-size: var(--t-title);
   background-image: var(--foil);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.invite-answered-hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
+.invite-answered-hint { margin: 0 0 16px; color: var(--ink-soft); font-size: var(--t-small); line-height: 1.85; }
 
 /* ---------- 对话区 ---------- */
 
@@ -620,8 +620,8 @@
   padding-top: 20px;
 }
 
-.invite-chat-title { margin: 0 0 4px; font-family: var(--font-title); font-size: 19px; }
-.invite-chat-hint { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); line-height: 1.8; }
+.invite-chat-title { margin: 0 0 4px; font-family: var(--font-title); font-size: var(--t-lead); }
+.invite-chat-hint { margin: 0 0 14px; font-size: var(--t-small); color: var(--ink-soft); line-height: 1.8; }
 
 .invite-chat-list {
   display: flex;
@@ -636,22 +636,22 @@
   max-width: 84%;
   padding: 9px 13px;
   border-radius: 13px;
-  font-size: 15px;
+  font-size: var(--t-body);
   line-height: 1.75;
   animation: invite-rise 0.4s ease-out both;
 }
 
 .invite-chat-guest { align-self: flex-end; background: rgba(0, 0, 0, 0.055); }
 .invite-chat-host { align-self: flex-start; background: var(--glow); }
-.invite-chat-who { display: block; font-size: 11px; color: var(--ink-soft); margin-bottom: 2px; }
+.invite-chat-who { display: block; font-size: var(--t-tiny); color: var(--ink-soft); margin-bottom: 2px; }
 .invite-chat-text { white-space: pre-wrap; word-break: break-word; }
-.invite-chat-error { color: var(--accent); font-size: 13px; }
+.invite-chat-error { color: var(--accent); font-size: var(--t-small); }
 .invite-chat-form { display: flex; gap: 8px; }
 
 .invite-chat-input {
   flex: 1;
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-body);
   padding: 11px 13px;
   border: 1px solid var(--paper-edge);
   border-radius: 11px;
@@ -662,7 +662,7 @@
 
 .invite-btn-send {
   padding: 11px 22px;
-  font-size: 15px;
+  font-size: var(--t-body);
   color: #fff;
   background: linear-gradient(160deg, var(--accent), var(--accent-2));
 }
@@ -671,13 +671,13 @@
 
 .invite-loading, .invite-broken-title {
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: var(--t-lead);
   color: var(--accent);
 }
 
-.invite-broken-emoji { display: block; font-size: 46px; margin-bottom: 10px; text-align: center; }
+.invite-broken-emoji { display: block; font-size: var(--t-hero); margin-bottom: 10px; text-align: center; }
 .invite-broken { max-width: 420px; margin: 70px auto 0; text-align: center; }
-.invite-broken-text { font-size: 15px; line-height: 1.9; color: var(--ink-soft); }
+.invite-broken-text { font-size: var(--t-body); line-height: 1.9; color: var(--ink-soft); }
 
 /* ==========================================================================
    小人：零件 + 每个姿态

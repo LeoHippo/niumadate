@@ -187,7 +187,7 @@
 .atmo-heart {
   width: auto;
   height: auto;
-  font-size: 13px;
+  font-size: var(--t-small);
   line-height: 1;
   color: #ff9dbb;
   --atmo-ink: 0.85;

@@ -7,6 +7,8 @@ import './styles.css';
 import './progress-role.css';
 import './selection-role.css';
 import './reveal.css';
+import './type-scale.css';
+import './motion-floor.css';
 
 /**
  * 兜底错误边界。

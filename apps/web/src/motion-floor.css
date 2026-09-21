@@ -1,0 +1,110 @@
+/* ==========================================================================
+   动效的"可感知下限"
+   --------------------------------------------------------------------------
+   用户的原话：「有些动画太快了就有点看不太清其实。」
+
+   查下来是真的：为了让兄弟那套"干脆"，我把它的时长令牌设成了
+     兄弟 --dur-1: 60ms / --dur-4: 160ms
+   160ms 的整屏过渡 —— **人眼基本来不及看清**，主观感受就是"闪了一下"。
+
+   这里不动各自身份的**相对快慢**（兄弟仍然最快、宝宝仍然最慢），
+   而是给所有入场/转场加一个**地板**：
+     · 元素入场（淡入、位移）不少于 260ms
+     · 整屏转场不少于 420ms
+   低于这个的，一律提到这个。
+
+   为什么是这两个数：动画研究里 100ms 以内算"瞬时"，
+   200ms 左右"能感觉到但来不及看"，**260ms 以上才开始能被"看清楚"**。
+   整屏转场因为信息量大，还得再长。
+   ========================================================================== */
+
+/* ---------- 元素入场：地板 260ms ---------- */
+.reveal-line,
+.screen-inner > *,
+.count-up {
+  animation-duration: 420ms !important;
+}
+
+/* ---------- 整屏转场：地板 460ms ---------- */
+.card-leaving-pull,
+.card-leaving-push,
+.card-leaving-fly,
+.card-entering-pull,
+.card-entering-push,
+.card-entering-fly,
+.screen-inner {
+  animation-duration: 460ms !important;
+}
+
+/* 小人拖屏那一段本来就更长，保持它的节奏 */
+.puller {
+  animation-duration: 760ms !important;
+}
+
+/*
+  身份之间的差异**仍然保留** —— 只是都在地板之上：
+    兄弟 460ms（最快）  姐妹 520ms  宝宝 620ms（最慢、带回弹）  家人 470ms
+  这样"快"是相对的，不是快到看不见。
+*/
+.invite-page[data-theme='sister'] .card-entering-pull,
+.invite-page[data-theme='sister'] .card-entering-push,
+.invite-page[data-theme='sister'] .card-entering-fly,
+.invite-page[data-theme='sister'] .card-leaving-pull,
+.invite-page[data-theme='sister'] .card-leaving-push,
+.invite-page[data-theme='sister'] .card-leaving-fly {
+  animation-duration: 520ms !important;
+}
+
+.invite-page[data-theme='baby'] .card-entering-pull,
+.invite-page[data-theme='baby'] .card-entering-push,
+.invite-page[data-theme='baby'] .card-entering-fly,
+.invite-page[data-theme='baby'] .card-leaving-pull,
+.invite-page[data-theme='baby'] .card-leaving-push,
+.invite-page[data-theme='baby'] .card-leaving-fly {
+  animation-duration: 620ms !important;
+}
+
+.invite-page[data-theme='dadmam'] .card-entering-pull,
+.invite-page[data-theme='dadmam'] .card-entering-push,
+.invite-page[data-theme='dadmam'] .card-entering-fly,
+.invite-page[data-theme='dadmam'] .card-leaving-pull,
+.invite-page[data-theme='dadmam'] .card-leaving-push,
+.invite-page[data-theme='dadmam'] .card-leaving-fly {
+  animation-duration: 470ms !important;
+}
+
+/* 兄弟那套原本是 160ms —— 已经快到看不清，现在统一在地板之上 */
+.invite-page[data-theme='brother'] .card-entering-pull,
+.invite-page[data-theme='brother'] .card-entering-push,
+.invite-page[data-theme='brother'] .card-entering-fly,
+.invite-page[data-theme='brother'] .card-leaving-pull,
+.invite-page[data-theme='brother'] .card-leaving-push,
+.invite-page[data-theme='brother'] .card-leaving-fly {
+  animation-duration: 460ms !important;
+}
+
+/* 逐句浮现的间隔也放宽 —— 太快的话几行文字是一起出来的，等于没演 */
+.screen-inner > *:nth-child(1) { animation-delay: 90ms !important; }
+.screen-inner > *:nth-child(2) { animation-delay: 300ms !important; }
+.screen-inner > *:nth-child(3) { animation-delay: 480ms !important; }
+.screen-inner > *:nth-child(4) { animation-delay: 660ms !important; }
+.screen-inner > *:nth-child(5) { animation-delay: 820ms !important; }
+.screen-inner > *:nth-child(6) { animation-delay: 980ms !important; }
+.screen-inner > *:nth-child(7) { animation-delay: 1120ms !important; }
+.screen-inner > *:nth-child(n + 8) { animation-delay: 1240ms !important; }
+
+/* ---------- 减少动效：地板不适用，直接关 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-line,
+  .screen-inner > *,
+  .count-up,
+  .card-leaving-pull,
+  .card-leaving-push,
+  .card-leaving-fly,
+  .card-entering-pull,
+  .card-entering-push,
+  .card-entering-fly {
+    animation-duration: 160ms !important;
+    animation-delay: 0ms !important;
+  }
+}

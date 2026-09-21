@@ -294,3 +294,73 @@
     animation: none !important;
   }
 }
+
+
+/* ==========================================================================
+   过渡纱：把"快速划过"变成"渐出 → 渐入"
+   --------------------------------------------------------------------------
+   用户说「动画、渐入渐出的场景比较少」。
+
+   查下来：转场**是有** opacity 的，但它和"卡片飞出去"同时发生 ——
+   两个动作叠在一起，主观感受就是"唰地划过去了"，不是"渐出、渐入"。
+
+   所以加一层纱：
+     · 走的时候纱**徐上来**（把旧内容轻轻盖住）
+     · 新的进来时纱**徐下去**（把新内容让出来）
+   一上一下，中间隔着一拍 —— 这一拍就是"渐入渐出"的感觉。
+   ========================================================================== */
+
+.screen-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  /* 和纸色一致，所以看起来不是"蒙了一层白"，是"光线变了一下" */
+  background: var(--paper);
+}
+
+.screen-veil-cover {
+  animation: veil-cover 460ms var(--ease, ease) both;
+}
+
+.screen-veil-reveal {
+  animation: veil-reveal 520ms var(--ease-out, ease) both;
+}
+
+@keyframes veil-cover {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes veil-reveal {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/*
+  纱要有点"光"的意思 —— 纯色会很闷。
+  中间稍亮一点，像翻页时那一瞬间的反光。
+*/
+.screen-veil::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0) 62%
+  );
+}
+
+/* 兄弟那套不需要"呼吸" —— 它就是干脆的，纱也短一点、薄一点 */
+.invite-page[data-theme='brother'] .screen-veil-cover { animation-duration: 220ms; }
+.invite-page[data-theme='brother'] .screen-veil-reveal { animation-duration: 240ms; }
+
+/* 宝宝那套要慢，要有回味 */
+.invite-page[data-theme='baby'] .screen-veil-cover { animation-duration: 620ms; }
+.invite-page[data-theme='baby'] .screen-veil-reveal { animation-duration: 760ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-veil { display: none; }
+}

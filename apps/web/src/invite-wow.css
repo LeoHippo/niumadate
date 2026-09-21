@@ -76,7 +76,7 @@
 .burst-baby .burst-bit:nth-child(3n) {
   border-radius: 0;
   background: none !important;
-  font-size: 15px;
+  font-size: var(--t-body);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,7 +101,7 @@
   top: 44%;
   padding: 14px 30px;
   font-family: 'FangSong', 'STFangsong', serif;
-  font-size: 30px;
+  font-size: var(--t-display);
   letter-spacing: 0.32em;
   color: #b3121b;
   border: 4px solid #b3121b;

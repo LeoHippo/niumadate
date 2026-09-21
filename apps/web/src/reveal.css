@@ -72,21 +72,21 @@
 
 .countdown-num {
   font-family: var(--font-title);
-  font-size: 46px;
+  font-size: var(--t-hero);
   line-height: 1.05;
   color: var(--accent);
   letter-spacing: 0.02em;
 }
 
 .countdown-label {
-  font-size: 12px;
+  font-size: var(--t-tiny);
   letter-spacing: 0.22em;
   color: var(--ink-soft);
   opacity: 0.85;
 }
 
 /* 已经过了 / 就是今天，走另一套说法，字小一点别喧哗 */
-.countdown-past .countdown-num { font-size: 30px; }
+.countdown-past .countdown-num { font-size: var(--t-display); }
 
 /* ---------- 「轻点继续」也要呼吸 ----------
    网易云那边底部提示是一亮一暗的 —— 它比一个静止的按钮"邀请"得多。 */

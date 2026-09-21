@@ -128,7 +128,7 @@
   opacity: 0.4;
 }
 
-.decor-sister .decor-bow { font-size: 22px; opacity: 0.75; }
+.decor-sister .decor-bow { font-size: var(--t-title); opacity: 0.75; }
 .decor-sister .decor-bow-a { top: 7%; right: 9%; transform: rotate(14deg); }
 .decor-sister .decor-bow-b { bottom: 12%; left: 8%; transform: rotate(-12deg); }
 
@@ -146,15 +146,15 @@
 
 /* 好宝宝：**装饰最多** —— 爱心、玫瑰、星光撒一层。浪漫就靠这个。 */
 .decor-baby span { opacity: 0.62; }
-.decor-baby .d-heart-a { top: 8%; left: 9%; font-size: 25px; transform: rotate(-14deg); }
-.decor-baby .d-heart-b { top: 30%; right: 8%; font-size: 19px; transform: rotate(12deg); }
-.decor-baby .d-heart-c { bottom: 22%; left: 7%; font-size: 22px; transform: rotate(8deg); }
-.decor-baby .d-heart-d { bottom: 9%; right: 11%; font-size: 17px; transform: rotate(-9deg); }
-.decor-baby .d-rose-a { top: 17%; right: 19%; font-size: 23px; transform: rotate(8deg); }
-.decor-baby .d-rose-b { bottom: 33%; right: 15%; font-size: 20px; transform: rotate(-12deg); }
-.decor-baby .d-spark-a { top: 47%; left: 12%; font-size: 15px; }
-.decor-baby .d-spark-b { top: 68%; right: 20%; font-size: 13px; }
-.decor-baby .d-rose-c { top: 55%; left: 20%; font-size: 18px; transform: rotate(16deg); }
+.decor-baby .d-heart-a { top: 8%; left: 9%; font-size: var(--t-title); transform: rotate(-14deg); }
+.decor-baby .d-heart-b { top: 30%; right: 8%; font-size: var(--t-lead); transform: rotate(12deg); }
+.decor-baby .d-heart-c { bottom: 22%; left: 7%; font-size: var(--t-title); transform: rotate(8deg); }
+.decor-baby .d-heart-d { bottom: 9%; right: 11%; font-size: var(--t-body); transform: rotate(-9deg); }
+.decor-baby .d-rose-a { top: 17%; right: 19%; font-size: var(--t-title); transform: rotate(8deg); }
+.decor-baby .d-rose-b { bottom: 33%; right: 15%; font-size: var(--t-lead); transform: rotate(-12deg); }
+.decor-baby .d-spark-a { top: 47%; left: 12%; font-size: var(--t-body); }
+.decor-baby .d-spark-b { top: 68%; right: 20%; font-size: var(--t-small); }
+.decor-baby .d-rose-c { top: 55%; left: 20%; font-size: var(--t-lead); transform: rotate(16deg); }
 
 /* DAD&MUM：没有花哨的，但**正式图形**很多 —— 表格线、方框、文号 */
 .decor-dadmam .decor-rule {
@@ -181,7 +181,7 @@
   right: 0;
   text-align: center;
   font-family: 'FangSong', 'STFangsong', serif;
-  font-size: 13px;
+  font-size: var(--t-small);
   letter-spacing: 0.2em;
   color: rgba(90, 90, 90, 0.5);
 }

@@ -40,12 +40,12 @@
   margin-bottom: 16px;
 }
 
-.icard-mark { font-size: 30px; line-height: 1; }
+.icard-mark { font-size: var(--t-display); line-height: 1; }
 
 .icard-title {
   font-family: var(--font-title);
   /* 字距拉开 —— 请柬上的标题就是这样的 */
-  font-size: 21px;
+  font-size: var(--t-lead);
   letter-spacing: 0.42em;
   /* 注意：letter-spacing 会在末尾多留一个字距，往左挪半格才真的居中 */
   margin-left: 0.42em;
@@ -81,7 +81,7 @@
 .icard-row dt {
   flex: none;
   width: 3.2em;
-  font-size: 12px;
+  font-size: var(--t-tiny);
   letter-spacing: 0.18em;
   color: var(--ink-soft);
 }
@@ -91,7 +91,7 @@
 /* 时间和地点是"要记住"的两样，加重 + 烫金 */
 .icard-strong {
   font-family: var(--font-title);
-  font-size: 19px;
+  font-size: var(--t-lead);
   color: var(--accent);
 }
 
@@ -106,14 +106,14 @@
 }
 
 .icard-foot-text {
-  font-size: 13px;
+  font-size: var(--t-small);
   color: var(--ink-soft);
   letter-spacing: 0.06em;
 }
 
 .icard-sign {
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: var(--t-body);
   color: var(--ink);
   letter-spacing: 0.1em;
 }
@@ -139,9 +139,9 @@
 /* 窄屏：四行的标签栏再窄一点 */
 @media (max-width: 380px) {
   .icard { padding: 18px 15px 15px; }
-  .icard-row dt { width: 2.8em; font-size: 11px; }
-  .icard-strong { font-size: 17px; }
-  .icard-title { font-size: 18px; }
+  .icard-row dt { width: 2.8em; font-size: calc(var(--t-tiny) * 0.9); }
+  .icard-strong { font-size: calc(var(--t-body) * 0.9); }
+  .icard-title { font-size: calc(var(--t-lead) * 0.9); }
 }
 
 
@@ -160,7 +160,7 @@
    只在填了名字时才渲染（见 Invite.tsx 的注释）。 */
 .screen-exclusive {
   margin: 14px 0 0;
-  font-size: 12.5px;
+  font-size: var(--t-tiny);
   letter-spacing: 0.12em;
   color: var(--ink-soft);
   opacity: 0.75;
@@ -184,7 +184,7 @@
 .save-poster-btn {
   margin-top: 14px;
   padding: 10px 22px;
-  font-size: 13.5px;
+  font-size: var(--t-small);
   letter-spacing: 0.12em;
   color: var(--accent);
   background: transparent;
@@ -241,7 +241,7 @@
 
 .save-hint {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--t-small);
   letter-spacing: 0.1em;
   color: #fff;
   opacity: 0.9;
@@ -256,7 +256,7 @@
 .save-download,
 .save-close {
   padding: 9px 20px;
-  font-size: 13.5px;
+  font-size: var(--t-small);
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;

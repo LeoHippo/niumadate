@@ -50,7 +50,7 @@
 }
 
 .screen-emoji {
-  font-size: 54px;
+  font-size: var(--t-hero);
   line-height: 1;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
   animation: screen-emoji-in 0.8s cubic-bezier(0.22, 1.4, 0.4, 1) both;
@@ -64,7 +64,7 @@
 
 .screen-kicker {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--t-small);
   letter-spacing: 0.16em;
   color: var(--ink-soft);
 }
@@ -73,7 +73,7 @@
 .screen-question {
   margin: 4px 0 0;
   font-family: var(--font-title);
-  font-size: 30px;
+  font-size: var(--t-display);
   letter-spacing: 0.06em;
   color: var(--accent);
 }
@@ -82,7 +82,7 @@
 .screen-big {
   margin: 6px 0 0;
   font-family: var(--font-title);
-  font-size: 34px;
+  font-size: var(--t-display);
   line-height: 1.5;
   letter-spacing: 0.03em;
   background-image: var(--foil);
@@ -95,7 +95,7 @@
 
 .screen-hand {
   margin: 8px 0 0;
-  font-size: 19px;
+  font-size: var(--t-lead);
   line-height: 1.95;
   color: var(--ink);
 }
@@ -103,7 +103,7 @@
 .screen-body {
   margin: 10px 0 0;
   white-space: pre-wrap;
-  font-size: 17px;
+  font-size: var(--t-body);
   line-height: 2.1;
   text-align: left;
   color: var(--ink);
@@ -113,7 +113,7 @@
   margin: 18px 0 0;
   align-self: flex-end;
   color: var(--ink-soft);
-  font-size: 16px;
+  font-size: var(--t-body);
 }
 
 /* 拆信那一屏的印章单独定位（平时它是压在信纸上的，这里要居中） */
@@ -172,7 +172,7 @@
 .screen-skip {
   flex: none;
   padding: 9px 16px;
-  font-size: 14px;
+  font-size: var(--t-small);
   color: var(--ink-soft);
   border-color: var(--paper-edge);
   background: transparent;
@@ -182,7 +182,7 @@
 .screen-next {
   flex: 1;
   padding: 14px 20px;
-  font-size: 17px;
+  font-size: var(--t-body);
   font-weight: 700;
   color: #fff;
   border: none;
@@ -217,7 +217,7 @@
 }
 
 .move-word {
-  font-size: 14px;
+  font-size: var(--t-small);
   letter-spacing: 0.1em;
   color: var(--ink-soft);
 }

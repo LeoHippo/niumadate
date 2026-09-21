@@ -451,6 +451,16 @@ export function InvitePage() {
             </div>
           )}
 
+                    {/*
+            过渡纱：走的时候徐上来、新的进来时徐下去。
+            一上一下之间那一拍，才是"渐入渐出"的感觉 ——
+            之前只有"飞出去"，看起来是唰地划过。
+          */}
+          {leaving !== null && <span className="screen-veil screen-veil-cover" aria-hidden="true" />}
+          {leaving === null && enterFrom !== null && (
+            <span className="screen-veil screen-veil-reveal" aria-hidden="true" />
+          )}
+
           {justAccepted && <Burst role={invite.role} />}
 
           {leaving !== null && (
