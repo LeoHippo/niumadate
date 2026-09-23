@@ -1,0 +1,265 @@
+/* ==========================================================================
+   展开信封
+   --------------------------------------------------------------------------
+   用户思路里的关键一步：
+     「然后做一个**展开信封**的动作，从里面**掏出来一张纸** —— 这就是一个页面。」
+
+   分四拍，每一拍都要看得清（用户明确要求"动作更清楚、持续更久"）：
+
+     0.00s ~ 0.45s   火漆**裂开**：先一颤，然后裂成两半往两边滑开
+     0.35s ~ 1.05s   **三角形翻盖掀起来**（rotateX -168°，真有 3D）
+     1.00s ~ 1.95s   **那张纸从信封口慢慢抽出来**（一边升一边立起来）
+     1.85s ~ 2.45s   纸**铺满屏幕** —— 从此刻起，这一屏就是那张纸
+
+   总计约 2.4 秒。慢是故意的：这个动作是整页的"开场"，它得配得上。
+   ========================================================================== */
+
+.opening {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper, #fdf8ee);
+  /* 3D：翻盖要能真的"掀"起来，父层必须有 perspective */
+  perspective: 1100px;
+  perspective-origin: 50% 40%;
+  overflow: hidden;
+}
+
+/* ---------- 信封 ---------- */
+
+.op-env {
+  position: relative;
+  width: 268px;
+  height: 186px;
+  transform-style: preserve-3d;
+  animation: op-env-settle 2.4s ease-in-out both;
+}
+
+@keyframes op-env-settle {
+  0% { transform: rotate(-1.2deg) scale(1); }
+  /* 火漆裂开时整只信封跟着一震 */
+  10% { transform: rotate(-1.2deg) scale(1.012) translateY(-2px); }
+  22% { transform: rotate(-1.2deg) scale(1); }
+  /* 纸被抽出去之后，信封自己缩小退场 */
+  78% { transform: rotate(-1.2deg) scale(1); opacity: 1; }
+  100% { transform: rotate(-1.2deg) scale(0.94) translateY(14px); opacity: 0; }
+}
+
+.op-env-body {
+  position: absolute;
+  inset: 0;
+  background: var(--env-paper, #f0e6d2);
+  border: 1px solid var(--env-edge, #d9c9a8);
+  border-radius: 4px;
+  z-index: 1;
+}
+
+/* 里面的那张纸 —— 主角 */
+.op-env-paper {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 4px;
+  height: 176px;
+  background: var(--paper, #fdf8ee);
+  border: 1px solid var(--paper-edge, #e6d9c2);
+  border-radius: 3px;
+  box-shadow: 0 6px 18px rgba(90, 70, 40, 0.16);
+  z-index: 2;
+  transform-origin: 50% 100%;
+  animation: op-paper-out 2.4s cubic-bezier(0.3, 0.9, 0.3, 1) both;
+}
+
+@keyframes op-paper-out {
+  /* 前 40% 它还在信封里，跟着信封一起抖 */
+  0%, 40% { transform: translateY(0) scale(1); opacity: 0.98; }
+  /* 开始往外抽：先往上顶出来一截 */
+  52% { transform: translateY(-46px) scale(1.01); opacity: 1; }
+  /* 抽到一半，整个立起来一点（像手里捏着一角往外拉） */
+  70% { transform: translateY(-118px) scale(1.06) rotate(-3deg); }
+  /* 完全抽出来 */
+  84% { transform: translateY(-168px) scale(1.14) rotate(0deg); }
+  /* 铺满屏幕：放大到盖住整屏 */
+  100% { transform: translateY(-120px) scale(4.4); }
+}
+
+/* ---------- 三片折角 ---------- */
+
+.op-env-fold {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  z-index: 3;
+}
+
+.op-env-fold-l { clip-path: polygon(0 0, 0 100%, 62% 100%); background: linear-gradient(115deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1)); }
+.op-env-fold-r { clip-path: polygon(100% 0, 100% 100%, 38% 100%); background: linear-gradient(245deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1)); }
+.op-env-fold-b { clip-path: polygon(0 100%, 100% 100%, 50% 22%); background: linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(120, 95, 60, 0.08)); z-index: 4; }
+
+/* ---------- 三角形翻盖：会掀起来 ---------- */
+
+.op-env-flap {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 58%);
+  background: linear-gradient(178deg, var(--env-flap-hi, #fbf3e2), var(--env-flap-lo, #e6d6b6));
+  z-index: 5;
+  /* 折痕在上边 —— 掀开就是绕这条边转 */
+  transform-origin: 50% 0;
+  backface-visibility: visible;
+  animation: op-flap-open 2.4s cubic-bezier(0.5, 0, 0.3, 1) both;
+}
+
+@keyframes op-flap-open {
+  /* 前 15%（火漆还在裂）它先绷着 */
+  0%, 15% { transform: rotateX(0deg); }
+  /* 掀起来：绕过顶 —— 到 -168° 基本贴在后面了 */
+  28% { transform: rotateX(-38deg); }
+  40% { transform: rotateX(-120deg); }
+  46%, 100% { transform: rotateX(-168deg); }
+}
+
+/* 翻盖掀起来之后，背面得能看见（不然会"消失"） */
+.op-env-flap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(178deg, var(--env-flap-lo, #e6d6b6), var(--env-flap-hi, #fbf3e2));
+  clip-path: inherit;
+  opacity: 0.92;
+}
+
+/* ---------- 火漆：先裂开 ---------- */
+
+.op-env-seal {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  animation: op-seal-break 2.4s ease-in both;
+}
+
+/* 用两半拼一枚章：裂开就是两半往两边滑 */
+.op-env-seal::before,
+.op-env-seal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 52%;
+  height: 100%;
+  background: radial-gradient(circle at 40% 34%, var(--seal-hi, #e0714a), var(--seal, #c4472a) 62%, var(--seal-dark, #8f2c17));
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+}
+
+.op-env-seal::before { left: 0; border-radius: 42px 0 0 42px; transform-origin: right center; }
+.op-env-seal::after { right: 0; border-radius: 0 42px 42px 0; transform-origin: left center; }
+
+@keyframes op-seal-break {
+  /* 先绷一下（要裂没裂的那一下最抓人） */
+  0% { transform: rotate(6deg) scale(1); }
+  8% { transform: rotate(6deg) scale(1.07); }
+  12% { transform: rotate(6deg) scale(0.99); }
+  /* 然后两半分开 */
+  22% { transform: rotate(6deg) scale(1); opacity: 1; }
+  38% { opacity: 0.9; }
+  100% { transform: rotate(6deg) scale(0.92); opacity: 0; }
+}
+
+/* 两半各自往外滑 —— 用 before/after 自己的动画 */
+.op-env-seal::before { animation: op-seal-l 2.4s ease-in both; }
+.op-env-seal::after { animation: op-seal-r 2.4s ease-in both; }
+
+@keyframes op-seal-l {
+  0%, 12% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  30% { transform: translate(-26px, 10px) rotate(-22deg); opacity: 1; }
+  60% { transform: translate(-54px, 26px) rotate(-52deg); opacity: 0; }
+  100% { transform: translate(-54px, 26px) rotate(-52deg); opacity: 0; }
+}
+
+@keyframes op-seal-r {
+  0%, 12% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  30% { transform: translate(26px, 10px) rotate(22deg); opacity: 1; }
+  60% { transform: translate(54px, 26px) rotate(52deg); opacity: 0; }
+  100% { transform: translate(54px, 26px) rotate(52deg); opacity: 0; }
+}
+
+/* 裂开那一刻崩出来的碎屑 */
+.op-env-dust {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--seal-dark, #8f2c17);
+  opacity: 0;
+  animation: op-dust 2.4s ease-out both;
+}
+
+@keyframes op-dust {
+  0%, 12% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  20% { opacity: 0.9; transform: translate(0, 0) scale(1); }
+  46% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.5); }
+  100% { opacity: 0; }
+}
+
+/* 八片碎屑，八个方向 */
+.op-env-dust:nth-child(1) { --dx: -34px; --dy: -22px; }
+.op-env-dust:nth-child(2) { --dx: 30px; --dy: -26px; }
+.op-env-dust:nth-child(3) { --dx: -42px; --dy: 4px; }
+.op-env-dust:nth-child(4) { --dx: 46px; --dy: 8px; }
+.op-env-dust:nth-child(5) { --dx: -22px; --dy: 30px; }
+.op-env-dust:nth-child(6) { --dx: 26px; --dy: 34px; }
+.op-env-dust:nth-child(7) { --dx: -8px; --dy: -40px; }
+.op-env-dust:nth-child(8) { --dx: 12px; --dy: -36px; }
+
+/* ---------- 那一层"光":纸被抽出来的时候有一道光掠过 ---------- */
+
+.opening-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 252, 240, 0.85) 50%,
+    transparent 62%
+  );
+  opacity: 0;
+  animation: op-shine 2.4s ease-out both;
+}
+
+@keyframes op-shine {
+  0%, 62% { opacity: 0; transform: translateX(-60%); }
+  72% { opacity: 0.9; }
+  88% { opacity: 0.5; transform: translateX(40%); }
+  100% { opacity: 0; transform: translateX(90%); }
+}
+
+/* ---------- 减少动效：直接跳 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .opening { display: none; }
+}
+
+
+/* ==========================================================================
+   展开的时候，把底下那一屏藏起来
+   --------------------------------------------------------------------------
+   不藏的话屏幕上会同时出现两个信封（原地一个、展开层一个），
+   看起来就像出了 bug —— 实测截图里就是这样：上面一个、下面一个。
+
+   展开层已经 portal 到 <body> 了，所以这里可以用 body:has() 选到它，
+   纯 CSS 就能把底下的 .invite-page 收掉，不用再加一个 state。
+   ========================================================================== */
+
+body:has(.opening) .invite-page {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms linear;
+}

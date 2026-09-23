@@ -6,6 +6,7 @@ import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
 import { rememberInvite } from '../lib';
 import { Atmosphere } from '../atmosphere';
+import { Opening } from '../opening';
 import { drawPoster } from '../poster';
 import { useCountUp } from '../count-up';
 import { Puppet } from '../puppet';
@@ -173,6 +174,16 @@ export function InvitePage() {
   const [data, setData] = useState<{ invite: Invite; messages: InviteMessage[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
+
+  /*
+    正在**展开信封**。
+
+    用户思路里的关键一步：「做一个展开信封的动作，从里面掏出来一张纸 ——
+    这就是一个页面。」所以第一屏点开时**不翻页**，而是演这一段：
+    火漆裂开 → 翻盖掀起 → 纸抽出来 → 铺满屏幕（约 2.4 秒）。
+    演完才切到第二屏，而且切的时候纸已经铺满了，接得上。
+  */
+  const [opening, setOpening] = useState(false);
   /** 赶时间的人：一键摊开看全部。 */
   const [showAll, setShowAll] = useState(false);
   /*
@@ -481,7 +492,14 @@ export function InvitePage() {
                   type="button"
                   className="btn btn-primary screen-next"
                   title="看下一屏"
-                  onClick={() => goTo(index + 1)}
+                  onClick={() => {
+                    // 第一屏点开是"拆信封"，不是普通翻页
+                    if (screen === 'seal') {
+                      setOpening(true);
+                      return;
+                    }
+                    goTo(index + 1);
+                  }}
                 >
                   轻点继续 →
                 </button>
@@ -541,6 +559,22 @@ export function InvitePage() {
             {String(index + 1).padStart(2, '0')}
             <span className="screen-step-total">/{String(SCREEN_TOTAL).padStart(2, '0')}</span>
           </span>
+
+          {/*
+            展开的时候把原来那一屏**藏起来** ——
+            不然屏幕上会同时有一个信封（原地）和一个信封（展开层），
+            实测就是这样：上面一个、下面一个，看着像出 bug 了。
+          */}
+
+          {/*
+            展开信封：火漆裂开 → 翻盖掀起 → 纸抽出来 → 铺满屏幕。
+            演完（2400ms）**直接切到下一屏**，不走普通翻页 ——
+            因为这时纸已经铺满整屏了，再演一次拖屏反而多余。
+          */}
+          <Opening active={opening} onDone={() => {
+            setOpening(false);
+            setIndex((current) => Math.min(current + 1, SCREENS.length - 1));
+          }} />
 
           {justAccepted && <Burst role={invite.role} />}
 
