@@ -1,0 +1,243 @@
+/* ==========================================================================
+   火漆的真实感 + 信封的立体感
+   --------------------------------------------------------------------------
+   这是把"第一屏"放大到 1.6 倍、盯着看之后改的。看到的问题：
+
+   ① 印章是**橙色/灰色**的，读不出"火漆" —— 像一枚木扣子。
+      四个身份原来的 --seal 是 #9e1b1b / #c2809c / #e79a4a / #7a7a7a，
+      后三个已经离开了"蜡"的颜色家族。现在四个都收进蜡的家族，
+      靠色相区分身份（深红 / 玫红 / 琥珀 / 砖红），而不是靠"换个颜色"。
+
+   ② 蜡是**平的**：一层很温柔的径向渐变，没有高光、没有暗边，
+      看起来像打印上去的圆片。真火漆的读法来自三样东西：
+      一小块锐利的高光、一圈压出来的暗边、以及**边缘那一圈不规则的鼓包**。
+
+   ③ 信封没有厚度：翻盖和身体是同一块颜色，翻盖下面没有影子，
+      所以"这是一只封好的信封"这件事只能靠形状去猜。
+      修法是给翻盖加 drop-shadow —— 它会**沿着 clip-path 的三角形轮廓**投影，
+      于是尖角下面自然出现一道影子，厚度感立刻出来。
+   ========================================================================== */
+
+/* ---------- ① 四个身份都用"蜡"的颜色 ---------- */
+
+.invite-page[data-theme='brother'],
+[data-theme='brother'] {
+  --seal: #a8201a;
+  --seal-dark: #66100c;
+  --seal-hi: #d34a3a;
+  --glow: rgba(200, 60, 40, 0.34);
+}
+
+.invite-page[data-theme='sister'],
+[data-theme='sister'] {
+  --seal: #bf4a6b;
+  --seal-dark: #78243e;
+  --seal-hi: #e8849f;
+  --glow: rgba(220, 120, 155, 0.34);
+}
+
+.invite-page[data-theme='baby'],
+[data-theme='baby'] {
+  --seal: #d9701f;
+  --seal-dark: #8c3f0e;
+  --seal-hi: #f4a950;
+  --glow: rgba(240, 170, 90, 0.34);
+}
+
+.invite-page[data-theme='dadmam'],
+[data-theme='dadmam'] {
+  --seal: #9a4640;
+  --seal-dark: #5c2620;
+  --seal-hi: #c4776b;
+  --glow: rgba(180, 120, 110, 0.32);
+}
+
+/* ---------- ② 蜡：高光 + 暗边 + 压出来的鼓包 ---------- */
+
+.invite-page .invite-seal-wax {
+  background:
+    radial-gradient(circle at 34% 26%, var(--seal-hi) 0%, var(--seal) 38%, var(--seal-dark) 100%);
+  box-shadow:
+    /* 外圈：蜡离开纸面的影 */
+    0 6px 14px rgba(60, 20, 10, 0.34),
+    /* 底部内阴影：蜡的厚度 */
+    inset 0 -6px 14px rgba(40, 8, 4, 0.42),
+    /* 顶部内高光：光从左上打过来 */
+    inset 0 5px 12px rgba(255, 255, 255, 0.22);
+}
+
+/* 那一小块锐利的高光：有没有它，是"塑料片"和"蜡"的分界 */
+.invite-page .invite-seal-wax::before {
+  content: '';
+  position: absolute;
+  left: 22%;
+  top: 16%;
+  width: 30%;
+  height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* 边缘那一圈被压出来的蜡：不规则、比主体暗、微微发亮 */
+.invite-page .invite-seal-rim {
+  inset: -6px;
+  border-radius: 47% 53% 52% 48% / 51% 46% 54% 49%;
+  background: radial-gradient(
+    circle at 50% 48%,
+    var(--seal) 58%,
+    var(--seal-dark) 70%,
+    rgba(0, 0, 0, 0) 76%
+  );
+  opacity: 0.85;
+  filter: blur(0.8px);
+}
+
+/* 图案是"压"进蜡里的，不是贴上去的：上缘一道暗、下缘一道亮 */
+.invite-page .invite-seal-face {
+  filter:
+    brightness(0.94)
+    saturate(0.82)
+    drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.22));
+}
+
+/* ---------- ③ 信封的厚度 ---------- */
+
+/*
+   drop-shadow 会跟着 clip-path 的轮廓走 ——
+   所以三角形翻盖的**两条斜边和尖角**下面会自然出现影子，
+   "翻盖压在身体上"这件事才看得出来。
+*/
+.invite-page .env-flap {
+  filter: drop-shadow(0 3px 3px rgba(120, 95, 60, 0.3));
+}
+
+/* 底片也一样：它压在最上面，下面要有一道影 */
+.invite-page .env-fold-bottom {
+  filter: drop-shadow(0 -2px 3px rgba(120, 95, 60, 0.22));
+}
+
+/* 左右两片折角贴边，给一点内侧的暗，纸才有厚度 */
+.invite-page .env-fold-l {
+  box-shadow: inset 2px 0 3px -1px rgba(120, 95, 60, 0.28);
+}
+.invite-page .env-fold-r {
+  box-shadow: inset -2px 0 3px -1px rgba(120, 95, 60, 0.28);
+}
+
+/* ---------- ④ 排版上两处小毛病（截图上看到的） ---------- */
+
+/* 对话屏的提示文案被折成"……牛马看 / 得见。"，最后一行只有三个字。
+   text-wrap: pretty 会让浏览器自己把这种孤字挪掉。 */
+/*
+   注意：这里要用 text-wrap: balance，不是 pretty。
+   实测 pretty 对中文长句没有效果（一模一样折成"……牛马看 / 得见。"），
+   而 balance 会把两行的字数**摊匀**（浏览器只对 ≤6 行的块做这件事），
+   孤字就没了。
+*/
+.invite-page .invite-chat-hint,
+.invite-page .invite-locked-hint,
+.invite-page .invite-answered-hint {
+  text-wrap: balance;
+}
+
+/* 「存下这张请柬」原来飘在卡片外面，看着和这张请柬没关系 ——
+   收紧它和卡片之间的距离，让它读起来是"这张卡的下一步"。 */
+.invite-page .save-poster-btn {
+  margin-top: 10px;
+}
+
+/* ---------- ⑤ 「存下这张请柬」：让它长在请柬上 ---------- */
+
+/*
+   它原来是一枚飘在纸**外面**的虚线胶囊，和这张请柬没关系。
+   现在做成"从纸的下缘垂下来的一条撕口"（像请柬底下那条回执）：
+   背景用纸色、和纸共边、影子和纸连成一条，读起来就是"这张卡的下一步"。
+*/
+.invite-page .save-poster-btn {
+  margin-top: -1px;
+  padding: 12px 30px;
+  font-size: var(--t-small);
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  background: #fffefa;
+  border: 1px solid rgba(150, 120, 80, 0.22);
+  border-top: none;
+  border-radius: 0 0 7px 7px;
+  box-shadow:
+    0 8px 18px -10px rgba(110, 84, 52, 0.28),
+    0 26px 44px -24px rgba(90, 68, 40, 0.34);
+}
+
+/* 收口一条虚线，像可以沿这里撕下来 */
+.invite-page .save-poster-btn::before {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(150, 120, 80, 0.4) 0 4px,
+    transparent 4px 9px
+  );
+}
+
+.invite-page .save-poster-btn {
+  position: relative;
+}
+
+/* 宝宝那枚蜡偏"烤过的颜色"了，往红里收一点，更像蜡不像点心 */
+.invite-page[data-theme='baby'],
+[data-theme='baby'] {
+  --seal: #c95a17;
+  --seal-dark: #7d3208;
+  --seal-hi: #eb8b3c;
+}
+
+/* ==========================================================================
+   ⑥ 小人：把明度拉开四档
+   --------------------------------------------------------------------------
+   放大到 3 倍看：头和身子是**同一个奶油色**，四肢更是一样，
+   所以它在页面上只有 108px 宽的时候，整只糊成一团浅色。
+   明度结构本来就在调色板里（--puppet-body-hi / -body / -lo），
+   只是头、身子、四肢全用了同一个值。现在分开放：
+     头 + 肚皮  最亮（hi）
+     身子       中间（body → lo 之间）
+     四肢       再深一档
+     蹄子 / 手   最深（lo）
+   这样小尺寸下也能一眼看出一只"有光的小牛马"，而不是一团色块。
+   ========================================================================== */
+
+/* 身子比头深一档（身体那个渐变 id 是 pupBody-xxx，头是 pupHead-xxx） */
+.puppet [id^='pupBody-'] .puppet-stop-mid {
+  stop-color: color-mix(in srgb, var(--puppet-body) 55%, var(--puppet-body-lo));
+}
+.puppet [id^='pupBody-'] .puppet-stop-lo {
+  stop-color: color-mix(in srgb, var(--puppet-body-lo) 88%, #6b4a22);
+}
+
+/* 四肢再深一档：手和脚要能从头/身子的底色里"跳"出来 */
+.puppet .puppet-limb,
+.puppet .puppet-ear {
+  fill: color-mix(in srgb, var(--puppet-body) 62%, var(--puppet-body-lo));
+}
+
+/* 蹄子和手掌最深 */
+.puppet .puppet-hoof,
+.puppet .puppet-paw {
+  fill: color-mix(in srgb, var(--puppet-body-lo) 86%, #6b4a22);
+}
+
+/* 肚皮再亮一点、不透明度提上去：身子深了之后，它才像一个"前面" */
+.puppet .puppet-belly {
+  opacity: 0.72;
+}
+
+/* 脚下的影子改成暖灰：纯黑 15% 在米色纸上是"脏"的 */
+.puppet .puppet-shadow {
+  fill: rgba(112, 82, 46, 0.2);
+}

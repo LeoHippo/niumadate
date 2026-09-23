@@ -106,6 +106,8 @@ import '../opening-position.css';
 import '../opening-seal-3d.css';
 // 最后的美学一遍（纸的质感 / 请柬可读性 / 回答屏的摘要），必须最后加载
 import '../paper-look-4.css';
+// 火漆与信封的材质（颜色家族 / 高光暗边 / 翻盖投影），同样必须最后加载
+import '../wax-real.css';
 
 /**
  * 好友点开邀请链接看到的页面。
