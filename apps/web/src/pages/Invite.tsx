@@ -104,6 +104,8 @@ import '../opening-position.css';
 // 必须放在最后：翻盖的真·3D 翻转 + 火漆的四种消失都在这份里，
 // 它要盖掉前面 opening.css / opening-2d.css 里那两套旧做法。
 import '../opening-seal-3d.css';
+// 最后的美学一遍（纸的质感 / 请柬可读性 / 回答屏的摘要），必须最后加载
+import '../paper-look-4.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -1219,6 +1221,32 @@ function Answer({
   return (
     <div className="invite-answer">
       <div className="invite-stage" ref={stageRef}>
+        {/*
+          这块 148px 是给小人抢按钮留的站位，可小人一开始并不在场 ——
+          空着的时候整张回答卡像没做完（逐张截图看出来的）。
+          所以先在这里放一份"去哪儿、什么时候"的回执摘要：
+          好友不用翻回前面几屏就能做决定。小人一进场它就淡掉让位。
+        */}
+        <div className="answer-recap">
+          <div className="answer-recap-row">
+            <span className="answer-recap-k">时间</span>
+            <span className="answer-recap-v">
+              {fullDate(invite.date)}
+              {invite.timeText === '' ? '' : ` ${invite.timeText}`}
+            </span>
+          </div>
+          <div className="answer-recap-row">
+            <span className="answer-recap-k">地点</span>
+            <span className="answer-recap-v">
+              {invite.place === '' ? '（没写，到时候说）' : invite.place}
+            </span>
+          </div>
+          <div className="answer-recap-row">
+            <span className="answer-recap-k">事由</span>
+            <span className="answer-recap-v">{invite.activity || '（没写，去了就知道）'}</span>
+          </div>
+        </div>
+
         {invite.noDecline && act !== 'idle' && (
           <div
             ref={puppetRef}

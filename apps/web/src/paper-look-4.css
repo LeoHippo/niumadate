@@ -1,0 +1,161 @@
+/* ==========================================================================
+   纸的质感（第四次调） + 回答屏不再空着
+   --------------------------------------------------------------------------
+   这一版是**把八个屏逐张看了一遍**之后改的。看完的结论：
+     · 纸太弱：纸色和页面底色只差 8~20 个色阶，影也太淡，
+       八张屏看上去都"糊成一片"，纸没有从背景上立起来。
+       （同类优秀案例的通用做法就是这一条：纸比背景亮一档、边看得见、影分三层。）
+     · 回答屏是空的：那 148px 是给"小人抢按钮"留的站位，
+       可小人一开始并不在场，于是整张卡中间空一大块，像没做完。
+     · 请柬上的地点/事由用了鎏金：金色在白纸上的对比度只有 2.6:1，
+       是"好看但看不清"。关键信息必须能一眼读到，所以那几行换成**深金**。
+   ========================================================================== */
+
+/* ---------- ① 纸：亮一档、边看得见、影分三层 ---------- */
+
+.invite-page .screen-inner,
+.invite-page .icard,
+.invite-page .invite-letter,
+.invite-letter {
+  /* 真信纸是白的。上一版 #fffcf3 和背景只差一点点，看着像没铺纸 */
+  background: #fffefa !important;
+  border: 1px solid rgba(150, 120, 80, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(110, 84, 52, 0.16),
+    0 8px 18px -8px rgba(110, 84, 52, 0.24),
+    0 28px 48px -22px rgba(90, 68, 40, 0.32) !important;
+}
+
+/* 展开时那张纸跟着一起亮，不然"信封里那纸"和"落地那纸"不是一个东西 */
+.opening .op-env-paper {
+  background: #fffefa !important;
+  border: 1px solid rgba(150, 120, 80, 0.22) !important;
+  box-shadow:
+    0 1px 2px rgba(110, 84, 52, 0.16),
+    0 8px 18px -8px rgba(110, 84, 52, 0.24),
+    0 28px 48px -22px rgba(90, 68, 40, 0.32) !important;
+}
+
+/* ---------- ② 请柬卡上的关键值：深金（好看，也要看得清） ---------- */
+
+.invite-page .icard-row dd.icard-strong {
+  background-image: linear-gradient(
+    100deg,
+    #8a6120 0%,
+    #c9a154 30%,
+    #7d561d 58%,
+    #d8b877 80%,
+    #8a6120 100%
+  ) !important;
+  background-size: 300% 100% !important;
+}
+
+/* 标签再深一点：11px 的浅灰在手机上几乎是"看不见"的 */
+.invite-page .icard-row dt {
+  color: var(--ink-soft) !important;
+  opacity: 1 !important;
+}
+
+/* ---------- ③ 回答屏：把那块空地填成"回执摘要" ---------- */
+
+/*
+   这块地方（.invite-stage 的 padding-top: 148px）原本是给小人抢按钮留的站位，
+   但小人一开始并不在场 —— 空着的时候整张卡像没做完。
+   现在放一份"去哪儿、什么时候"的摘要：好友不用翻回前面几屏就能决定。
+   小人一进场（.invite-puppet-holder 出现）它就淡掉让位。
+*/
+.screen-answer .invite-stage .answer-recap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 4px;
+  text-align: left;
+  transition: opacity 0.25s ease;
+}
+
+.invite-stage:has(.invite-puppet-holder) .answer-recap {
+  opacity: 0;
+}
+
+.answer-recap-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  line-height: 1.5;
+}
+
+.answer-recap-k {
+  flex: none;
+  width: 2.4em;
+  font-size: var(--t-tiny);
+  letter-spacing: var(--ls-wide);
+  color: var(--ink-soft);
+}
+
+.answer-recap-v {
+  font-size: var(--t-body);
+  color: var(--ink);
+}
+
+/* 摘要下面一条极淡的分隔线，把"信息"和"决定"分开 */
+.screen-answer .invite-stage .answer-recap::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(150, 120, 80, 0.28), transparent);
+}
+
+/* ==========================================================================
+   ④ 按钮的触感
+   --------------------------------------------------------------------------
+   同类案例里"行动按钮"那一条写得很直白：**要有反馈**。
+   我们的主按钮原来只有 hover（手指点不到），按下去了没有任何回应 ——
+   在手机上这就是"按钮坏了"的手感。
+   ========================================================================== */
+
+.invite-btn,
+.screen-next,
+.screen-skip,
+.btn {
+  /* 手机上点按钮会闪一块半透明蓝灰，很难看 —— 关掉，用我们自己的反馈 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.invite-btn:active,
+.screen-next:active,
+.screen-skip:active {
+  /* 往下压一点点 + 稍微变暗，就是"按下去了" */
+  transform: translateY(1px) scale(0.975);
+  filter: brightness(0.94);
+}
+
+/* 键盘/无障碍：焦点要看得见 */
+.invite-btn:focus-visible,
+.screen-next:focus-visible,
+.screen-skip:focus-visible {
+  outline: 2px solid rgba(179, 18, 27, 0.55);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   ⑤ 行距：日期这种长中文串会折成两行，1.25 的行高会让两行贴在一起
+   ========================================================================== */
+
+.invite-page .screen-big {
+  line-height: 1.34;
+}
+
+/* 卡片底部不用留那么多：页脚本来就在卡外面，留 74px 只是让卡显得下盘空 */
+.invite-page .screen-inner {
+  padding-bottom: 44px !important;
+}
