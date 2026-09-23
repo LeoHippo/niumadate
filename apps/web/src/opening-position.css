@@ -1,0 +1,110 @@
+/* ==========================================================================
+   根因：**没定位的元素，z-index 是无效的**
+   --------------------------------------------------------------------------
+   我把动画逐帧截下来、自己看（这是视觉模型真正有用的地方），终于看清楚了：
+
+     W-2300ms 那一帧：计算值说 火漆 0.44 / 纸 0.44 / 小人 0.94，
+     画面里**只有火漆是半透明的**（它确实被画出来了），
+     纸和小人**完全没有出现**。
+
+   对比三者最关键的差别：
+     .op-env-seal   有 position: absolute   -> 画出来了
+     .op-env-paper  **没有 position**       -> 画不出来
+     .op-puppet     定位不完全              -> 画不出来
+
+   **z-index 只对「已定位元素」（position 不是 static）生效。**
+   没定位的元素 z-index 直接无效，于是纸和小人一直躺在信封底下 ——
+   它们的 opacity 一直在变，只是被盖住了，看不见。
+
+   这个文件把开场里每个元素都显式定位 + 显式给 z-index，
+   一个都不留含糊。
+   ========================================================================== */
+
+.opening {
+  /* 容器本身定位好，作为所有子元素的基准 */
+  position: fixed;
+  inset: 0;
+}
+
+.op-env {
+  position: relative;
+  z-index: 1;
+}
+
+/* 信封的各层：全部显式定位 */
+.op-env-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.op-env-fold,
+.op-env-fold-l,
+.op-env-fold-r,
+.op-env-fold-b {
+  position: absolute;
+  inset: 0;
+}
+
+.op-env-fold-l { z-index: 2; }
+.op-env-fold-r { z-index: 2; }
+.op-env-fold-b { z-index: 3; }
+
+.op-env-flap {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+
+/* ★ 纸：必须定位，否则 z-index 无效，会被压在信封底下 */
+.op-env-paper {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 6px;
+  height: 174px;
+  z-index: 5;
+}
+
+/* ★ 火漆：压在翻盖上 */
+.op-env-seal {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  z-index: 6;
+}
+
+/* ★ 小人：最高一层 */
+.op-puppet {
+  position: absolute;
+  z-index: 7;
+}
+
+/* 碎屑也一样 */
+.op-env-dust {
+  position: absolute;
+  z-index: 8;
+}
+
+.opening-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+}
+
+/*
+  顺手把"纸"再做得像纸一点 ——
+  上一轮我把它的底色改成纯白，但用户看到的仍然是"和信封一个色"，
+  原因就是它压根没被画出来。现在能看见了，再把边和影加重一档。
+*/
+.op-env-paper {
+  background: #ffffff !important;
+  border: 1px solid #dccdaf !important;
+  box-shadow:
+    0 1px 0 #fff inset,
+    0 3px 8px rgba(120, 92, 56, 0.22),
+    0 16px 34px -10px rgba(90, 70, 40, 0.3) !important;
+}

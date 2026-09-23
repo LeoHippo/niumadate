@@ -1,0 +1,151 @@
+/* ==========================================================================
+   开场：彻底改用 2D 变换（3D 在视觉上根本没画出来）
+   --------------------------------------------------------------------------
+   我把动画逐帧截下来、**自己看了**（视觉模型的用处就在这）：
+     1000ms / 1700ms / 2400ms / 3000ms —— **四帧一模一样**。
+   计算值说"火漆透明度 1.00 -> 0.41 -> 0.00"，但画面上纹丝不动。
+
+   查到的三个原因是真的，而且都在我这边：
+
+   ① **翻盖用 rotateX，但它同时有 clip-path**
+      clip-path 是在 2D 平面做裁剪的，rotateX 转过去之后裁剪形状并不跟着变，
+      于是"翻开"这件事在视觉上**完全没有发生**（实测 opacity 全程 1.00）。
+   ② **纸藏在信封里，而且纸色和信封内部几乎同色**（#fffaf0 vs #faf3e2）
+      —— 它确实出来了（opacity 0.92），但眼睛分不出来。
+   ③ **小人位置算错**，opacity 是 1.00 却不在画面上。
+
+   结论：**不要用 3D**。改用位移 + 缩放 + 透明度 ——
+   这些一定会被真实画出来，而且更好控制、更不容易出意外。
+
+   新的时间表（4300ms）：
+     0.00~0.55s  完整的信 + 火漆（静置）
+     0.55~1.60s  火漆消失（四种方式）
+     1.50~2.30s  翻盖**往上让开**（translateY + 缩一点，不用 3D）
+     2.10~2.90s  纸**从信封口往上冒出来**（颜色比信封亮，看得出是纸）
+     2.60~3.40s  小人**从左边走进来**，站到信封左下方
+     3.20~4.30s  纸**一边被抽出、一边放大**，直到占满"一张纸"的范围
+   ========================================================================== */
+
+/* ---------- ① 翻盖：往上让开（不用 rotateX）---------- */
+
+.op-env-flap {
+  /* 撤掉 3D，改 2D */
+  transform-style: flat;
+  animation: flap-lift 4.3s cubic-bezier(0.4, 0, 0.3, 1) both !important;
+}
+
+@keyframes flap-lift {
+  /* 火漆还在：盖着，一动不动 */
+  0%, 35% { transform: translateY(0) scale(1); opacity: 1; }
+  /* 火漆一没就开始往上抬 —— 一路抬到信封顶边之外 */
+  42% { transform: translateY(-14px) scale(1.01); opacity: 1; }
+  52% { transform: translateY(-52px) scale(1.02); opacity: 1; }
+  62% { transform: translateY(-104px) scale(1.03); opacity: 1; }
+  70% { transform: translateY(-150px) scale(1.04); opacity: 0.9; }
+  /* 让开之后淡掉，把位置腾给纸 */
+  78%, 100% { transform: translateY(-168px) scale(1.05); opacity: 0; }
+}
+
+/* 翻盖的背面那层也别盖着 —— 不然抬起来还是一片颜色 */
+.op-env-flap::after { opacity: 0 !important; }
+
+/* ---------- ② 纸：从信封口往上冒，颜色要和信封分得开 ---------- */
+
+.op-env-paper {
+  /* 比信封亮一档，才看得出"这儿有一张纸" */
+  background: #ffffff !important;
+  border: 1px solid #e0d2b4 !important;
+  box-shadow:
+    0 2px 6px rgba(120, 92, 56, 0.2),
+    0 14px 30px -10px rgba(90, 70, 40, 0.28) !important;
+  z-index: 9 !important;
+  animation: paper-rise 4.3s cubic-bezier(0.3, 0.9, 0.3, 1) both !important;
+}
+
+@keyframes paper-rise {
+  /* 翻盖没让开之前，纸**不出现** */
+  0%, 46% { opacity: 0; transform: translateY(4px) scale(1); }
+  /* 翻盖让开，纸从信封口冒头 */
+  52% { opacity: 1; transform: translateY(-10px) scale(1); }
+  /* 一路往上冒，每帧都在动 */
+  60% { transform: translateY(-34px) scale(1.04); }
+  68% { transform: translateY(-58px) scale(1.09); }
+  /* 完全站起来 */
+  76% { transform: translateY(-78px) scale(1.16); }
+  /* 然后一边被拉出去、一边长大 */
+  86% { transform: translateY(-92px) scale(1.42); }
+  94% { transform: translateY(-100px) scale(1.76); }
+  100% { transform: translateY(-104px) scale(1.98); }
+}
+
+/* ---------- ③ 小人：从左边走进来，站在信封左下方 ---------- */
+
+.op-puppet {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: 120px !important;
+  height: 138px !important;
+  /* 信封 268 宽居中，左边缘在 50% - 134px；
+     让小人最后停在信封左下方，中心在 50% - 150px 处 */
+  margin-left: -210px !important;
+  margin-top: 44px !important;
+  z-index: 12 !important;
+  animation: puppet-walk-in 4.3s cubic-bezier(0.25, 0.9, 0.4, 1) both !important;
+}
+
+@keyframes puppet-walk-in {
+  0%, 58% { opacity: 0; transform: translateX(-240px); }
+  64% { opacity: 1; transform: translateX(-150px); }
+  72% { transform: translateX(-72px); }
+  80% { transform: translateX(-16px); }
+  /* 站上去，抓住纸 */
+  86% { transform: translateX(4px) rotate(-6deg); }
+  92% { transform: translateX(-6px) rotate(-12deg); }
+  100% { transform: translateX(-12px) rotate(-9deg); }
+}
+
+/* ---------- ④ 信封和折角：纸长大之后让开 ---------- */
+
+.op-env-body,
+.op-env-fold {
+  animation: env-ease-out 4.3s ease-in both !important;
+}
+
+@keyframes env-ease-out {
+  0%, 74% { opacity: 1; }
+  92%, 100% { opacity: 0; }
+}
+
+/* ---------- ⑤ 火漆：单独用一层，确保它不被翻盖的 clip-path 影响 ---------- */
+
+/*
+  ⚠️ 火漆现在**已经在翻盖外面**了（上一条改动），所以不再被裁。
+  但为了保险，再显式声明一次它的层和形状。
+*/
+.op-env-seal {
+  z-index: 10 !important;
+  clip-path: none !important;
+  border-radius: 50% !important;
+}
+
+.op-env-seal::before,
+.op-env-seal::after {
+  border-radius: 50% 0 0 50% !important;
+}
+
+.op-env-seal::after {
+  border-radius: 0 50% 50% 0 !important;
+}
+
+/* ---------- 减少动效：同样是 2D，压短一点 ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .op-env-flap,
+  .op-env-paper,
+  .op-puppet,
+  .op-env-body,
+  .op-env-fold {
+    animation-duration: 1.8s !important;
+  }
+}
