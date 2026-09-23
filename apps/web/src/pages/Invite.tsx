@@ -58,6 +58,8 @@ import '../invite-shape.css';
   它要覆盖前面所有文件里的 reduce-motion 规则，所以排最后。
 */
 import '../reduced-motion-is-not-delete.css';
+/* 排查用的最后一道：?motion=on 强制走完整动画 */
+import '../motion-debug.css';
 
 /**
  * 好友点开邀请链接看到的页面。

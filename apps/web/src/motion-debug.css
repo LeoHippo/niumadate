@@ -1,0 +1,52 @@
+/* ==========================================================================
+   ?motion=on —— 强制走完整动画，用来排查"设备设置"是不是元凶
+   --------------------------------------------------------------------------
+   代码已经确认部署到公网（我从 niumadate.xyz 下载了包，逐个关键帧都对得上），
+   缓存头也正常。所以"看不到动画"剩下的可能只在设备侧。
+
+   最可能是「减弱动态效果」开着 —— 那个开关下系统会要求所有动效降级，
+   我照做了（改成淡入淡出）。但用户想看的显然是完整版。
+
+   所以给一个**一键排查**的口子：
+     在链接后面加 ?motion=on  ->  无论系统设置如何，一律走完整动画
+   如果加了参数就能看到完整效果，那原因就 100% 确定了。
+
+   实现很轻：JS 读到参数就在 body 上打个 data-motion="on"，
+   这个文件把这些选择器全部提到"正常版本"。
+   ========================================================================== */
+
+body[data-motion='on'] .atmo { display: block !important; opacity: 1 !important; }
+body[data-motion='on'] .atmo-bit,
+body[data-motion='on'] .aurora { animation: revert !important; }
+
+body[data-motion='on'] .opening { display: flex !important; }
+
+body[data-motion='on'] .op-env,
+body[data-motion='on'] .op-env-flap,
+body[data-motion='on'] .op-env-paper,
+body[data-motion='on'] .op-env-seal,
+body[data-motion='on'] .op-env-seal::before,
+body[data-motion='on'] .op-env-seal::after,
+body[data-motion='on'] .op-puppet,
+body[data-motion='on'] .opening-shine {
+  animation-duration: 4.3s !important;
+  animation-timing-function: revert !important;
+}
+
+body[data-motion='on'] .op-puppet { animation-name: op-puppet-run !important; }
+body[data-motion='on'] .op-env-flap { animation-name: op-flap !important; }
+body[data-motion='on'] .op-env-paper { animation-name: op-paper !important; }
+
+body[data-motion='on'] .envelope { animation: env-drop 1.4s cubic-bezier(0.22, 1, 0.36, 1) both !important; }
+body[data-motion='on'] .burst { display: block !important; }
+body[data-motion='on'] .burst-bit { animation: burst-out 1.7s cubic-bezier(0.15, 0.7, 0.3, 1) both !important; opacity: 0; }
+body[data-motion='on'] .confetti { display: block !important; }
+body[data-motion='on'] .confetti-bit { animation: confetti-fall 1.5s cubic-bezier(0.3, 0.6, 0.5, 1) both !important; opacity: 0; }
+body[data-motion='on'] .screen-veil-cover { animation: veil-cover 0.46s ease both !important; }
+body[data-motion='on'] .screen-veil-reveal { animation: veil-reveal 0.52s ease both !important; }
+body[data-motion='on'] .reveal-line,
+body[data-motion='on'] .screen-inner > * { animation-duration: 1.15s !important; }
+body[data-motion='on'] .puller,
+body[data-motion='on'] .puller-pull,
+body[data-motion='on'] .puller-push,
+body[data-motion='on'] .puller-fly { animation-duration: 1.6s !important; }

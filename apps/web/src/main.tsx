@@ -3,6 +3,13 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
+import { applyMotionParam } from './motion-param';
+
+/*
+  ⚠️ 必须在 <App /> 渲染之前调用 —— 它给 body 打一个 data-motion 标记，
+  CSS 靠这个标记决定走"完整动画"还是"减弱版"。
+*/
+applyMotionParam();
 import './styles.css';
 import './progress-role.css';
 import './selection-role.css';
