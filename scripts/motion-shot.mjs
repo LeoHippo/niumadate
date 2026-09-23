@@ -83,6 +83,9 @@ const chrome = spawn(
     '--hide-scrollbars',
     '--force-device-scale-factor=1',
     '--window-size=' + spec.width + ',' + spec.height,
+    // 想验证**公网**上真正跑的那份包时，本机 DNS 解不了 niumadate.xyz，
+    // 给 Chrome 一条解析规则就够了（和 curl --resolve 一个意思）。
+    ...(spec.resolveHost ? ['--host-resolver-rules=MAP ' + spec.resolveHost] : []),
     'about:blank',
   ],
   { stdio: 'ignore' },

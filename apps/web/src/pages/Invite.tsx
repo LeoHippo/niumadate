@@ -109,6 +109,8 @@ import '../opening-seal-3d.css';
 import '../paper-look-4.css';
 // 火漆与信封的材质（颜色家族 / 高光暗边 / 翻盖投影），同样必须最后加载
 import '../wax-real.css';
+// 转场：过渡纱盖住整屏 + press/push 名字对不上，这两条修在这里
+import '../invite-moves.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -205,8 +207,19 @@ function fullDate(date: string): string {
   return `${parsed.getFullYear()} 年 ${parsed.getMonth() + 1} 月 ${parsed.getDate()} 日（${WEEKDAYS[parsed.getDay()] ?? ''}）`;
 }
 
-/** 屏与屏之间的三种过渡 —— 轮着来，别每次都一样。 */
-const MOVES = ['pull', 'fly', 'press'] as const;
+/*
+  屏与屏之间的三种过渡 —— 轮着来，别每次都一样。
+
+  ⚠️ 这里原来写的是 'press'，而 CSS 里的类名是 .card-leaving-**push** /
+  .puller-**push** / .card-entering-**push**（puller-struggle.css）。
+  对不上的后果不是"名字难看"，是**这一种过渡整个没有样式**：
+  卡片只播了 0.14 秒的预备动作（.card-leaving 的 card-anticipate）就停住，
+  小人也一动不动 —— 而好友**最先看到的就是这一种**（第一次点"轻点继续"）。
+  所以：键名必须和 CSS 一致，写成 push。
+  注意"姿势"仍然叫 press（.puppet-press 是 CSS 里真实存在的姿势类），
+  两个词一个属于"过渡"，一个属于"小人的姿势"，别混。
+*/
+const MOVES = ['pull', 'fly', 'push'] as const;
 type Move = (typeof MOVES)[number];
 
 /**
@@ -226,7 +239,7 @@ const ANSWER_WORDS: Record<RoleKey, { yes: string; no: string }> = {
   dadmam: { yes: '同意', no: '不同意' },
 };
 
-const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: 'press' };
+const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', push: 'press' };
 
 /** 过渡要放多久。太短看不见，太长让人等。 */
 /*
@@ -339,7 +352,7 @@ export function InvitePage() {
         [330, 'pull'],
       ],
       // 压：从上面下来就是压，不铺垫
-      press: [[0, 'press']],
+      push: [[0, 'press']],
       // 飞：够 → 抓 → 拎起来抛
       fly: [
         [0, 'reach'],
