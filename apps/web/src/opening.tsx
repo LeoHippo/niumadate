@@ -15,7 +15,15 @@ import './opening.css';
  *
  * 总共 2400ms。慢是故意的：这是整页的开场，它得配得上。
  */
-export const OPENING_MS = 2400;
+/*
+  ⚠️ 这个数必须和 opening.css 里那套动画的总时长**对齐**。
+
+  用户要求「动画一到 2 秒，让人看清」，所以那套动画从 2.4s 拉长到了 3.4s。
+  如果我忘了改这里，展开层会在动画演到一半时被切掉 ——
+  **看起来就是"动画没做到"**（实际是做了一半被掐了）。
+  这种"CSS 和 JS 各存一份时长"的地方最容易对不上，MOVE_MS 已经踩过一次。
+*/
+export const OPENING_MS = 3400;
 
 export function Opening({ active, onDone }: { active: boolean; onDone: () => void }) {
   /*

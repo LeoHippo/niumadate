@@ -1,0 +1,45 @@
+/* ==========================================================================
+   火漆改成**圆形**
+   --------------------------------------------------------------------------
+   用户最新反馈：「那个火漆应该是圆形的，有些为什么是方的。」
+
+   我知道这和更早那次的要求冲突 —— 更早他说过：
+     「兄弟就是正方形，姐妹就是边缘是圆的形，好宝宝可能是爱心，
+       家长就是最正常的图形。」
+   我当时就是照那个做的，所以兄弟那套的章是 4px 圆角的方章。
+
+   **以最新要求为准**：四套全部改成**正圆**。
+   （真正的蜡封本来就是滴出来的圆坨，方的是我为了"身份区分"硬做的，也确实生硬。）
+
+   身份的区分不靠章的方圆 —— 靠纸色、材质、装饰、动效节奏，那些本来就更有效。
+   ========================================================================== */
+
+.invite-page .invite-seal,
+.invite-page[data-theme='brother'] .invite-seal,
+.invite-page[data-theme='sister'] .invite-seal,
+.invite-page[data-theme='baby'] .invite-seal,
+.invite-page[data-theme='dadmam'] .invite-seal {
+  border-radius: 50% !important;
+  /* 爱心那套的 clip-path 也撤掉 —— 用户要的是圆 */
+  clip-path: none !important;
+}
+
+.invite-page .invite-seal-wax,
+.invite-page[data-theme='brother'] .invite-seal-wax,
+.invite-page[data-theme='sister'] .invite-seal-wax,
+.invite-page[data-theme='baby'] .invite-seal-wax,
+.invite-page[data-theme='dadmam'] .invite-seal-wax {
+  border-radius: 50% !important;
+}
+
+.invite-page .invite-seal-rim,
+.invite-page[data-theme='brother'] .invite-seal-rim,
+.invite-page[data-theme='sister'] .invite-seal-rim,
+.invite-page[data-theme='baby'] .invite-seal-rim,
+.invite-page[data-theme='dadmam'] .invite-seal-rim {
+  border-radius: 50% !important;
+}
+
+/* 展开时裂开的两半也要是半圆（之前 42px 的圆角在两半上是对的，这里统一一下） */
+.op-env-seal::before { border-radius: 50% 0 0 50% !important; }
+.op-env-seal::after { border-radius: 0 50% 50% 0 !important; }

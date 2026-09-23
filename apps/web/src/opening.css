@@ -35,7 +35,7 @@
   width: 268px;
   height: 186px;
   transform-style: preserve-3d;
-  animation: op-env-settle 2.4s ease-in-out both;
+  animation: op-env-settle 3.4s ease-in-out both;
 }
 
 @keyframes op-env-settle {
@@ -70,7 +70,7 @@
   box-shadow: 0 6px 18px rgba(90, 70, 40, 0.16);
   z-index: 2;
   transform-origin: 50% 100%;
-  animation: op-paper-out 2.4s cubic-bezier(0.3, 0.9, 0.3, 1) both;
+  animation: op-paper-out 3.4s cubic-bezier(0.3, 0.9, 0.3, 1) both;
 }
 
 @keyframes op-paper-out {
@@ -110,7 +110,7 @@
   /* 折痕在上边 —— 掀开就是绕这条边转 */
   transform-origin: 50% 0;
   backface-visibility: visible;
-  animation: op-flap-open 2.4s cubic-bezier(0.5, 0, 0.3, 1) both;
+  animation: op-flap-open 3.4s cubic-bezier(0.5, 0, 0.3, 1) both;
 }
 
 @keyframes op-flap-open {
@@ -141,7 +141,7 @@
   width: 84px;
   height: 84px;
   margin: -42px 0 0 -42px;
-  animation: op-seal-break 2.4s ease-in both;
+  animation: op-seal-break 3.4s ease-in both;
 }
 
 /* 用两半拼一枚章：裂开就是两半往两边滑 */
@@ -171,8 +171,8 @@
 }
 
 /* 两半各自往外滑 —— 用 before/after 自己的动画 */
-.op-env-seal::before { animation: op-seal-l 2.4s ease-in both; }
-.op-env-seal::after { animation: op-seal-r 2.4s ease-in both; }
+.op-env-seal::before { animation: op-seal-l 3.4s ease-in both; }
+.op-env-seal::after { animation: op-seal-r 3.4s ease-in both; }
 
 @keyframes op-seal-l {
   0%, 12% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
@@ -199,7 +199,7 @@
   border-radius: 50%;
   background: var(--seal-dark, #8f2c17);
   opacity: 0;
-  animation: op-dust 2.4s ease-out both;
+  animation: op-dust 3.4s ease-out both;
 }
 
 @keyframes op-dust {
@@ -232,7 +232,7 @@
     transparent 62%
   );
   opacity: 0;
-  animation: op-shine 2.4s ease-out both;
+  animation: op-shine 3.4s ease-out both;
 }
 
 @keyframes op-shine {

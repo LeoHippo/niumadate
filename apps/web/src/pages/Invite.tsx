@@ -28,6 +28,16 @@ import '../invite-motion.css';
 import '../puller-choreography.css';
 import '../puppet-acts.css';
 import '../envelope.css';
+/*
+  ⚠️ 必须**最后一个**导入。
+
+  这个文件是"动效时长的唯一出处"，里面全是 !important ——
+  它要覆盖 motion-floor.css / invite-motion.css / puller-choreography.css /
+  envelope.css / opening.css 里所有关于时长的规则。
+  CSS 里同权重比的是"谁在后面"，所以它得排最后。
+*/
+import '../timing-truth.css';
+import '../seal-round.css';
 import '../all-cards.css';
 import '../invite-wow.css';
 import '../invite-card.css';
@@ -164,7 +174,7 @@ const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: '
        小人拖屏 1100ms（表演比反馈慢，得一步一步看得清）。
   JS 这个时点跟着最长的那一段走。
 */
-const MOVE_MS = 1100;
+const MOVE_MS = 1600;
 
 export function InvitePage() {
   const config = useConfig();

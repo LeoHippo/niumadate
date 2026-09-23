@@ -14,9 +14,9 @@
      ① 页面的拉是**一条连续缓动**（0.58s 一次到底）—— 没有过程，只有结果。
      ② 页面和小人**各演各的**（0.58s vs 0.72s）—— 节拍对不上，
         看起来像小人在旁边打哑剧，不是它在拉。
-     ③ JS 等 1100ms，但两个动画 0.72s 就演完了 —— 后面 380ms 是空的。
+     ③ JS 等 1600ms，但两个动画 0.72s 就演完了 —— 后面 380ms 是空的。
 
-   所以这里把它们**绑成同一套节拍**：总长 1100ms（= MOVE_MS），
+   所以这里把它们**绑成同一套节拍**：总长 1600ms（= MOVE_MS），
    页面和小人共用一张时间表：
 
      0%    小人从屏外探进来         页面还在原位
@@ -37,7 +37,7 @@
    ========================================================================== */
 
 .card-leaving-pull {
-  animation: card-pull 1100ms linear both !important;
+  animation: card-pull 1600ms linear both !important;
 }
 
 @keyframes card-pull {
@@ -60,7 +60,7 @@
 
 /* 小人跟着同一张表走 —— 它有**举手的蓄势**，然后一顿一顿地后仰 */
 .puller-pull {
-  animation: puller-drag-left 1100ms linear both !important;
+  animation: puller-drag-left 1600ms linear both !important;
 }
 
 @keyframes puller-drag-left {
@@ -87,7 +87,7 @@
    ========================================================================== */
 
 .card-leaving-push {
-  animation: card-push 1100ms linear both !important;
+  animation: card-push 1600ms linear both !important;
 }
 
 @keyframes card-push {
@@ -107,7 +107,7 @@
 }
 
 .puller-push {
-  animation: puller-shove-right 1100ms linear both !important;
+  animation: puller-shove-right 1600ms linear both !important;
 }
 
 @keyframes puller-shove-right {
@@ -142,7 +142,7 @@
    ========================================================================== */
 
 .card-leaving-fly {
-  animation: card-fly 1100ms linear both !important;
+  animation: card-fly 1600ms linear both !important;
 }
 
 @keyframes card-fly {
@@ -158,7 +158,7 @@
 }
 
 .puller-fly {
-  animation: puller-hurl-up 1100ms linear both !important;
+  animation: puller-hurl-up 1600ms linear both !important;
 }
 
 @keyframes puller-hurl-up {

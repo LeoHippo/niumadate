@@ -29,7 +29,11 @@
 */
 .reveal-line {
   display: block;
-  animation: reveal-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  /*
+    1.15 秒 —— 用户要求「动画 1 到 2 秒，让人看清」。
+    之前是 0.62s，又被 motion-floor 压到 0.42s；现在这里就是唯一出处。
+  */
+  animation: reveal-in 1.15s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes reveal-in {

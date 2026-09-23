@@ -18,12 +18,21 @@
    整屏转场因为信息量大，还得再长。
    ========================================================================== */
 
-/* ---------- 元素入场：地板 260ms ---------- */
-.reveal-line,
-.screen-inner > *,
-.count-up {
-  animation-duration: 420ms !important;
-}
+/*
+  ⚠️ 这里原来有一条
+       .reveal-line, .screen-inner > *, .count-up { animation-duration: 420ms !important }
+
+  它是为了"别太快看不清"写的 —— 结果它**无差别地**命中了每一屏的所有直接子元素，
+  连 animation-name 都被顶掉（.screen-inner > * 自己带 reveal-in）。
+  实测后果：
+    · 信封：name 变成 reveal-in 0.42s —— 我写的 env-drop（落下+回弹）根本没跑
+    · 逐句浮现：0.42s
+    · 印章：0.52s
+  用户的原话就是「我感觉这个动画都没有做到」—— 对，做了一半被这条盖掉了。
+
+  **删掉。时长交给各文件自己管**（reveal.css / envelope.css / puller-choreography.css），
+  一处一个出处，不再用 !important 互相盖。
+  */
 
 /* ---------- 整屏转场：地板 460ms ---------- */
 .card-leaving-pull,

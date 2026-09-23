@@ -24,7 +24,8 @@
   /* 一点点倾斜 + 投影，像真的放在桌上 */
   transform: rotate(-1.2deg);
   filter: drop-shadow(0 14px 26px rgba(90, 70, 40, 0.2));
-  animation: env-drop 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* 1.4 秒：落下 → 回弹 → 稳住。这是整页第一眼看到的动作，得看全 */
+  animation: env-drop 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes env-drop {

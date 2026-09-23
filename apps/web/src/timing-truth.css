@@ -1,0 +1,170 @@
+/* ==========================================================================
+   动效时长的**唯一出处**
+   --------------------------------------------------------------------------
+   用户的原话：「我感觉这个动画都没有做到……动画我建议就是一到 2 秒，
+   这样的话能让人看清。」
+
+   我去把每个动画的**计算值**打出来，发现根因不在"时长设小了"，
+   而在 motion-floor.css 里那一条**无差别的 !important**：
+
+     .screen-inner > * { animation-duration: 420ms !important; }
+
+   它把每一屏的所有直接子元素**全部**改成 420ms ——
+   连 animation-name 都被 .screen-inner > * 的 reveal-in 顶掉了。
+   后果（实测）：
+     · 信封：name=reveal-in 0.42s  ← 我写的 env-drop（落下+回弹）**根本没跑**
+     · 逐句浮现：0.42s              ← 要 1~2 秒
+     · 信封上的章：seal-slam 0.52s  ← 太短
+   一条为了"别太快"而写的规则，反而把所有**精心设计过**的动画换成了同一条淡入。
+
+   所以这个文件做两件事：
+     ① 把它压回去（用 !important 覆盖 !important）
+     ② 成为**所有入场/转场时长的唯一出处** —— 以后要调，只改这里
+   ========================================================================== */
+
+/* ---------- ① 把被压扁的动画还原，并放到 1~2 秒 ---------- */
+
+/* 信封落下（env-drop：落下 → 回弹 → 稳住）—— 1.4 秒 */
+.envelope {
+  animation: env-drop 1.4s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
+/* 逐句浮现 —— 1.15 秒。这是最常被看到的动画，得给足 */
+.reveal-line,
+.screen-inner > * {
+  animation-duration: 1.15s !important;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/*
+  但**鎏金**和**常驻氛围**不能被这条碰到 ——
+  它们是"一直在那儿的"，不是"进场的"。上面那条会连它们一起改。
+  所以这里再顶一次（用更具体的选择器）。
+*/
+.invite-page .screen-question,
+.invite-page .invite-title,
+.invite-page .screen-big,
+.invite-page .icard-strong {
+  animation-duration: 12s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+.invite-page[data-theme='brother'] .screen-question,
+.invite-page[data-theme='brother'] .invite-title,
+.invite-page[data-theme='brother'] .screen-big,
+.invite-page[data-theme='brother'] .icard-strong {
+  animation-duration: 14s !important;
+}
+
+/* 数字滚动 —— 和逐句浮现同一档，别抢 */
+.count-up {
+  animation-duration: 1.2s !important;
+}
+
+/* 印章落下的那一下（seal-slam）—— 1.3 秒，要有"压下去"的分量 */
+.invite-seal,
+.env-flap .invite-seal {
+  animation-duration: 1.3s !important;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* 小人退场 / 姿态切换 —— 这几处本来就短，但都提到 0.6 秒以上 */
+.answered-puppet .puppet,
+.puppet-idle .puppet-body,
+.puppet-idle .puppet-head-group {
+  animation-duration: 3.6s !important;
+}
+
+/* ---------- ② 展开信封：每一拍都拉到 1~2 秒 ---------- */
+
+/*
+  原来的四拍（总计 2.4s）里，翻盖只有 0.7s、纸只有 0.95s —— 都偏快。
+  现在放到：火漆 0.5s、翻盖 1.4s、纸 1.5s，总计约 3.4s。
+  用户要的是"看清"，那就一拍拍看清楚。
+*/
+.opening .op-env {
+  animation-duration: 3.4s !important;
+}
+
+.opening .op-env-flap {
+  animation-duration: 3.4s !important;
+}
+
+.opening .op-env-paper {
+  animation-duration: 3.4s !important;
+}
+
+.opening .op-env-seal {
+  animation-duration: 3.4s !important;
+}
+
+.opening .op-env-seal::before,
+.opening .op-env-seal::after {
+  animation-duration: 3.4s !important;
+}
+
+.opening .opening-shine {
+  animation-duration: 3.4s !important;
+}
+
+/* ---------- ③ 转场：卡片本身 1.1 秒，小人拖屏 1.6 秒 ---------- */
+
+.card-leaving-pull,
+.card-leaving-push,
+.card-leaving-fly,
+.card-entering-pull,
+.card-entering-push,
+.card-entering-fly {
+  animation-duration: 1.1s !important;
+}
+
+.puller {
+  animation-duration: 1.6s !important;
+}
+
+.puller-pull,
+.puller-push,
+.puller-fly {
+  animation-duration: 1.6s !important;
+}
+
+.card-leaving-pull,
+.puller-pull { animation-duration: 1.6s !important; }
+
+.card-leaving-push,
+.puller-push { animation-duration: 1.6s !important; }
+
+.card-leaving-fly,
+.puller-fly { animation-duration: 1.6s !important; }
+
+/* 过渡纱跟着卡片走 */
+.screen-veil-cover { animation-duration: 1.1s !important; }
+.screen-veil-reveal { animation-duration: 1.2s !important; }
+
+/* ---------- ④ 减少动效：压到最短，但**保留动作**（不是消失） ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .envelope,
+  .reveal-line,
+  .screen-inner > *,
+  .count-up,
+  .card-leaving-pull,
+  .card-leaving-push,
+  .card-leaving-fly,
+  .card-entering-pull,
+  .card-entering-push,
+  .card-entering-fly {
+    animation-duration: 0.3s !important;
+    animation-delay: 0s !important;
+  }
+
+  /* 展开信封不要整层消失 —— 那样用户什么都看不到。
+     改成"很快就开完"，动作还在，只是不拖沓。 */
+  .opening .op-env,
+  .opening .op-env-flap,
+  .opening .op-env-paper,
+  .opening .op-env-seal {
+    animation-duration: 0.7s !important;
+  }
+}
