@@ -4,6 +4,7 @@ import { Puppet } from '../puppet';
 import '../motion-lab.css';
 import '../lab-3d.css';
 import '../lab-fix.css';
+import '../lab-fix2.css';
 
 /**
  * 动效实验室（/dev/motion）
