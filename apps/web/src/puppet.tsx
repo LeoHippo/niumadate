@@ -19,6 +19,12 @@
  * 纯 SVG，不引第三方库。
  */
 
+/*
+  useId：给每个小人实例一个**唯一**的渐变色 id。
+  页面上会同时存在多个小人，id 撞了就会互相抢渐变（实测：开场里的小人整个变黑）。
+*/
+import { useId } from 'react';
+
 export type PuppetMood =
   | 'idle' // 站着不动（会轻轻呼吸）
   | 'walk' // 走
@@ -43,6 +49,21 @@ export function Puppet({
 }) {
   const male = gender === 'male';
 
+  /*
+    ⚠️ SVG 渐变必须用**每个实例唯一**的 id。
+
+    原来写死了 id="pupBody" / id="pupHead"，而页面上会**同时存在多个小人**
+    （开场的那个 + 内容页那个 + 停靠在左上角的那个）。
+    id 一撞，url(#pupBody) 就解析到别人的渐变上 ——
+    实测后果：开场里的小人**整个是黑的剪影**（渐变没解析到，填成黑）。
+
+    useId() 给的是 :r1: 这种带冒号的串，冒号在 url(#...) 里不合法，
+    所以要把非字母数字的字符去掉。
+  */
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const bodyId = 'pupBody-' + uid;
+  const headId = 'pupHead-' + uid;
+
   return (
     <svg
       className={`puppet puppet-${mood} puppet-${gender}`}
@@ -53,12 +74,12 @@ export function Puppet({
       aria-label={male ? '小牛马（男）' : '小牛马（女）'}
     >
       <defs>
-        <radialGradient id="pupBody" cx="36%" cy="28%" r="78%">
+        <radialGradient id={bodyId} cx="36%" cy="28%" r="78%">
           <stop className="puppet-stop puppet-stop-hi" offset="0%" />
           <stop className="puppet-stop puppet-stop-mid" offset="62%" />
           <stop className="puppet-stop puppet-stop-lo" offset="100%" />
         </radialGradient>
-        <radialGradient id="pupHead" cx="38%" cy="26%" r="80%">
+        <radialGradient id={headId} cx="38%" cy="26%" r="80%">
           <stop className="puppet-stop puppet-stop-hi" offset="0%" />
           <stop className="puppet-stop puppet-stop-mid" offset="66%" />
           <stop className="puppet-stop puppet-stop-lo" offset="100%" />
@@ -78,7 +99,7 @@ export function Puppet({
       </g>
 
       {/* ---- 身体 ---- */}
-      <ellipse className="puppet-body" cx="80" cy="118" rx="37" ry="38" fill="url(#pupBody)" />
+      <ellipse className="puppet-body" cx="80" cy="118" rx="37" ry="38" fill={'url(#' + bodyId + ')'} />
       <ellipse className="puppet-belly" cx="80" cy="126" rx="21" ry="22" />
 
       {/* 男：领巾。女：小围裙。**一眼就能看出是谁。** */}
@@ -129,7 +150,7 @@ export function Puppet({
           </g>
         )}
 
-        <circle className="puppet-head" cx="80" cy="64" r="38" fill="url(#pupHead)" />
+        <circle className="puppet-head" cx="80" cy="64" r="38" fill={'url(#' + headId + ')'} />
 
         <g className="puppet-face">
           {/* 男：粗眉毛。女：长睫毛。 */}

@@ -391,3 +391,41 @@
     animation-duration: 1.2s !important;
   }
 }
+
+
+/* ==========================================================================
+   信纸要**窄一点**，四周留出背景
+   --------------------------------------------------------------------------
+   用户第三次强调：「专门**框出来一个信纸的范围**」。
+
+   实测数据说明问题：内容页那张纸宽约 400px、视口 430px —— **占 93%**，
+   左右几乎贴边，看起来就是"整页"，不是"一张纸"。
+
+   所以：
+     · 内容页那张纸收到 min(76vw, 340px)
+     · 开场的纸最终停在同样的宽度上 —— 两边对得上，切换时不会跳
+     · 四周留出背景，纸才是"放在桌上的一封信"
+   ========================================================================== */
+
+.screen-inner,
+.icard,
+.invite-letter {
+  width: min(76vw, 340px) !important;
+  min-width: 0;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* 开场的纸：最终停在同样的宽度上（信封里那张纸的基础宽约 224px，×1.45 ≈ 325） */
+.op-env-paper {
+  --paper-final-scale: 1.45;
+}
+
+@keyframes op-paper {
+  0%, 54% { opacity: 0; transform: translateY(0) scale(1); }
+  58% { opacity: 1; transform: translateY(-8px) scale(1); }
+  72% { transform: translateY(-54px) scale(1.08); }
+  80% { transform: translateY(-92px) scale(1.22) rotate(-2deg); }
+  90% { transform: translateY(-104px) scale(1.42) rotate(0deg); }
+  100% { transform: translateY(-108px) scale(1.45) rotate(0deg); }
+}

@@ -10,7 +10,8 @@
      dadmam   红头文件 + 钢印
    ------------------------------------------------------------------ */
 
-.invite-page {
+.invite-page,
+.opening {
   --paper: #fbf6ea;
   --paper-edge: #e6d9bd;
   --paper-tex: none;
@@ -59,7 +60,8 @@
 /* ---------- 四套材质 ---------- */
 
 /* 好兄弟：牛皮纸。粗糙的横向纤维 + 一点酒渍般的暖色斑 */
-.invite-page[data-theme='brother'] {
+.invite-page[data-theme='brother'],
+[data-theme='brother'] {
   --paper: #f2e6cd;
   --paper-edge: #c9b088;
   --ink: #2f2a22;
@@ -85,7 +87,8 @@
 }
 
 /* 好姐妹：珠光信笺。柔和的粉紫渐变 + 一层细腻的斜光 */
-.invite-page[data-theme='sister'] {
+.invite-page[data-theme='sister'],
+[data-theme='sister'] {
   --paper: #fffbfd;
   --paper-edge: #f2d6e2;
   --ink: #4a3a42;
@@ -111,7 +114,8 @@
 }
 
 /* 好宝宝：奶油纸。软、圆、糖果色的暖斑，底纹像云 */
-.invite-page[data-theme='baby'] {
+.invite-page[data-theme='baby'],
+[data-theme='baby'] {
   --paper: #fffdf6;
   --paper-edge: #ffe3b4;
   --ink: #4a3f33;
@@ -135,7 +139,8 @@
 }
 
 /* DAD&MUM：红头文件。冷、正、有表格线 */
-.invite-page[data-theme='dadmam'] {
+.invite-page[data-theme='dadmam'],
+[data-theme='dadmam'] {
   --paper: #fffef9;
   --paper-edge: #e4d9c2;
   --ink: #2b2b2b;
