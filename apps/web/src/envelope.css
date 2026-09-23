@@ -1,0 +1,241 @@
+/* ==========================================================================
+   信封
+   --------------------------------------------------------------------------
+   用户给的整个思路：
+     「邀请页面是一个**信封**，在信封的**中间三角形**那一块盖一个**章子**，
+       然后做一个**展开信封**的动作，从里面**掏出来一张纸** —— 这就是一个页面。
+       之后所有切换页面的动作都是**对这张纸**而言的：
+       拖它也好、从上往下压走也好、从内往外拉出来也好。」
+
+   所以第一屏的舞台是**信封**，不是一枚孤零零的火漆 ——
+   火漆（四套形状/材质早就做好了）只是**盖在翻盖正中间**的那一枚章。
+
+   几何（全部用 clip-path 画，不引图）：
+     信封      268 × 186
+     翻盖      从顶边向下，尖到 58% —— polygon(0 0, 100% 0, 50% 58%)
+     章        落在翻盖的几何中心附近（也就是"三角形那一块"中间）
+   ========================================================================== */
+
+.envelope {
+  position: relative;
+  width: 268px;
+  height: 186px;
+  margin: 0 auto 22px;
+  /* 一点点倾斜 + 投影，像真的放在桌上 */
+  transform: rotate(-1.2deg);
+  filter: drop-shadow(0 14px 26px rgba(90, 70, 40, 0.2));
+  animation: env-drop 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes env-drop {
+  0% { opacity: 0; transform: rotate(-1.2deg) translateY(-26px) scale(0.94); }
+  62% { transform: rotate(-1.2deg) translateY(4px) scale(1.01); }
+  100% { opacity: 1; transform: rotate(-1.2deg) translateY(0) scale(1); }
+}
+
+/* ---------- 信封主体 ---------- */
+.env-body {
+  position: absolute;
+  inset: 0;
+  background: var(--env-paper, #f0e6d2);
+  border: 1px solid var(--env-edge, #d9c9a8);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 rgba(120, 95, 60, 0.12);
+}
+
+/* ---------- 里面的纸：露一道边 ---------- */
+.env-paper-peek {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: -6px;
+  height: 26px;
+  background: var(--paper, #fdf8ee);
+  border: 1px solid var(--paper-edge, #e6d9c2);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04);
+  z-index: 1;
+}
+
+/* ---------- 三片折角 ---------- */
+.env-fold {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(120, 95, 60, 0.06));
+  border-radius: 4px;
+}
+
+/* 左右两片：从下角往中间收 */
+.env-fold-l {
+  clip-path: polygon(0 0, 0 100%, 62% 100%);
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1));
+}
+
+.env-fold-r {
+  clip-path: polygon(100% 0, 100% 100%, 38% 100%);
+  background: linear-gradient(245deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1));
+}
+
+/* 底片：从下边往上折 */
+.env-fold-bottom {
+  clip-path: polygon(0 100%, 100% 100%, 50% 22%);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(120, 95, 60, 0.08));
+  z-index: 2;
+}
+
+/* ---------- 三角形翻盖：尖朝下 ---------- */
+.env-flap {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 58%);
+  background: linear-gradient(178deg, var(--env-flap-hi, #fbf3e2), var(--env-flap-lo, #e6d6b6));
+  z-index: 3;
+  transform-origin: 50% 0;
+  /* 翻盖边上那道折痕 */
+  box-shadow: inset 0 -1px 0 rgba(120, 95, 60, 0.18);
+}
+
+/* ---------- 章：盖在翻盖正中间 ----------
+   注意：这里把 .invite-seal 从"屏幕中央的大印"改成"信封上的一枚章" ——
+   所以尺寸收小、halo 收弱，位置由翻盖决定。 */
+.env-flap .invite-seal {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  /* 章是"盖"上去的，不是浮在上面：跟着翻盖的倾斜走一点 */
+  transform: rotate(6deg);
+}
+
+.env-flap .invite-seal::after { inset: -14px; opacity: 0.5; }
+
+/* ---------- 四套风格：信封和纸的颜色跟着身份走 ---------- */
+.invite-page[data-theme='brother'] {
+  --env-paper: #e8dcc2;
+  --env-edge: #c9b691;
+  --env-flap-hi: #f2e8d0;
+  --env-flap-lo: #d6c39c;
+}
+
+.invite-page[data-theme='sister'] {
+  --env-paper: #f6e6ec;
+  --env-edge: #e2c2d0;
+  --env-flap-hi: #fdf2f6;
+  --env-flap-lo: #ecd2dd;
+}
+
+.invite-page[data-theme='baby'] {
+  --env-paper: #f7ead2;
+  --env-edge: #e6cfa6;
+  --env-flap-hi: #fff6e4;
+  --env-flap-lo: #f0dcb4;
+}
+
+.invite-page[data-theme='dadmam'] {
+  --env-paper: #eeeae0;
+  --env-edge: #cfc8b8;
+  --env-flap-hi: #f8f5ee;
+  --env-flap-lo: #ded7c8;
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 380px) {
+  .envelope { width: 236px; height: 164px; }
+  .env-flap .invite-seal { width: 72px; height: 72px; margin: -36px 0 0 -36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .envelope { animation: none !important; }
+}
+
+
+/* ==========================================================================
+   三处调整
+   ========================================================================== */
+
+/*
+  ① 章往**尖**那边挪。
+
+  真信封的章是盖在**翻盖尖端**的（那里才是封口），
+  第一版我放在三角形的几何中心（34%），看着像"贴在翻盖上半部分"，
+  不像"封住了这只信封"。挪到 48% —— 靠近尖，但还在"三角形那一块"里。
+*/
+.env-flap .invite-seal {
+  top: 48%;
+}
+
+/* 顺便放大一点：它是主角，不该比信封上的花纹还小 */
+.env-flap .invite-seal {
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+}
+
+/*
+  ② 那道"白条"。
+
+  第一版把信封里的纸做成了一条横贯的白色矩形（left/right: 12%），
+  结果它看起来像在信封上面**贴了张白纸**，不像"里面装着一张纸"。
+
+  改成：窄一点、短一点，只从翻盖下面露出一小片，
+  并且**颜色用纸色而不是纯白**，边角也收一点。
+*/
+.env-paper-peek {
+  left: 20%;
+  right: 20%;
+  top: -5px;
+  height: 18px;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/*
+  ③ 信封要**暖**。
+
+  第一版出来的信封偏灰（截图里像白卡纸）——
+  因为我把 --env-paper 给成了低饱和的米灰。
+  信封是牛皮纸/米色纸，应该是**暖**的：色相往黄橙走，明度保持高。
+*/
+.invite-page[data-theme='brother'] {
+  --env-paper: #ecdcb8;
+  --env-edge: #cbb387;
+  --env-flap-hi: #f8eed6;
+  --env-flap-lo: #ddc79c;
+}
+
+.invite-page[data-theme='sister'] {
+  --env-paper: #fae4ec;
+  --env-edge: #e8bfd0;
+  --env-flap-hi: #fff4f8;
+  --env-flap-lo: #f2d2de;
+}
+
+.invite-page[data-theme='baby'] {
+  --env-paper: #fbe9c8;
+  --env-edge: #e8cd9c;
+  --env-flap-hi: #fff8e6;
+  --env-flap-lo: #f5dcb0;
+}
+
+.invite-page[data-theme='dadmam'] {
+  --env-paper: #f2ecdd;
+  --env-edge: #d4cbb4;
+  --env-flap-hi: #fbf8f0;
+  --env-flap-lo: #e3dbc8;
+}
+
+/* 信封本身再多一点暖光，别让它看着像打印纸 */
+.envelope::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: linear-gradient(150deg, rgba(255, 246, 224, 0.5) 0%, rgba(255, 246, 224, 0) 46%);
+  z-index: 4;
+  pointer-events: none;
+}

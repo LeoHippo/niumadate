@@ -26,6 +26,7 @@ import '../invite-motion.css';
 */
 import '../puller-choreography.css';
 import '../puppet-acts.css';
+import '../envelope.css';
 import '../all-cards.css';
 import '../invite-wow.css';
 import '../invite-card.css';
@@ -669,12 +670,38 @@ function ScreenBody({
 
   switch (screen) {
     case 'seal':
+      /*
+        第一屏是**一个信封**，不是一枚孤零零的火漆。
+
+        用户给的思路：「邀请页面是一个信封，然后在那个信封的中间三角形那一块
+        盖一个章子。这个章子要有四个风格的，然后就是做一个展开信封的动作，
+        从里面掏出来一张纸 —— 这就是一个页面。」
+
+        所以这一屏的舞台是：信封主体 + 里头的纸露出一角 + **尖朝下的三角形翻盖**，
+        章就盖在翻盖正中（火漆的四套形状和材质之前已经做好了，直接搬进来）。
+      */
       return (
         <>
-          <div className="invite-seal" aria-hidden="true">
-            <span className="invite-seal-wax" />
-            <span className="invite-seal-face">{roleEmoji}</span>
-            <span className="invite-seal-rim" />
+          <div className="envelope" aria-hidden="true">
+            {/* 信封里的纸 —— 露一个白边，暗示"里面有东西" */}
+            <span className="env-paper-peek" />
+
+            {/* 信封主体 */}
+            <span className="env-body" />
+
+            {/* 三片折角：左右 + 底。有了它们，那个矩形才像一只信封 */}
+            <span className="env-fold env-fold-l" />
+            <span className="env-fold env-fold-r" />
+            <span className="env-fold env-fold-bottom" />
+
+            {/* 三角形翻盖（尖朝下）—— 章盖在它中间 */}
+            <span className="env-flap">
+              <span className="invite-seal">
+                <span className="invite-seal-wax" />
+                <span className="invite-seal-face">{roleEmoji}</span>
+                <span className="invite-seal-rim" />
+              </span>
+            </span>
           </div>
           <p className="screen-kicker">有一封邀请</p>
           <h1 className="screen-question">拆开看看？</h1>
