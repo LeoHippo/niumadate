@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Puppet } from '../puppet';
 import '../motion-lab.css';
 import '../lab-3d.css';
+import '../lab-fix.css';
 
 /**
  * 动效实验室（/dev/motion）
@@ -143,7 +144,7 @@ export function MotionLab() {
         <Card title="05 小人拉纸，很费劲" note="关键在前两次使劲纸纹丝不动。那才叫拉不动，一路滑出去不叫。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
             <div className="lab-paper-demo" key={'pull' + round}>
-              <div className="lab-demo-paper" />
+              <div className="lab-demo-paper pull-demo" />
               <div className="op-puppet lab-puppet-pull">
                 <Puppet gender={gender as 'male' | 'female'} mood="pull" />
               </div>
@@ -154,7 +155,7 @@ export function MotionLab() {
         <Card title="06 小人压纸" note="从屏幕上方落下来，压扁，弹回一点，再压，最后压到底。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
             <div className="lab-paper-demo" key={'press' + round}>
-              <div className="lab-demo-paper" />
+              <div className="lab-demo-paper press-demo" />
               <div className="op-puppet lab-puppet-press">
                 <Puppet gender={gender as 'male' | 'female'} mood="press" />
               </div>
@@ -165,7 +166,7 @@ export function MotionLab() {
         <Card title="07 小人抛纸" note="拎起来，拎不动放下，再拎，半空顿一下，最后甩出去。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
             <div className="lab-paper-demo" key={'fly' + round}>
-              <div className="lab-demo-paper" />
+              <div className="lab-demo-paper fly-demo" />
               <div className="op-puppet lab-puppet-fly">
                 <Puppet gender={gender as 'male' | 'female'} mood="fly" />
               </div>
