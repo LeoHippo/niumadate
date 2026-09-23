@@ -81,10 +81,23 @@ export function Opening({
         <Puppet gender={gender} mood="run" />
       </div>
 
+      {/*
+        ★ 纸必须**在信封外面**。
+        信封自己的动画（op-env）最后会把自己 opacity 归 0 —— 瘪下去、淡出。
+        纸原来是 .op-env 的孩子，于是跟着一起消失了：
+        实测 4200ms 时 .op-env-paper 的 opacity 是 1，
+        但父层 .op-env 只有 0.001 —— **计算值完全查不出问题，只有看图才发现**：
+        整段"抽出来 → 长大 → 铺满屏幕"的结尾是空的，
+        观众看到的是下一屏的纸从后面透出来。
+        这里给纸一个和信封完全重合的独立舞台（同尺寸、同中心），
+        几何一点没变，但它不再被信封带走。
+      */}
+      <span className="op-paper-stage">
+        <span className="op-env-paper" />
+      </span>
+
       <div className="op-env">
         <span className="op-env-body" />
-        {/* 主角：那张纸 */}
-        <span className="op-env-paper" />
 
         {/* 三片折角 */}
         <span className="op-env-fold op-env-fold-l" />

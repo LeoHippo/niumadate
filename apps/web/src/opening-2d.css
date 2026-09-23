@@ -62,20 +62,38 @@
   animation: paper-rise 4.3s cubic-bezier(0.3, 0.9, 0.3, 1) both !important;
 }
 
+/*
+  ⚠️ 这里踩过一个很隐蔽的坑，值得写下来：
+  keyframes 里**只在 52% 写了 opacity: 1**，后面的关键帧都没写。
+  按 CSS 规范，某个属性在 100% 那一帧没写时，终点取的是**元素自己的计算值**，
+  而这个元素的计算 opacity 是 0 —— 于是纸从 52% 的 1 一路插值回 0：
+    实测 opacity   2500ms(58%) -> 0.618
+                   3400ms(79%) -> 0.036
+                   4200ms(98%) -> 0.0002
+  也就是说：**纸在最该铺满屏幕的那一段，恰好是看不见的。**
+  整段"抽出来→长大→铺满"最后是空的，观众看到的其实是下一屏的纸从后面透出来。
+  每一帧该写的东西都要写全 —— 这类"少写一个属性"的 bug 计算值查不出来，
+  只能靠定格截图 + 逐帧量 opacity 才看得见。
+
+  另外把终点的 scale 从 1.98 收到 1.35：
+  信封里那张纸基础宽 223px，223 × 1.35 ≈ 301px，
+  正好等于下一屏 .screen-inner 的宽度（clamp(300px, 62vw, 560px)）。
+  上一版长到 441px，交接时会被"缩一下"，很不顺。
+*/
 @keyframes paper-rise {
   /* 翻盖没让开之前，纸**不出现** */
   0%, 46% { opacity: 0; transform: translateY(4px) scale(1); }
   /* 翻盖让开，纸从信封口冒头 */
   52% { opacity: 1; transform: translateY(-10px) scale(1); }
   /* 一路往上冒，每帧都在动 */
-  60% { transform: translateY(-34px) scale(1.04); }
-  68% { transform: translateY(-58px) scale(1.09); }
+  60% { opacity: 1; transform: translateY(-34px) scale(1.04); }
+  68% { opacity: 1; transform: translateY(-58px) scale(1.09); }
   /* 完全站起来 */
-  76% { transform: translateY(-78px) scale(1.16); }
+  76% { opacity: 1; transform: translateY(-78px) scale(1.14); }
   /* 然后一边被拉出去、一边长大 */
-  86% { transform: translateY(-92px) scale(1.42); }
-  94% { transform: translateY(-100px) scale(1.76); }
-  100% { transform: translateY(-104px) scale(1.98); }
+  86% { opacity: 1; transform: translateY(-100px) scale(1.22); }
+  94% { opacity: 1; transform: translateY(-116px) scale(1.3); }
+  100% { opacity: 1; transform: translateY(-126px) scale(1.35); }
 }
 
 /* ---------- ③ 小人：从左边走进来，站在信封左下方 ---------- */

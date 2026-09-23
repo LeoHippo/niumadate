@@ -167,6 +167,12 @@ try {
         params.captureBeyondViewport = true;
       }
     }
+    // shot.after：在"已经定格到 shot.ms"之后取一次诊断值并打印出来。
+    // 想做"某一毫秒时的计算样式"，必须先定格再量，否则量到的永远是第 0 帧。
+    if (shot.after) {
+      const v = await cdp.eval(shot.after, sessionId);
+      console.log('AFTER ' + shot.name + ' ' + JSON.stringify(v));
+    }
     const { data } = await cdp.send('Page.captureScreenshot', params, sessionId);
     const file = path.join(outDir, shot.name + '.png');
     writeFileSync(file, Buffer.from(data, 'base64'));
