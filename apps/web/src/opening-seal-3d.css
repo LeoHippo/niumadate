@@ -1,0 +1,287 @@
+/* ==========================================================================
+   开场的两件事：**翻盖绕着轴真翻** + **火漆四种消失**（覆盖旧做法）
+   --------------------------------------------------------------------------
+   这份文件必须**最后加载**（在 Invite.tsx 的 import 列表最末尾），
+   因为它要盖掉前面两套旧做法：
+     · opening.css       —— 火漆消失了但翻盖只是平移淡出（不是"翻"）
+     · opening-2d.css    —— 明确写着"不要用 3D"，翻盖改成 translateY 往上抬
+   我当时的结论"3D 画不出来"是错的：真正的原因是
+   **rotateX 和 clip-path 写在同一个元素上**，clip-path 在 2D 平面裁剪，
+   转过去之后裁剪形状不跟着变，于是"翻开"在视觉上完全没发生。
+   分开给两个元素就成立 —— 这一点先在 /dev/motion 的 03 卡上验证过才搬到这里。
+
+   顺便修掉一个一直没人发现的形状 bug：
+   88px 的正圆切成两半，每半是 44×88 的盒子，border-radius: 50% 0 0 50%
+   的百分比是**按盒子自身宽高分别算**的（水平 22px、垂直 44px），
+   拼起来不是圆，是个"圆角方块"。正解要按轴写：100% 0 0 100% / 50% 0 0 50%。
+   ========================================================================== */
+
+/* ---------- ① 翻盖：外层只转，内层只裁 ---------- */
+
+.opening .op-env {
+  /* 有透视，翻转才有"纵深"，不然只是压扁 */
+  perspective: 1200px;
+}
+
+.opening .op-env-flap {
+  clip-path: none !important;
+  transform-style: preserve-3d;
+  transform-origin: 50% 0 !important;
+  animation: op-flap3d-flip 4.3s cubic-bezier(0.45, 0, 0.28, 1) both !important;
+  z-index: 8 !important;
+}
+
+@keyframes op-flap3d-flip {
+  /* 火漆还在：盖着，纹丝不动 */
+  0%, 32% { transform: rotateX(0deg); opacity: 1; }
+  /* 起手要有"用力"的一下，再一路翻过去 */
+  38% { transform: rotateX(-22deg); opacity: 1; }
+  46% { transform: rotateX(-72deg); opacity: 1; }
+  54% { transform: rotateX(-132deg); opacity: 1; }
+  60% { transform: rotateX(-170deg); opacity: 1; }
+  64% { transform: rotateX(-178deg); opacity: 1; }
+  /* 翻过去之后**抬走**（用户原话），一路抬出画面 */
+  76% { transform: translateY(-56px) rotateX(-178deg); opacity: 0.85; }
+  88%, 100% { transform: translateY(-168px) rotateX(-178deg); opacity: 0; }
+}
+
+.opening .op-env-flap-face,
+.opening .op-env-flap-back {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 58%);
+  backface-visibility: hidden;
+  background: linear-gradient(178deg, var(--env-flap-lo, #e6d6b6), var(--env-flap-hi, #fbf3e2));
+}
+
+/* 背面：翻过 90° 之后露出来的那一面。**必须和正面不一样**，
+   否则根本看不出"翻过去了"。 */
+.opening .op-env-flap-back {
+  transform: rotateY(180deg) translateZ(0.5px);
+  background:
+    linear-gradient(2deg, #d9c6a1, #f0e2c4),
+    repeating-linear-gradient(90deg, rgba(120, 95, 60, 0.07) 0 1px, transparent 1px 9px);
+  filter: brightness(0.95);
+}
+
+/* 旧的"背面"是用 ::after 画的，现在改成真元素了 */
+.opening .op-env-flap::after {
+  display: none !important;
+}
+
+/* ---------- ② 火漆：正圆 + 四种消失 ---------- */
+
+.opening .op-env-seal {
+  background: var(--seal-dark, #8f2c17) !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  z-index: 10 !important;
+  /* 一点点歪，是手盖上去的样子。用独立的 rotate 属性，
+     这样下面每一条 keyframes 都能自由用 transform，不用每条都带上这个角度。 */
+  rotate: 6deg;
+  animation: op-seal2-brother 4.3s linear both !important;
+}
+
+.opening .op-env-seal::before,
+.opening .op-env-seal::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  width: 50% !important;
+  height: 100% !important;
+  /* 渐变按**整个章**铺（200% 宽），两半各显示自己那一半 ——
+     否则每半各有一个自己的圆心，中间会留一条明显的缝。 */
+  background-image: radial-gradient(
+    circle at 40% 34%,
+    var(--seal-hi, #e0714a),
+    var(--seal, #c4472a) 62%,
+    var(--seal-dark, #8f2c17)
+  ) !important;
+  background-size: 200% 100% !important;
+  background-repeat: no-repeat !important;
+  box-shadow:
+    inset 0 3px 5px rgba(255, 255, 255, 0.28),
+    inset 0 -6px 12px rgba(60, 10, 5, 0.5) !important;
+  /* 默认两半不单独动，跟着外面的章一起淡 */
+  animation: none !important;
+}
+
+.opening .op-env-seal::before {
+  left: 0 !important;
+  background-position: left top !important;
+  border-radius: 100% 0 0 100% / 50% 0 0 50% !important;
+}
+.opening .op-env-seal::after {
+  right: 0 !important;
+  background-position: right top !important;
+  border-radius: 0 100% 100% 0 / 0 50% 50% 0 !important;
+}
+
+/* 压在上面的身份图案 */
+.opening .op-env-seal-face {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  line-height: 1;
+  opacity: 0.92;
+  filter: saturate(0.78) brightness(0.94) drop-shadow(0 1px 1px rgba(60, 10, 5, 0.5));
+  pointer-events: none;
+}
+
+/* ---- ① 好兄弟：平淡 —— 就是淡掉、微微下沉。不飞、不炸、没有花。---- */
+@keyframes op-seal2-brother {
+  0%, 10% { opacity: 1; transform: translateY(0) scale(1); }
+  22% { opacity: 0.6; transform: translateY(2px) scale(0.99); }
+  30% { opacity: 0.18; transform: translateY(4px) scale(0.97); }
+  36%, 100% { opacity: 0; transform: translateY(5px) scale(0.96); }
+}
+
+/* ---- ② 好姐妹：化开 —— 轻轻转开、缩小、往上飘，花瓣被风斜着吹散 ---- */
+@keyframes op-seal2-sister {
+  0%, 12% { opacity: 1; transform: rotate(0deg) scale(1); }
+  24% { opacity: 0.9; transform: rotate(-5deg) scale(0.95) translate(-2px, -4px); }
+  34% { opacity: 0.38; transform: rotate(-12deg) scale(0.82) translate(-7px, -14px); }
+  42%, 100% { opacity: 0; transform: rotate(-18deg) scale(0.7) translate(-11px, -22px); }
+}
+
+/* ---- ③ 好宝宝：先"绽开"一下，再炸成满天的花 ---- */
+@keyframes op-seal2-baby {
+  0%, 8% { opacity: 1; transform: scale(1); filter: brightness(1); }
+  18% { opacity: 1; transform: scale(1.22); filter: brightness(1.55); }
+  24% { opacity: 1; transform: scale(1.04); filter: brightness(1.15); }
+  32% { opacity: 1; transform: scale(1.5); filter: brightness(1.95); }
+  42%, 100% { opacity: 0; transform: scale(2.1); filter: brightness(2.4); }
+}
+
+/* ---- ④ 家人：从正中利落地裂开，两半**垂直**落下，不转、不飘 ---- */
+@keyframes op-seal2-dadmam {
+  0%, 12% { opacity: 1; }
+  20% { opacity: 1; }
+  36% { opacity: 0.55; }
+  46%, 100% { opacity: 0; }
+}
+@keyframes op-seal2-dad-l {
+  0%, 12% { opacity: 1; transform: translate(0, 0); }
+  16% { opacity: 1; transform: translate(-3px, -2px); }
+  40%, 100% { opacity: 0; transform: translate(-11px, 84px); }
+}
+@keyframes op-seal2-dad-r {
+  0%, 12% { opacity: 1; transform: translate(0, 0); }
+  16% { opacity: 1; transform: translate(3px, -2px); }
+  40%, 100% { opacity: 0; transform: translate(11px, 90px); }
+}
+
+[data-theme='brother'] .opening .op-env-seal { animation-name: op-seal2-brother !important; }
+[data-theme='sister'] .opening .op-env-seal { animation-name: op-seal2-sister !important; }
+[data-theme='baby'] .opening .op-env-seal { animation-name: op-seal2-baby !important; }
+[data-theme='dadmam'] .opening .op-env-seal { animation-name: op-seal2-dadmam !important; }
+
+[data-theme='dadmam'] .opening .op-env-seal::before {
+  animation: op-seal2-dad-l 4.3s linear both !important;
+}
+[data-theme='dadmam'] .opening .op-env-seal::after {
+  animation: op-seal2-dad-r 4.3s linear both !important;
+}
+/* 家人那张脸在裂开的一瞬间收掉，别跟着两半一起飘 */
+[data-theme='dadmam'] .opening .op-env-seal-face {
+  animation: op-seal2-dad-face 4.3s linear both !important;
+}
+@keyframes op-seal2-dad-face {
+  0%, 14% { opacity: 0.92; }
+  22%, 100% { opacity: 0; }
+}
+
+/* ---------- ③ 碎屑：三种身份三种东西（兄弟什么都不撒） ---------- */
+
+.opening .op-env-seal .op-env-dust {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: none !important;
+  border-radius: 0;
+  opacity: 0;
+  z-index: 4;
+  animation-duration: 4.3s;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+.opening .op-env-seal .op-env-dust:nth-child(3n) { animation-delay: 0.08s; }
+.opening .op-env-seal .op-env-dust:nth-child(4n) { animation-delay: 0.16s; }
+
+/* 姐妹：一片片花瓣，斜着往右上被吹走 */
+[data-theme='sister'] .opening .op-env-seal .op-env-dust {
+  display: block;
+  width: 22px;
+  height: 13px;
+  margin: -6px 0 0 -11px;
+  border-radius: 62% 38% 62% 38%;
+  background: linear-gradient(120deg, #ffe3ee, #ef87a8 70%, #d9608a) !important;
+  animation-name: op-petal-fly;
+}
+@keyframes op-petal-fly {
+  0%, 14% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.3); }
+  24% { opacity: 1; transform: translate(calc(var(--dx) * 0.55), calc(var(--dy) * 0.5 - 8px)) rotate(26deg) scale(1); }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * 1.9 + 26px), calc(var(--dy) * 1.5 - 54px)) rotate(150deg) scale(0.75);
+  }
+}
+
+/* 宝宝：一朵朵花，四面八方炸开，边飞边转 */
+[data-theme='baby'] .opening .op-env-seal .op-env-dust {
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  font-size: 19px;
+  line-height: 22px;
+  text-align: center;
+  animation-name: op-flower-fly;
+}
+[data-theme='baby'] .opening .op-env-seal .op-env-dust::before { content: '🌸'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(2)::before { content: '🌺'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(3)::before { content: '🌷'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(4)::before { content: '💐'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(5)::before { content: '🌼'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(6)::before { content: '🌸'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(7)::before { content: '🌺'; }
+[data-theme='baby'] .opening .op-env-seal .op-env-dust:nth-child(8)::before { content: '🌷'; }
+@keyframes op-flower-fly {
+  0%, 20% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.2); }
+  32% { opacity: 1; transform: translate(calc(var(--dx) * 1.1), calc(var(--dy) * 1.1)) rotate(120deg) scale(1); }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * 2.1), calc(var(--dy) * 2.1)) rotate(320deg) scale(1.15);
+  }
+}
+
+/* 家人：裂开时掉下来的渣，直直往下 */
+[data-theme='dadmam'] .opening .op-env-seal .op-env-dust {
+  display: block;
+  width: 9px;
+  height: 9px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196, 71, 42, 0.9), rgba(196, 71, 42, 0)) !important;
+  animation-name: op-crumb-fall;
+}
+@keyframes op-crumb-fall {
+  0%, 16% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  28% { opacity: 0.85; transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.5 + 10px)) scale(1); }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * 1.2), calc(var(--dy) * 0.6 + 76px)) scale(1.4); }
+}
+
+/* ---------- ④ 减少动效：照演，但不转不飞 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .opening .op-env-flap-face,
+  .opening .op-env-flap-back {
+    backface-visibility: visible;
+  }
+  .opening .op-env-flap-back { display: none; }
+  .opening .op-env-seal-face { opacity: 0.92; }
+}

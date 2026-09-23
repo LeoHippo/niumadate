@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { buildDocNumber, fillInviteName, findRole } from '@niumadate/shared';
 import type { Invite, InviteMessage, RoleKey } from '@niumadate/shared';
@@ -11,6 +12,7 @@ import { drawPoster } from '../poster';
 import { useCountUp } from '../count-up';
 import { Puppet } from '../puppet';
 import type { PuppetMood } from '../puppet';
+import { BURST_PIECES } from '../burst';
 import '../invite-page.css';
 import '../invite-flow.css';
 import '../invite-motion.css';
@@ -99,6 +101,9 @@ import '../opening-2d.css';
   这个文件把开场里每个元素都显式定位 + 显式给 z-index。
 */
 import '../opening-position.css';
+// 必须放在最后：翻盖的真·3D 翻转 + 火漆的四种消失都在这份里，
+// 它要盖掉前面 opening.css / opening-2d.css 里那两套旧做法。
+import '../opening-seal-3d.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -648,6 +653,7 @@ export function InvitePage() {
           */}
           <Opening
             active={opening}
+            role={invite.role}
             gender={config.invite.hostGender}
             onDone={() => {
               setOpening(false);
@@ -682,21 +688,38 @@ export function InvitePage() {
  * DAD&MUM 摆的全是**正式图形**（表格线、方框、文号），没有一件是装饰性的花。
  */
 function Burst({ role }: { role: RoleKey }) {
-  // 家人不撒花 —— 盖一个方正的红印压下来，比什么都正式
+  // 家人不撒花 —— 盖一个方正的红印压下来，比什么都正式。
+  // 但光有一枚印太静了，所以补一圈冲击光环 + 一团暖光：**拍**下去那一下要有声。
   if (role === 'dadmam') {
     return (
       <div className="burst burst-dadmam" aria-hidden="true">
+        <span className="burst-flash" />
+        <span className="burst-ring" />
         <span className="burst-stamp">同意</span>
       </div>
     );
   }
 
-  const bits = role === 'brother' ? 10 : role === 'sister' ? 16 : 26;
+  // 密度就是"炸开"和"掉了几个纸屑"的区别：兄弟最少（干脆），宝宝最多（最热闹）
+  const bits = role === 'brother' ? 40 : role === 'sister' ? 48 : 60;
 
   return (
     <div className={`burst burst-${role}`} aria-hidden="true">
-      {Array.from({ length: bits }, (_, i) => (
-        <span key={i} className={`burst-bit burst-bit-${i % 10}`} />
+      <span className="burst-flash" />
+      <span className="burst-ring" />
+      {BURST_PIECES.slice(0, bits).map((p, i) => (
+        <span
+          key={i}
+          className={`burst-bit burst-bit-${i % 10}`}
+          style={
+            {
+              ['--dx' as string]: p.dx,
+              ['--dy' as string]: p.dy,
+              ['--rot' as string]: p.rot,
+              animationDelay: p.delay,
+            } as CSSProperties
+          }
+        />
       ))}
     </div>
   );

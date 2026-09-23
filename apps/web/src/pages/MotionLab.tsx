@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Puppet } from '../puppet';
+import { BURST_PIECES } from '../burst';
+import { ROLE_EMOJI, ROLE_LABEL } from '../role-emoji';
+import type { RoleKey } from '@niumadate/shared';
 import '../motion-lab.css';
 import '../lab-3d.css';
 import '../lab-fix.css';
 import '../lab-fix2.css';
+import '../lab-fix3.css';
+import '../lab-scenes.css';
 
 /**
  * 动效实验室（/dev/motion）
@@ -22,19 +27,15 @@ import '../lab-fix2.css';
 
 const SPEEDS = [0.25, 0.5, 1, 2];
 
-/** 四个身份各自的印章 emoji —— 之前实验室里写死了 🍻，所以四个都一样，那是错的。 */
-const ROLE_EMOJI: Record<string, string> = {
-  brother: '🍻',
-  sister: '💅',
-  baby: '🥰',
-  dadmam: '🏠',
-};
+/* 身份 emoji / 中文名和线上共用一份（src/role-emoji.ts），改一处两边都变 */
 
 export function MotionLab() {
   const [speed, setSpeed] = useState(1);
   const [round, setRound] = useState(0);
   const [gender, setGender] = useState('male');
-  const [theme, setTheme] = useState('baby');
+  // 身份用 RoleKey 而不是 string：这样 ROLE_EMOJI[theme] 才查得到，
+  // 少一个身份也会在编译期报出来，而不是运行时显示成 🐮 兜底图。
+  const [theme, setTheme] = useState<RoleKey>('baby');
 
   return (
     <div className="lab" data-theme={theme}>
@@ -59,7 +60,7 @@ export function MotionLab() {
 
           <label>
             身份
-            <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+            <select value={theme} onChange={(e) => setTheme(e.target.value as RoleKey)}>
               <option value="brother">好兄弟</option>
               <option value="sister">好姐妹</option>
               <option value="baby">好宝宝</option>
@@ -109,13 +110,34 @@ export function MotionLab() {
           </div>
         </Card>
 
-        <Card title="02 火漆消失（四种）" note="好兄弟被拍飞，好姐妹花瓣散开，好宝宝化成一团光，家人裂成两半。">
+        <Card
+          title="02 火漆消失（四种）"
+          note="同一张时间轴（4.2 秒）横着看：兄弟原地淡掉、微微下沉；姐妹转开缩小、花瓣被风吹散；宝宝先绽开一下再炸成满天转着圈的花；家人从正中裂开、两半垂直落下。"
+        >
           <div className="lab-stage lab-stage-tall">
             <div className="lab-seal-row">
-              {['brother', 'sister', 'baby', 'dadmam'].map((r) => (
-                <div className="lab-seal-cell" key={r + round} data-theme={r}>
-                  <span className="op-env-seal lab-seal-big" />
-                  <span className="lab-seal-name">{r}</span>
+              {/*
+                ⚠️ 这里原来是 data-theme={r}，而实验室根节点上也挂着 data-theme
+                （身份选择器）。后代选择器 [data-theme='baby'] .lab-seal-cell
+                会匹配**任意祖先**，于是"宝宝"那套动画套在了全部四格上 ——
+                实测四个章的 animation-name 全是 seal-baby-bloom。
+                换成 data-role，和主题彻底切开。
+              */}
+              {(['brother', 'sister', 'baby', 'dadmam'] as const).map((r) => (
+                <div className="lab-seal-cell" key={r + round} data-role={r}>
+                  <div className="mv-seal-stage">
+                    <span className="mv-flash" />
+                    <span className="mv-seal-body">
+                      <span className="op-env-seal lab-seal-big">
+                        <span className="mv-seal-face">{ROLE_EMOJI[r]}</span>
+                      </span>
+                      <span className="mv-crack" />
+                    </span>
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <i className="mv-dust" key={i} style={{ ['--i' as string]: String(i) }} />
+                    ))}
+                  </div>
+                  <span className="lab-seal-name">{ROLE_LABEL[r]}</span>
                 </div>
               ))}
             </div>
@@ -124,12 +146,20 @@ export function MotionLab() {
 
         <Card title="03 翻盖抬走，纸冒出来" note="翻盖往上让开，纸从信封口冒出来，然后一边被抽一边长大。">
           <div className="lab-stage lab-stage-tall">
+            {/*
+              ⚠️ 这里原来写的是 .op-env-flap，而翻盖的动画挂在 .env-flap3d 上 ——
+              **选择器根本没匹配**，所以这张卡的翻盖一直不翻（实测 getComputedStyle
+              查 .env-flap3d 得到"没有"）。改成和 01 卡同一套 3D 结构。
+            */}
             <div className="lab-env-wrap" key={'rise' + round}>
               <span className="op-env-body" />
               <span className="op-env-fold op-env-fold-l" />
               <span className="op-env-fold op-env-fold-r" />
+              {/* 纸：一开始**藏在信封里**（top 在信封内），翻盖让开之后才往上冒 */}
               <span className="op-env-paper" />
-              <span className="op-env-flap" />
+              <span className="env-flap3d">
+                <span className="env-flap" />
+              </span>
             </div>
           </div>
         </Card>
@@ -202,12 +232,44 @@ export function MotionLab() {
           </div>
         </Card>
 
-        <Card title="11 答应的爆发" note="按下同意那一下。四套身份爆的东西不一样。">
-          <div className="lab-stage">
-            <div className="lab-burst" key={'burst' + round}>
-              {Array.from({ length: 18 }, (_, i) => (
-                <span key={i} className={'burst-bit burst-bit-' + (i % 10)} />
-              ))}
+        <Card
+          wide
+          title="11 答应的爆发"
+          note="按下「同意」那一下。四套身份爆的东西不一样：兄弟是火花，姐妹是珠光雨，宝宝是爱心加星光，家人是一枚方方正正的红印压下来。上面选身份可以当场换。"
+        >
+          <div className="lab-stage lab-stage-burst">
+            {/*
+              ⚠️ 两处漏掉的东西，这就是用户说"完全没有"的原因：
+              ① 这里原来**没有 .burst-<role> 这一层** —— 线上四条按身份定制的规则
+                 （.burst-brother / .burst-sister / .burst-baby / .burst-dadmam）
+                 一条都没生效，四个身份全是那个默认的粉色小片。
+              ② 卡片只有 320px 宽，而 .burst-bit 的位移是 ±400px（线上是整屏 fixed）——
+                 绝大多数碎片直接飞出卡片、被 .lab-stage 的 overflow:hidden 裁掉。
+              所以这张卡改成通栏 + 880px 的大舞台。
+            */}
+            <div className={'lab-burst burst-' + theme} key={'burst' + round}>
+              <span className="burst-flash" />
+              <span className="burst-ring" />
+              {theme === 'dadmam' ? (
+                <span className="burst-stamp">同意</span>
+              ) : (
+                BURST_PIECES.slice(0, theme === 'brother' ? 40 : theme === 'sister' ? 48 : 60).map(
+                  (p, i) => (
+                    <span
+                      key={i}
+                      className={'burst-bit burst-bit-' + (i % 10)}
+                      style={
+                        {
+                          ['--dx' as string]: p.dx,
+                          ['--dy' as string]: p.dy,
+                          ['--rot' as string]: p.rot,
+                          animationDelay: p.delay,
+                        } as CSSProperties
+                      }
+                    />
+                  ),
+                )
+              )}
             </div>
           </div>
         </Card>
@@ -216,9 +278,19 @@ export function MotionLab() {
   );
 }
 
-function Card({ title, note, children }: { title: string; note: string; children: ReactNode }) {
+function Card({
+  title,
+  note,
+  children,
+  wide,
+}: {
+  title: string;
+  note: string;
+  children: ReactNode;
+  wide?: boolean;
+}) {
   return (
-    <section className="lab-card">
+    <section className={wide ? 'lab-card lab-card-wide' : 'lab-card'}>
       <h2 className="lab-card-title">{title}</h2>
       <p className="lab-card-note">{note}</p>
       {children}

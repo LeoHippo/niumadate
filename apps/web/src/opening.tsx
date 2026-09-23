@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import type { RoleKey } from '@niumadate/shared';
 import { Puppet } from './puppet';
+import { ROLE_EMOJI } from './role-emoji';
 import './opening.css';
 
 /**
@@ -26,7 +28,17 @@ import './opening.css';
 */
 export const OPENING_MS = 4300;
 
-export function Opening({ active, onDone, gender }: { active: boolean; onDone: () => void; gender: 'male' | 'female' }) {
+export function Opening({
+  active,
+  onDone,
+  gender,
+  role,
+}: {
+  active: boolean;
+  onDone: () => void;
+  gender: 'male' | 'female';
+  role: RoleKey;
+}) {
   /*
     ⚠️ onDone 要用 ref 存。
 
@@ -78,14 +90,30 @@ export function Opening({ active, onDone, gender }: { active: boolean; onDone: (
         <span className="op-env-fold op-env-fold-l" />
         <span className="op-env-fold op-env-fold-r" />
 
-        {/* 三角形翻盖（会掀起来）+ 盖在它上面的火漆（会裂开） */}
+        {/*
+          三角形翻盖：**外层只转，内层只裁**。
+          ⚠️ 我上一版把 rotateX 和 clip-path 写在同一个元素上，
+          clip-path 是 2D 平面的裁剪，转过去之后裁剪形状并不跟着变 ——
+          于是"绕着一根轴翻起来"这件事在视觉上**完全没有发生**（实测 opacity 全程 1.00）。
+          当时我的结论是"3D 画不出来，撤掉用位移"，那是错的：
+          分开给两个元素就成立（实验室里已验证）。
+        */}
         <span className="op-env-flap">
-          <span className="op-env-seal">
-            {/* 裂开时崩出来的八片碎屑，八个方向 */}
-            {Array.from({ length: 8 }, (_, i) => (
-              <span key={i} className="op-env-dust" />
-            ))}
-          </span>
+          <span className="op-env-flap-face" />
+          <span className="op-env-flap-back" />
+        </span>
+
+        {/*
+          火漆：从翻盖**里面挪出来**做兄弟节点。
+          它是"盖在翻盖上"的，翻盖一转它就会被一起带走 ——
+          所以让它站在翻盖外面、z-index 更高，两者互不干涉。
+        */}
+        <span className="op-env-seal">
+          <span className="op-env-seal-face">{ROLE_EMOJI[role]}</span>
+          {/* 消失时崩出来的八片碎屑（花瓣 / 花 / 渣），八个方向 */}
+          {Array.from({ length: 8 }, (_, i) => (
+            <span key={i} className="op-env-dust" />
+          ))}
         </span>
 
         <span className="op-env-fold op-env-fold-b" />
