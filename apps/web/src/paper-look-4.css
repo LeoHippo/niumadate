@@ -159,3 +159,81 @@
 .invite-page .screen-inner {
   padding-bottom: 44px !important;
 }
+
+/* ==========================================================================
+   ⑦ 纸的"页面感"：一道内框线 + 页脚一枚小饰
+   --------------------------------------------------------------------------
+   八张屏逐张看下来，剩下的唯一一个"不够好看"是**空**：
+   纸很大、字很少，四周一大片白，看上去像没排完版 —— 而不是"留白"。
+   留白要成立，需要让这块白**有边界、有中心**。所以给每张纸两样东西：
+     · 一道离纸边 9px 的极淡内框线（正式信笺的 keyline，也是最省事的"排版感"）
+     · 页脚正中一枚小饰（两段细线夹一个小点），把纸的下缘收住
+   两样都极淡（alpha 0.16~0.5），只在"看第二眼"时出现 ——
+   这是刻意的：纸不该抢内容，但空页需要一点结构。
+   ========================================================================== */
+
+.invite-page .screen-inner {
+  /* 内框线和小饰都要贴着这张纸定位，所以纸自己得是定位上下文 */
+  position: relative;
+}
+
+/*
+   请柬那一屏（.screen-inner 里装着 .icard）**不加**这道框线 ——
+   截图上看到它和 .icard 自己的圆角边离得很近，成了"双线套框"，很啰嗦。
+   请柬本身已经是一张卡，纸就退成背景。
+*/
+.invite-page .screen-inner:not(:has(.icard))::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(150, 120, 80, 0.16);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* 页脚小饰：左右各一段细线，中间一个小点 */
+.invite-page .screen-inner::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  width: 66px;
+  height: 7px;
+  margin-left: -33px;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(150, 120, 80, 0.5) 0 1.6px, transparent 1.8px),
+    linear-gradient(90deg, transparent, rgba(150, 120, 80, 0.38) 22% 78%, transparent),
+    linear-gradient(90deg, transparent, rgba(150, 120, 80, 0.38) 22% 78%, transparent);
+  background-repeat: no-repeat;
+  background-size:
+    7px 7px,
+    24px 1px,
+    24px 1px;
+  background-position:
+    center center,
+    left center,
+    right center;
+}
+
+/* ==========================================================================
+   ⑧ 信封的纸纤维
+   --------------------------------------------------------------------------
+   信封原来只有颜色和投影，放大看是一块"平涂的色块"。
+   牛皮纸/米色纸是有纤维的 —— 两条极淡的斜纹就够（和纸面那张用同一套做法）。
+   ========================================================================== */
+
+.invite-page .env-body,
+.invite-page .env-flap {
+  background-image:
+    repeating-linear-gradient(88deg, rgba(120, 95, 60, 0.05) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(4deg, rgba(120, 95, 60, 0.035) 0 1px, transparent 1px 7px);
+}
+
+/* 翻盖自己有渐变，纤维叠在渐变上面（background-image 会盖掉原来的背景图，
+   所以这里把原来的线性渐变也一起写回来） */
+.invite-page .env-flap {
+  background-image:
+    repeating-linear-gradient(88deg, rgba(120, 95, 60, 0.045) 0 1px, transparent 1px 5px),
+    linear-gradient(178deg, var(--env-flap-hi, #fbf3e2), var(--env-flap-lo, #e6d6b6));
+}
