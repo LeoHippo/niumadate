@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Puppet } from '../puppet';
 import '../motion-lab.css';
+import '../lab-3d.css';
 
 /**
  * 动效实验室（/dev/motion）
@@ -18,6 +19,14 @@ import '../motion-lab.css';
  */
 
 const SPEEDS = [0.25, 0.5, 1, 2];
+
+/** 四个身份各自的印章 emoji —— 之前实验室里写死了 🍻，所以四个都一样，那是错的。 */
+const ROLE_EMOJI: Record<string, string> = {
+  brother: '🍻',
+  sister: '💅',
+  baby: '🥰',
+  dadmam: '🏠',
+};
 
 export function MotionLab() {
   const [speed, setSpeed] = useState(1);
@@ -78,10 +87,20 @@ export function MotionLab() {
               <span className="env-fold env-fold-l" />
               <span className="env-fold env-fold-r" />
               <span className="env-fold env-fold-bottom" />
-              <span className="env-flap" />
+              {/*
+                翻盖分两层：外层只转（rotateX），内层只裁（clip-path）。
+                上一轮我把两者放在同一个元素上，clip-path 在 2D 平面裁剪，
+                元素绕 X 转过去之后裁剪形状不跟着变 —— "翻开"在视觉上完全没发生。
+                当时我的处理是"把 3D 撤掉"，结果是不打架了、也没立体感了。
+                分开给两个元素才是正解。
+              */}
+              <span className="env-flap3d">
+                <span className="env-flap" />
+              </span>
               <span className="invite-seal">
                 <span className="invite-seal-wax" />
-                <span className="invite-seal-face">🍻</span>
+                {/* 按身份取 emoji —— 之前这里写死了 🍻，所以四个身份一模一样 */}
+                <span className="invite-seal-face">{ROLE_EMOJI[theme] ?? '🐮'}</span>
                 <span className="invite-seal-rim" />
               </span>
             </div>

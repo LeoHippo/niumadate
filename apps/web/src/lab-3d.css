@@ -1,0 +1,170 @@
+/* ==========================================================================
+   把 3D 加回来 —— 但用对的写法
+   --------------------------------------------------------------------------
+   用户：「整个动画都没有特别完善，3D 效果也不是很强。」
+
+   对。我上一轮**把 3D 全撤了** —— 当时发现 clip-path 和 rotateX 冲突
+   （clip-path 在 2D 平面裁剪，元素绕 X 转过去之后裁剪形状不跟着变，
+     所以"翻开"在视觉上完全没发生）。
+   但我的处理是"躲开"，不是"解决"：改成 translateY 抬走。
+   结果是**不打架了，但也没有立体感了**。
+
+   正确的写法：**把两件事分给两个元素**。
+     外层 .env-flap3d   —— 只负责 transform（rotateX），带 preserve-3d
+     内层 .env-flap     —— 只负责 clip-path（三角形）
+   这样旋转是旋转、裁切是裁切，互不干扰，两个效果都在。
+   ========================================================================== */
+
+/* ---------- 信封：先把透视建起来 ---------- */
+
+.envelope,
+.lab-env-wrap {
+  perspective: 900px;
+  perspective-origin: 50% 42%;
+  transform-style: preserve-3d;
+}
+
+/* ---------- 翻盖：外层转，内层裁 ---------- */
+
+.env-flap3d {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  /* 掀开到 -168°，贴着信封背面 */
+  transform: rotateX(-168deg);
+  transition: transform 0.5s ease;
+}
+
+/* 内层：只负责三角形裁切 */
+.env-flap3d > .env-flap {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 58%);
+  transform: none;
+  backface-visibility: hidden;
+}
+
+/* 翻盖背面：掀过去之后要能看见（不然会"消失"） */
+.env-flap3d > .env-flap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: inherit;
+  background: linear-gradient(178deg, var(--env-flap-lo, #e6d6b6), var(--env-flap-hi, #fbf3e2));
+  opacity: 1;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+
+/* ---------- 信封主体：加厚度 ---------- */
+
+.env-body,
+.op-env-body {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -3px 6px rgba(120, 95, 60, 0.14),
+    inset 3px 0 6px rgba(120, 95, 60, 0.06),
+    inset -3px 0 6px rgba(120, 95, 60, 0.06);
+}
+
+/* ---------- 折角：做出"纸压着纸"的层次 ---------- */
+
+.env-fold-l,
+.op-env-fold-l {
+  box-shadow: inset -10px 0 18px -12px rgba(90, 70, 40, 0.5);
+}
+
+.env-fold-r,
+.op-env-fold-r {
+  box-shadow: inset 10px 0 18px -12px rgba(90, 70, 40, 0.5);
+}
+
+.env-fold-bottom,
+.op-env-fold-b {
+  box-shadow: inset 0 12px 20px -14px rgba(90, 70, 40, 0.55);
+}
+
+/* ---------- 火漆：一坨有厚度的蜡 ---------- */
+
+.invite-seal {
+  /* 底下一圈深影 = 蜡坨的厚度 */
+  filter:
+    drop-shadow(0 2px 0 rgba(90, 20, 10, 0.55))
+    drop-shadow(0 6px 12px rgba(70, 10, 5, 0.35));
+}
+
+.invite-seal-wax {
+  box-shadow:
+    inset 0 -5px 10px rgba(0, 0, 0, 0.38),
+    inset 0 5px 10px rgba(255, 220, 180, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 高光：一小块偏左上，蜡就有弧面了 */
+.invite-seal-wax::before {
+  content: '';
+  position: absolute;
+  left: 22%;
+  top: 16%;
+  width: 34%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 210, 0.75), transparent 70%);
+  pointer-events: none;
+}
+
+/* ---------- 信封整体：轻微倾斜 = 立体 ---------- */
+
+.envelope {
+  transform: rotateX(8deg) rotateY(-6deg) rotateZ(-1.2deg);
+}
+
+/* 实验室里放大的那种也带上 */
+.lab-stage .envelope {
+  transform: rotateX(8deg) rotateY(-6deg) rotateZ(-1.2deg) scale(0.82);
+}
+
+
+/* ==========================================================================
+   翻盖的默认状态应该是「关着」
+   --------------------------------------------------------------------------
+   我上面把 .env-flap3d 的静态 transform 直接写成了 rotateX(-168deg)（全开），
+   于是实验室里第 01 张卡一上来就是掀开的 —— 那是"演完"的样子，不是"开始"的样子。
+
+   默认关着，打开交给动画。
+   ========================================================================== */
+
+.env-flap3d {
+  transform: rotateX(0deg);
+}
+
+/* 实验室第 03 张卡里，翻盖要**自己掀开**（这条是静态演示，给它一条动画） */
+.lab-env-wrap .env-flap3d {
+  animation: flap-open-3d calc(4.3s / var(--lab-speed, 1)) cubic-bezier(0.45, 0, 0.3, 1) both;
+}
+
+@keyframes flap-open-3d {
+  0%, 35% { transform: rotateX(0deg); }
+  42% { transform: rotateX(-22deg); }
+  52% { transform: rotateX(-62deg); }
+  62% { transform: rotateX(-106deg); }
+  70% { transform: rotateX(-148deg); }
+  78%, 100% { transform: rotateX(-168deg); }
+}
+
+/* 信封那一屏（card 01）也要能看"打开"的过程 —— 给它一条慢一点的 */
+.lab-card .envelope .env-flap3d {
+  animation: flap-open-3d calc(5s / var(--lab-speed, 1)) cubic-bezier(0.45, 0, 0.3, 1) both;
+}
+
+/* 展开信封（线上那个）也接上 3D 翻盖 —— 之前的 op-env-flap 保持 2D 兼容 */
+.opening .env-flap3d,
+.opening .op-env-flap {
+  transform-style: preserve-3d;
+}
+
+.opening {
+  perspective: 1000px;
+}
