@@ -10,6 +10,8 @@ import { BookingPage } from './pages/Booking';
 import { EntryPage } from './pages/Entry';
 import { InvitePage } from './pages/Invite';
 import { MinePage } from './pages/Mine';
+/* 动效实验室：不在导航里，只能靠 /dev/motion 进；用来单独看每一条动画 */
+import { MotionLab } from './pages/MotionLab';
 import { StatusPage } from './pages/Status';
 
 export function App() {
@@ -66,6 +68,8 @@ export function App() {
         <Route path="/date/:role" element={<BookingPage />} />
         <Route path="/status/:role" element={<StatusPage />} />
         <Route path="/admin/*" element={<AdminPage />} />
+        {/* 动效实验室：不在导航里，只能靠 URL 进；用来单独看每一条动画 */}
+        <Route path="/dev/motion" element={<MotionLab />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ConfigContext.Provider>

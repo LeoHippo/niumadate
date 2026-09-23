@@ -1,0 +1,206 @@
+/* ==========================================================================
+   动效实验室
+   --------------------------------------------------------------------------
+   用户给的方法：「单独把每一个动画先设计出来，然后用页面展示一下，
+   最后再统一合并起来。」—— 这一页就是那个"展示"。
+
+   它的价值只有一个：**让每个动画能被单独看清、单独调**。
+   所以布局上不追求好看，追求"每张卡都能一眼看明白这一条动画在干什么"。
+   ========================================================================== */
+
+.lab {
+  min-height: 100vh;
+  padding: 28px 20px 80px;
+  background: #f6f1e6;
+  color: #3b3228;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.lab-head { max-width: 1100px; margin: 0 auto 26px; }
+.lab-head h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: 0.04em; }
+.lab-sub { margin: 0 0 18px; font-size: 13.5px; line-height: 1.8; color: #7d7264; }
+
+.lab-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.lab-controls label { display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
+.lab-controls select {
+  padding: 6px 10px;
+  font-size: 13.5px;
+  border: 1px solid #d9c9a8;
+  border-radius: 6px;
+  background: #fffdf8;
+}
+.lab-replay {
+  padding: 8px 18px;
+  font-size: 13.5px;
+  color: #fff;
+  background: #b3121b;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lab-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.lab-card {
+  padding: 16px;
+  background: #fffdf8;
+  border: 1px solid #e3d5b8;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(120, 92, 56, 0.08);
+}
+
+.lab-card-title { margin: 0 0 4px; font-size: 15px; }
+.lab-card-note { margin: 0 0 12px; font-size: 12px; line-height: 1.7; color: #8a7d6b; }
+
+.lab-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  overflow: hidden;
+  background: #faf5e9;
+  border-radius: 8px;
+}
+
+.lab-stage-tall { min-height: 250px; }
+.lab-stage-motion { min-height: 300px; }
+.lab-stage-paper { min-height: 300px; background: #f2ead8; }
+
+/* ---------- 速度滑杆 ----------
+   所有动画的时长都写成 calc(基准 / --lab-speed)，
+   所以拖动上面的"速度"，这一页里每一条动画一起变快变慢。 */
+.lab-stage .op-env-seal,
+.lab-stage .op-env-flap,
+.lab-stage .op-env-paper,
+.lab-stage .envelope,
+.lab-stage .op-env-body,
+.lab-stage .op-env-fold,
+.lab-stage .op-puppet,
+.lab-stage .screen-inner > *,
+.lab-stage .reveal-line {
+  animation-duration: calc(4.3s / var(--lab-speed, 1)) !important;
+}
+
+/* ---------- ① 信封 ---------- */
+.lab-stage .envelope { transform: scale(0.82); }
+
+/* ---------- ② 火漆四连 ---------- */
+.lab-seal-row { display: flex; gap: 10px; align-items: flex-end; }
+.lab-seal-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px 4px;
+}
+.lab-seal-big {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  width: 62px !important;
+  height: 62px !important;
+  display: block;
+}
+.lab-seal-name { font-size: 11px; color: #8a7d6b; }
+
+/* ---------- ③ 翻盖 + 纸 ---------- */
+.lab-env-wrap {
+  position: relative;
+  width: 240px;
+  height: 170px;
+}
+.lab-env-wrap .op-env-body,
+.lab-env-wrap .op-env-fold { position: absolute; inset: 0; }
+.lab-env-wrap .op-env-paper {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 6px;
+  height: 158px;
+  z-index: 5;
+}
+.lab-env-wrap .op-env-flap { position: absolute; inset: 0; z-index: 4; }
+
+/* ---------- ④ 小人 ---------- */
+.lab-puppet-static {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+}
+.lab-puppet-static .puppet { width: 120px; height: 138px; }
+
+/* ---------- ⑤⑥⑦ 小人 + 纸 ---------- */
+.lab-paper-demo {
+  position: relative;
+  width: 300px;
+  height: 240px;
+}
+.lab-demo-paper {
+  position: absolute;
+  left: 90px;
+  top: 40px;
+  width: 170px;
+  height: 150px;
+  background: #fff;
+  border: 1px solid #dccdaf;
+  border-radius: 3px;
+  box-shadow: 0 3px 10px rgba(120, 92, 56, 0.18), 0 16px 30px -12px rgba(90, 70, 40, 0.28);
+}
+.lab-puppet-pull,
+.lab-puppet-press,
+.lab-puppet-fly {
+  position: absolute !important;
+  left: 30px !important;
+  top: 60px !important;
+  margin: 0 !important;
+}
+.lab-puppet-press { left: 120px !important; top: -30px !important; }
+.lab-puppet-fly { left: 20px !important; top: 90px !important; }
+.lab-paper-demo .puppet { width: 110px; height: 127px; }
+.lab-paper-demo .lab-demo-paper { animation: none; }
+
+/* 让纸演示里的"纸"真的动起来（跟线上同一套节拍） */
+.lab-paper-demo .lab-demo-paper {
+  animation-duration: calc(4.3s / var(--lab-speed, 1)) !important;
+}
+.lab-puppet-pull .puppet { animation: puller-strain-left calc(4.3s / var(--lab-speed, 1)) linear both !important; }
+
+/* ---------- ⑧ 逐句 ---------- */
+.lab-lines { text-align: center; }
+.lab-lines > * { display: block; }
+.lab-lines > *:nth-child(1) { animation-delay: calc(0.06s / var(--lab-speed, 1)) !important; }
+.lab-lines > *:nth-child(2) { animation-delay: calc(0.21s / var(--lab-speed, 1)) !important; }
+.lab-lines > *:nth-child(3) { animation-delay: calc(0.34s / var(--lab-speed, 1)) !important; }
+.lab-lines > *:nth-child(4) { animation-delay: calc(0.47s / var(--lab-speed, 1)) !important; }
+
+/* ---------- ⑨ 鎏金 ---------- */
+.lab-foil { margin: 0; }
+
+/* ---------- ⑩ 纸的质感 ---------- */
+.lab-paper-sample {
+  width: 240px !important;
+  padding: 22px 16px 24px !important;
+}
+
+/* ---------- ⑪ 爆发 ---------- */
+.lab-burst {
+  position: relative;
+  width: 300px;
+  height: 220px;
+}
+.lab-burst .burst-bit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  animation-duration: calc(1.7s / var(--lab-speed, 1)) !important;
+}
