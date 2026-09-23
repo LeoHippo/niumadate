@@ -1,0 +1,83 @@
+
+
+/* ==========================================================================
+   审计查出的两个硬 bug —— 让「小人跑进来」和「露出那张纸」真的看得见
+   --------------------------------------------------------------------------
+   用户说「你完完全全没有按照我的要求」。我逐帧比对之后，承认：有**两个功能级**
+   的问题，正好卡在他要求的第 ④⑤ 步上。
+
+   bug 1：小人**永远在屏幕外**
+     .op-puppet { left: 50%; margin-left: -246px }  →  215 - 246 = **-31px**
+     再叠上 translateX(-320px → -14px)  →  全程是负数，人根本没进画面。
+     「小人跑过来、跑进来」这一步，用户一次都没看到。
+
+   bug 2：纸被翻盖**永久盖住**
+     纸 z-index: 2，翻盖 z-index: 5 —— 翻盖翻开之后**仍然压在纸上面**，
+     所以「翻开以后就会有一个信纸出现」也看不到。
+   ========================================================================== */
+
+/* ---------- bug 1：把小人放进画面，并且真的"跑进来" ---------- */
+
+.op-puppet {
+  width: 116px;
+  height: 133px;
+  /* 信封宽 268、居中 → 它的左边缘在 50% - 134px。
+     小人最后要停在**信封左边、稍微压住一点**的位置：
+     让它的中心落在 50% - 150px 处，116 宽 → 左边缘 = 50% - 208px。 */
+  margin-left: -208px;
+  margin-top: -20px;
+}
+
+@keyframes op-puppet-run {
+  /* 一开始在屏幕外（这是对的，它要"跑进来"） */
+  0%, 55% { opacity: 0; transform: translateX(-260px) rotate(6deg); }
+  /* 但后面必须**一路跑进画面**，终点是 0（也就是上面算好的那个位置） */
+  62% { opacity: 1; transform: translateX(-150px) rotate(4deg); }
+  72% { transform: translateX(-52px) rotate(-2deg); }
+  78% { transform: translateX(-10px) rotate(-4deg); }
+  /* 抓住纸往后拽（身体后仰） */
+  86% { transform: translateX(2px) rotate(-13deg); }
+  93% { transform: translateX(-9px) rotate(-17deg); }
+  100% { transform: translateX(-14px) rotate(-13deg); }
+}
+
+/* 脚下那团土的位置也跟着小人的新尺寸调 */
+.op-puppet::before {
+  left: 18px;
+  bottom: 10px;
+}
+
+/* ---------- bug 2：纸必须在翻盖**上面** ---------- */
+
+/*
+  翻盖是 3D 翻转的，但它和纸在同一个 preserve-3d 容器里；
+  CSS 在这种情况下的层叠还是看 z-index。所以要让纸**始终高于翻盖** ——
+  不然"翻开露出纸"这件事永远发生不了。
+*/
+.op-env-paper {
+  z-index: 8 !important;
+}
+
+/* 折角也别压住纸 */
+.op-env-fold {
+  z-index: 4 !important;
+}
+
+.op-env-fold-b {
+  z-index: 5 !important;
+}
+
+/* 翻盖留在这两层之间：盖得住折角，盖不住纸 */
+.op-env-flap {
+  z-index: 6 !important;
+}
+
+/* 火漆仍然在最上面（它是封在翻盖上的） */
+.op-env-seal {
+  z-index: 9 !important;
+}
+
+/* 小人比整只信封高一层 —— 它是"过来帮忙的"，得在信的前面 */
+.op-puppet {
+  z-index: 10 !important;
+}

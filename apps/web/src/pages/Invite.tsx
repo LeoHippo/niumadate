@@ -37,6 +37,7 @@ import '../envelope.css';
   CSS 里同权重比的是"谁在后面"，所以它得排最后。
 */
 import '../timing-truth.css';
+import '../opening-fixes.css';
 import '../seal-round.css';
 import '../all-cards.css';
 import '../invite-wow.css';
