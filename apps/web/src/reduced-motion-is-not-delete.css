@@ -1,0 +1,128 @@
+/* ==========================================================================
+   ⚠️ 「减弱动态效果」应该是**减少运动**，不是**删除内容**
+   --------------------------------------------------------------------------
+   用户说「这些都没有」—— 五个动作一个都看不到。
+
+   我直接问浏览器要动画状态，结果是**全部 running、时间也对**（t=1383/4300）。
+   我的验证环境里 prefers-reduced-motion = false，所以我永远复现不出来。
+
+   于是只剩一个解释：**用户的设备开着「减弱动态效果」**
+   （iOS：设置 → 辅助功能 → 动态效果 → 减弱动态效果；安卓各家叫法不同）。
+   而我在那个模式下做了**大量 display: none**：
+
+     atmosphere.css:245   .atmo { display: none }          <- 整个氛围层消失
+     invite-motion.css:334 .screen-veil { display: none }   <- 过渡纱消失
+     invite-wow.css:232   .burst { display: none }          <- 答应的爆发消失
+     envelope.css:134     .envelope { animation: none }     <- 信封落下消失
+     screen-stage.css:171 呼吸的那圈光消失
+     submit-celebration   confetti 消失
+     ...还有七八处 animation: none
+
+   对一个"减弱动态效果"的用户来说，**整个产品看起来就是死的** ——
+   他的反馈「这些都没有」精确得不能再精确。
+
+   正确的做法（也是无障碍的通行做法）：
+     **把"运动"换成"淡入淡出"，把时长压短，但绝不把东西藏起来。**
+   东西不见了，是 bug；只是没那么晃，才是"减弱"。
+
+   这个文件放在最后加载，专门把上面那些 display:none / animation:none 全部推翻。
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* ---------- ① 什么都不许 display: none ---------- */
+  .atmo,
+  .screen-veil,
+  .burst,
+  .confetti,
+  .opening {
+    display: revert !important;
+  }
+
+  /* 氛围层：不要飘了，但**留着**（它是底色的一部分） */
+  .atmo {
+    opacity: 0.55 !important;
+  }
+  .atmo-bit {
+    animation: none !important;
+  }
+  .aurora {
+    animation: none !important;
+  }
+
+  /* ---------- ② 开场：**照演**，只是改成"淡"而不是"飞" ---------- */
+  /*
+    这是最重要的一条。用户要看的五步全在这里，
+    一步都不能省 —— 只是把位移去掉、时长压到 1.6 秒。
+  */
+  .op-env,
+  .op-env-paper,
+  .op-env-flap,
+  .op-env-seal,
+  .op-env-seal::before,
+  .op-env-seal::after,
+  .op-puppet,
+  .opening-shine {
+    animation-duration: 1.6s !important;
+    animation-timing-function: ease-out !important;
+  }
+
+  /* 小人不跑了，但**要出现**、要站在信封旁边 */
+  .op-puppet {
+    animation-name: op-puppet-appear !important;
+  }
+
+  /* 翻盖不 3D 翻了，但**要打开**（用淡出+位移表达） */
+  .op-env-flap {
+    animation-name: op-flap-fade !important;
+  }
+
+  /* 纸不放大铺开，但要**出现并被抽出来** */
+  .op-env-paper {
+    animation-name: op-paper-fade !important;
+  }
+
+  /* ---------- ③ 其它：改成淡入淡出，别消失 ---------- */
+  .envelope {
+    animation: env-drop-simple 0.5s ease-out both !important;
+  }
+
+  .burst-bit,
+  .confetti-bit {
+    animation: none !important;
+    opacity: 0.9 !important;
+  }
+
+  .screen-veil-cover { animation: veil-cover 0.3s linear both !important; }
+  .screen-veil-reveal { animation: veil-reveal 0.35s linear both !important; }
+
+  .invite-puppet-holder.puppet-docked { animation: none !important; }
+
+  .puller-pull::after { display: revert !important; }
+}
+
+/* 小人："出现"这件事本身不能被拿掉 */
+@keyframes op-puppet-appear {
+  0%, 42% { opacity: 0; transform: none; }
+  55% { opacity: 1; transform: none; }
+  100% { opacity: 1; transform: none; }
+}
+
+/* 翻盖：淡出 + 往上让开，观众仍然能看出"它开了" */
+@keyframes op-flap-fade {
+  0%, 22% { opacity: 1; transform: none; }
+  45% { opacity: 0.25; transform: translateY(-14px); }
+  60%, 100% { opacity: 0; transform: translateY(-22px); }
+}
+
+/* 纸：淡入 + 轻轻抬起，观众能看出"纸出来了、变大了" */
+@keyframes op-paper-fade {
+  0%, 44% { opacity: 0; transform: none; }
+  56% { opacity: 1; transform: translateY(-20px) scale(1.06); }
+  80% { opacity: 1; transform: translateY(-40px) scale(1.3); }
+  100% { opacity: 1; transform: translateY(-48px) scale(1.45); }
+}
+
+@keyframes env-drop-simple {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -43,6 +43,21 @@ import '../all-cards.css';
 import '../invite-wow.css';
 import '../invite-card.css';
 import '../invite-shape.css';
+/*
+  ⚠️ **必须最后一个**。
+
+  这个文件专门推翻「减弱动态效果」下面那一堆 display:none。
+  用户的反馈是「这些都没有」，而我这边的环境 reduce-motion=false，
+  永远复现不出来 —— 问浏览器要动画状态，全部 running、时间也对，
+  说明动画本身没问题，是**他的设备开着减弱动态效果**，
+  而我在那个模式下把氛围层、过渡纱、爆发、信封落下**全藏起来了**。
+
+  「减弱」应该是"减少运动"，不是"删除内容"。
+  东西不见了是 bug；只是没那么晃，才叫减弱。
+
+  它要覆盖前面所有文件里的 reduce-motion 规则，所以排最后。
+*/
+import '../reduced-motion-is-not-delete.css';
 
 /**
  * 好友点开邀请链接看到的页面。
