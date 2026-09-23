@@ -241,3 +241,22 @@
 .puppet .puppet-shadow {
   fill: rgba(112, 82, 46, 0.2);
 }
+/* ==========================================================================
+   ⑩ 开着「减少动态效果」的设备：展开层被甩到了左上角
+   --------------------------------------------------------------------------
+   reduced-motion-is-not-delete.css 里为了让东西**别被藏起来**，写了一句
+       .opening { display: revert !important; }
+   用意是推翻别处的 display: none。但 revert 会把**作者写的 display: flex
+   一起扔掉**，回落到浏览器默认的 block ——
+   于是 .opening 不再是 flex 容器，里面的信封失去了居中。
+   实测（CDP 模拟 reduce）：信封整个跑到屏幕左上角，开场看起来就是坏的。
+
+   这里把 .opening 真正需要的布局显式写回来。
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .opening {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}

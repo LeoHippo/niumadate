@@ -308,3 +308,37 @@
   transform-style: preserve-3d;
   z-index: 6;
 }
+/* ==========================================================================
+   ⑨ 减少动效下的开场：**时间表要保住**
+   --------------------------------------------------------------------------
+   实测（用 CDP 模拟 prefers-reduced-motion: reduce）真实页面在"系统关了动画"时：
+     火漆  op-seal2-baby    4.3s   ← 我的规则 !important 赢了，照演
+     翻盖  op-flap3d-flip   4.3s   ← 同上
+     纸    paper-rise       **0.7s**  ← 被别处的降级规则改短了
+     小人  puppet-walk-in   **1.8s**  ← 同上
+   这就成了"火漆还在慢慢消失，纸已经唰地弹出来了"——
+   **一个节奏错位的开场，看起来就是坏了**，比不做动画还糟。
+
+   所以：开场这一个 4~5 秒的故事，在减少动效下**照原节奏演**。
+   它不闪、不晃、不循环，本身也不是"装饰性的动效"，而是内容本身。
+   真正该降级的是背景里那些**一直在循环**的东西（光晕、飘落、鎏金），
+   那些仍然按 reduced-motion 处理。
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .opening .op-env,
+  .opening .op-env-body,
+  .opening .op-env-fold,
+  .opening .op-env-flap,
+  .opening .op-env-flap-face,
+  .opening .op-env-flap-back,
+  .opening .op-env-paper,
+  .opening .op-env-seal,
+  .opening .op-env-seal::before,
+  .opening .op-env-seal::after,
+  .opening .op-env-seal-face,
+  .opening .op-env-dust,
+  .opening .op-puppet {
+    animation-duration: 4.3s !important;
+    animation-timing-function: revert !important;
+  }
+}
