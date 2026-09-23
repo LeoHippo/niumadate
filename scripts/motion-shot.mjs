@@ -118,6 +118,14 @@ try {
     sessionId,
   );
   // 关键：不 bringToFront 的话，标签页被当成后台页，渲染被节流，动画永远不前进。
+  if (spec.reducedMotion) {
+    // 模拟"系统里关了动画效果"的设备：prefers-reduced-motion: reduce
+    await cdp.send(
+      'Emulation.setEmulatedMedia',
+      { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] },
+      sessionId,
+    );
+  }
   await cdp.send('Page.bringToFront', {}, sessionId);
 
   await cdp.send('Page.navigate', { url: spec.url }, sessionId);
@@ -137,10 +145,25 @@ try {
     'document.getAnimations().forEach(function(a){ try { a.pause(); a.currentTime = ' + ms + '; } catch (e) {} });' +
     '"paused:" + document.getAnimations().length';
 
+  let t0 = 0;
   for (const shot of spec.shots) {
     if (shot.js) {
       await cdp.eval(shot.js, sessionId);
       await sleep(shot.settle ?? 700);
+      if (shot.real) t0 = Date.now();
+    }
+    // 真实播放：等到墙钟时间到了就抓，不暂停也不设置 currentTime。
+    // 定格截图能证明"某一毫秒长什么样"，但证明不了"它真的自己播出来了"。
+    if (shot.real) {
+      await sleep(Math.max(0, t0 + shot.ms - Date.now()));
+      const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);
+      writeFileSync(path.join(outDir, shot.name + '.png'), Buffer.from(data, 'base64'));
+      if (shot.after) {
+        const v = await cdp.eval(shot.after, sessionId);
+        console.log('AFTER ' + shot.name + ' ' + JSON.stringify(v));
+      }
+      console.log('REAL ' + path.join(outDir, shot.name + '.png') + ' @' + shot.ms + 'ms');
+      continue;
     }
     // 第一遍 pause 后 React 可能又渲染出新动画，所以隔一拍再 pause 一遍。
     await cdp.eval(pauseJs(shot.ms), sessionId);

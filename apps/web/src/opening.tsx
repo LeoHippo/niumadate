@@ -71,7 +71,21 @@ export function Opening({
       一律 portal 到 body，别跟祖先的 transform 赌。）
   */
   return createPortal(
-    <div className="opening" aria-hidden="true">
+    /*
+      ★ data-theme 写在展开层自己身上，不只是靠 <html>。
+
+      展开层是 portal 到 body 的，它不在 .invite-page 的子树里；
+      而 invite-page.css 顶部的兜底块「.invite-page, .opening { --seal: … }」
+      会给它写上一套**默认**变量 —— 元素上的声明**压过继承**，
+      所以光把主题挂到 <html> 还不够，展开层里那只火漆仍然是默认的深红
+      （封面是好友自己的颜色，一拆信封就换了色，很跳）。
+
+      这一行让展开层直接带上自己的身份：于是
+        · 以 [data-theme=…] 开头的那一族变量块会**命中 .opening 本身**，
+          火漆 / 纸 / 小人的调色板全对；
+        · 四条按身份定制的火漆消失动画也稳稳命中。
+    */
+    <div className="opening" data-theme={role} aria-hidden="true">
       {/*
         小人：从**左边跑进来**，站到信封左边，然后把纸抽走。
         用户：「这时候小人跑过来、跑进来，然后把纸张抽出来。」

@@ -5,6 +5,7 @@ import { buildDocNumber, fillInviteName, findRole } from '@niumadate/shared';
 import type { Invite, InviteMessage, RoleKey } from '@niumadate/shared';
 import { api, describeError } from '../api';
 import { useConfig } from '../config-context';
+import { usePageTheme } from '../theme';
 import { rememberInvite } from '../lib';
 import { Atmosphere } from '../atmosphere';
 import { Opening } from '../opening';
@@ -270,6 +271,31 @@ export function InvitePage() {
   const [opening, setOpening] = useState(false);
   /** 赶时间的人：一键摊开看全部。 */
   const [showAll, setShowAll] = useState(false);
+
+  /*
+    ★★ 这一行是这轮最重要的修复，必须写清楚 ★★
+
+    展开层（Opening）是 createPortal 挂到 document.body 的 ——
+    它**不在 .invite-page 的子树里**，所以：
+      · .invite-page[data-theme='baby'] 上的那一套变量（--seal / --sheet / 纸色…）
+        它一个都拿不到；
+      · 我写的那四条按身份定制的火漆消失动画
+        ［data-theme='x'］ .opening .op-env-seal 也全都选不中 ——
+        因为 <html> 上**根本没有 data-theme**。
+    结果就是：不管好友是什么身份，展开动画里的火漆永远走
+    .opening .op-env-seal 里那个**兜底的兄弟版**（平淡淡出），
+    颜色也退回 opening.css 里写死的橙红 —— 而封面上的火漆是好友自己的颜色。
+    也就是说：我做的另外三套消失动画，在真实页面上**从来没被用过**。
+
+    我之前"验证过四套都在"，是因为我的截图脚本里手动写了
+    document.documentElement.dataset.theme = 'sister' ——
+    **测试脚本自己把缺的东西补上了**，所以四套看起来都正常。
+    这是这轮最大的教训：验证手段不能替产品补它缺的东西。
+
+    修法：邀请页挂载时把邀请人的主题挂到 <html>（离开时自动摘掉）。
+    Opening 是 body 的孩子，于是它终于能看见这套主题。
+  */
+  usePageTheme(data?.invite.role);
   /*
     「存下这张请柬」存下来的那张图（dataURL）。
     ⚠️ 这个 useState **必须**和其他 state 放在一起 —— 不能放在
