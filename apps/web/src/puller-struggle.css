@@ -1,0 +1,217 @@
+/* ==========================================================================
+   小人「很费劲地」拖纸 —— 4.5 秒
+   --------------------------------------------------------------------------
+   用户：「之后的翻页都不是小人很费劲地拖着走呀。你这个小人很费劲地拖着走，
+          或者是很费劲拉出来、很费劲地压下去。整个过程……要持续 4 到 5 秒，
+          那个感知就很强。」
+
+   原来只有 1.1~1.6 秒 —— 快到只看得见"换了一屏"，看不见"有人在用力"。
+
+   **"费劲"是演出来的，不是动得快就能有**。它的关键是：
+     ① 先抓住、站稳（有准备动作）
+     ② **使劲，但纸纹丝不动** —— 这一步最重要。观众看到"拉不动"才会觉得重
+     ③ 再来一次，纸动了一点点
+     ④ 顿住、喘口气
+     ⑤ 最后一次，全身后仰，纸终于被拽出来
+
+   前两次纸**不动**，是整段"费劲"的全部来源。省了它，就只是"滑过去"。
+
+   总长 4500ms，和 Invite.tsx 的 MOVE_MS 对齐。
+   ========================================================================== */
+
+/* ---------- 拉：一顿一顿地拉出来 ---------- */
+
+.card-leaving-pull {
+  animation: card-pull-heavy 4.5s linear both !important;
+}
+
+@keyframes card-pull-heavy {
+  /* 0~10%：小人在冲进来，纸不动 */
+  0%, 10% { transform: translate(0, 0) rotate(0deg); }
+
+  /* 14%：被抓住，轻轻一颤（这是"抓住了"的反馈） */
+  14% { transform: translate(-6px, 1px) rotate(-1deg); }
+
+  /* ★ 18%~34%：第 1 次使劲 —— 纸**几乎不动**，只绷紧一点点 */
+  18% { transform: translate(2%, 0) rotate(0.4deg); }
+  26% { transform: translate(2.6%, 0) rotate(0.5deg); }
+  34% { transform: translate(3%, 0) rotate(0.6deg); }
+
+  /* 38%：松一下（手滑了一点，纸缩回去一点）—— 这个"回缩"特别像真的 */
+  38% { transform: translate(1.4%, 0) rotate(0.2deg); }
+
+  /* ★ 44%~58%：第 2 次使劲 —— 纸这次动了 */
+  44% { transform: translate(4%, -0.5%) rotate(1deg); }
+  52% { transform: translate(16%, -1.5%) rotate(2.6deg); }
+  58% { transform: translate(19%, -1.6%) rotate(2.8deg); }
+
+  /* 62%：又顿住（拉到这里卡了） */
+  62% { transform: translate(20%, -1.6%) rotate(2.9deg); }
+
+  /* ★ 68%~84%：第 3 次使劲 —— 大幅拉动 */
+  68% { transform: translate(34%, -2.4%) rotate(4.4deg); }
+  78% { transform: translate(64%, -3.4%) rotate(6.6deg) scale(0.99); }
+  84% { transform: translate(78%, -3.8%) rotate(7.6deg) scale(0.98); }
+
+  /* 88%：最后一次，全身后仰把它拽出去 */
+  88% { transform: translate(96%, -4%) rotate(8.8deg) scale(0.96); }
+
+  /* 100%：滑出屏幕 */
+  100% { transform: translate(136%, -5%) rotate(11deg) scale(0.9); opacity: 0.1; }
+}
+
+/* ---------- 小人：全程都在用力，而且看得出力气的方向 ---------- */
+
+.puller-pull {
+  animation: puller-strain-left 4.5s linear both !important;
+}
+
+@keyframes puller-strain-left {
+  /* 从左边冲进来 */
+  0% { transform: translateX(-130px) rotate(-4deg); opacity: 0; }
+  7% { opacity: 1; }
+  /* 一个箭步站到纸边 */
+  12% { transform: translateX(0) rotate(0deg) scale(1); }
+
+  /* 抓住：手往前够 */
+  16% { transform: translateX(4px) rotate(3deg) scale(1.01); }
+
+  /* ★ 第 1 次使劲 —— 整个人往后坐，脚蹬出去，但（纸没动） */
+  24% { transform: translateX(-12px) rotate(-11deg) scale(1.02); }
+  30% { transform: translateX(-16px) rotate(-14deg) scale(1.03); }
+  /* 力竭，微微前倾喘一下 */
+  34% { transform: translateX(-6px) rotate(-5deg) scale(1); }
+
+  /* 38%：手滑回去一点（配合纸的回缩） */
+  38% { transform: translateX(2px) rotate(1deg) scale(1); }
+
+  /* ★ 第 2 次使劲 */
+  46% { transform: translateX(-14px) rotate(-13deg) scale(1.03); }
+  54% { transform: translateX(-22px) rotate(-19deg) scale(1.04); }
+  58% { transform: translateX(-10px) rotate(-8deg) scale(1.01); }
+
+  /* 62%：顿住，重新站稳 */
+  64% { transform: translateX(-2px) rotate(0deg) scale(1); }
+
+  /* ★ 第 3 次使劲 —— 这次它整个人都快躺下去了 */
+  72% { transform: translateX(-20px) rotate(-17deg) scale(1.04); }
+  80% { transform: translateX(-30px) rotate(-25deg) scale(1.06); }
+
+  /* 84%：最后一把，用尽全身力气 */
+  88% { transform: translateX(-38px) rotate(-30deg) scale(1.07); }
+
+  /* 100%：被纸带着滑出去 */
+  100% { transform: translateX(-64px) rotate(-34deg) scale(0.96); opacity: 0.2; }
+}
+
+/* ---------- 压：从上面压下去，压三次 ---------- */
+
+.card-leaving-push {
+  animation: card-push-heavy 4.5s linear both !important;
+}
+
+@keyframes card-push-heavy {
+  0%, 12% { transform: translate(0, 0) scale(1, 1); }
+  /* 第一次压：被压扁一点 */
+  20% { transform: translate(0, 10px) scale(1.02, 0.965); }
+  30% { transform: translate(0, 12px) scale(1.024, 0.96); }
+  /* 弹回来一点（纸有韧性） */
+  36% { transform: translate(0, 6px) scale(1.012, 0.98); }
+  /* 第二次压 */
+  46% { transform: translate(0, 52px) scale(1.036, 0.89); }
+  56% { transform: translate(0, 58px) scale(1.04, 0.88); }
+  /* 又弹一点 */
+  62% { transform: translate(0, 46px) scale(1.03, 0.9); }
+  /* 第三次，压到底 */
+  74% { transform: translate(0, 130px) scale(1.06, 0.76); }
+  84% { transform: translate(0, 170px) scale(1.07, 0.68); }
+  100% { transform: translate(0, 250px) scale(1.08, 0.55); opacity: 0; }
+}
+
+.puller-push {
+  animation: press-heavy 4.5s linear both !important;
+  bottom: auto !important;
+  top: 4% !important;
+  left: 50% !important;
+  margin-left: -58px !important;
+}
+
+@keyframes press-heavy {
+  /* 从屏幕上方落下来 */
+  0% { transform: translateY(-200px) rotate(3deg); opacity: 0; }
+  8% { opacity: 1; }
+  14% { transform: translateY(-24px) rotate(0deg); }
+  /* 压第 1 次 */
+  20% { transform: translateY(4px) scale(1.06, 0.94) rotate(0deg); }
+  30% { transform: translateY(6px) scale(1.07, 0.93) rotate(0deg); }
+  /* 抬起来一点（重新蓄力） */
+  36% { transform: translateY(-14px) scale(1, 1) rotate(0deg); }
+  /* 压第 2 次 */
+  46% { transform: translateY(26px) scale(1.1, 0.88) rotate(0deg); }
+  56% { transform: translateY(28px) scale(1.1, 0.88) rotate(0deg); }
+  62% { transform: translateY(10px) scale(1.04, 0.96) rotate(0deg); }
+  /* 压第 3 次，到底 */
+  74% { transform: translateY(64px) scale(1.14, 0.8) rotate(0deg); }
+  84% { transform: translateY(86px) scale(1.15, 0.76) rotate(0deg); }
+  100% { transform: translateY(180px) scale(1.16, 0.7) rotate(0deg); opacity: 0.2; }
+}
+
+/* ---------- 飞：拎起来抛出去（同样给足时间） ---------- */
+
+.card-leaving-fly {
+  animation: card-fly-heavy 4.5s linear both !important;
+}
+
+@keyframes card-fly-heavy {
+  0%, 10% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  /* 被拎起来，离地 */
+  18% { transform: translate(2%, -14px) rotate(1.6deg); }
+  /* 拎不动，晃了一下又放下 */
+  26% { transform: translate(1%, -4px) rotate(1deg); }
+  /* 再拎，这次真的起来了 */
+  38% { transform: translate(6%, -38px) rotate(4deg) scale(0.99); }
+  50% { transform: translate(14%, -78px) rotate(8deg) scale(0.97); }
+  /* 在半空顿一下（很重） */
+  58% { transform: translate(18%, -88px) rotate(9deg) scale(0.96); }
+  /* 甩出去 */
+  74% { transform: translate(56%, -128px) rotate(17deg) scale(0.91); }
+  88% { transform: translate(102%, -166px) rotate(25deg) scale(0.84); }
+  100% { transform: translate(136%, -200px) rotate(32deg) scale(0.76); opacity: 0; }
+}
+
+.puller-fly {
+  animation: hurl-heavy 4.5s linear both !important;
+  bottom: 20% !important;
+}
+
+@keyframes hurl-heavy {
+  0% { transform: translate(-90px, 30px) rotate(10deg); opacity: 0; }
+  8% { opacity: 1; }
+  /* 够手抓住 */
+  14% { transform: translate(-6px, 4px) rotate(-3deg); }
+  /* 第一次拎 —— 拎不动 */
+  22% { transform: translate(0, -6px) rotate(-6deg) scale(1.02); }
+  28% { transform: translate(-2px, 2px) rotate(-3deg) scale(1); }
+  /* 第二次，扎好马步再拎 */
+  38% { transform: translate(0, -16px) rotate(-9deg) scale(1.03); }
+  50% { transform: translate(-6px, -26px) rotate(-13deg) scale(1.05); }
+  /* 顿住 */
+  58% { transform: translate(-4px, -28px) rotate(-14deg) scale(1.05); }
+  /* 抡起来 */
+  74% { transform: translate(-18px, -34px) rotate(-24deg) scale(1.06); }
+  88% { transform: translate(-30px, -18px) rotate(-32deg) scale(1.02); }
+  100% { transform: translate(-46px, 14px) rotate(-38deg) scale(0.94); opacity: 0.2; }
+}
+
+/* ---------- 减少动效：整套换成淡出，但**时间照给** ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .card-leaving-pull,
+  .card-leaving-push,
+  .card-leaving-fly,
+  .puller-pull,
+  .puller-push,
+  .puller-fly {
+    animation-duration: 2.4s !important;
+  }
+}

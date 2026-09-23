@@ -1,0 +1,62 @@
+
+
+/* ==========================================================================
+   最后两处（看着截图调的）
+   ========================================================================== */
+
+/*
+  ① 徽章圈太大，冲出纸面。
+
+  它原来是 2.6em（相对 76px 的 emoji ≈ 198px），在 430 宽的手机上还行，
+  到了桌面上纸只有 440 宽，那个圈就顶出纸边了 —— 看着像画糊了。
+  收到 1.9em，并且给卡片加 overflow: hidden 兜底，保证它永远不出框。
+*/
+.invite-page .screen-emoji::before {
+  width: 1.9em !important;
+  height: 1.9em !important;
+}
+
+.invite-page .screen-emoji::after {
+  width: 1.6em !important;
+  height: 1.6em !important;
+}
+
+/* 卡片裁掉溢出的部分 —— 纸就是纸，东西不该跑到纸外面 */
+.screen-inner {
+  overflow: hidden;
+}
+
+/* 顺手把 emoji 本体也收一点，让它和纸的比例更合适 */
+.invite-page .screen-emoji {
+  font-size: 68px;
+}
+
+/*
+  ② 纸在桌面上还是小。
+
+  我上一条写了 clamp(300px, 76vw, 620px)，但实测只有 440 ——
+  说明还有别的地方在限宽（父容器或者另一条 max-width）。
+  这里一次性把可能的约束都放开，只留宽度这一条。
+*/
+.invite-page .screen-inner,
+.invite-page .icard,
+.invite-page .invite-letter {
+  width: clamp(300px, 62vw, 560px) !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box;
+}
+
+/* 承载它的那些包装层也放开 */
+.invite-page .screen,
+.invite-page .invite-all,
+.invite-page {
+  max-width: none;
+}
+
+/* 请柬卡单独窄一点 */
+.invite-page .icard {
+  width: clamp(280px, 54vw, 420px) !important;
+}

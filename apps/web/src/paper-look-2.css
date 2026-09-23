@@ -1,0 +1,67 @@
+
+
+/* ==========================================================================
+   两处调整（看了实机截图之后）
+   ========================================================================== */
+
+/*
+  ① 所有身份的主徽章都改成**圆形**。
+
+  我之前"为了形状语言"，把兄弟那套的徽章做成 border-radius: 4px（方形）。
+  用户最新一条明确要圆形（「火漆应该是圆形的，有些为什么是方的」），
+  实机截图里那个方框也确实突兀。所以四套统一成圆。
+*/
+.invite-page .screen-emoji::after,
+.invite-page[data-theme='brother'] .screen-emoji::after,
+.invite-page[data-theme='sister'] .screen-emoji::after,
+.invite-page[data-theme='baby'] .screen-emoji::after,
+.invite-page[data-theme='dadmam'] .screen-emoji::after {
+  border-radius: 50% !important;
+}
+
+/* 小一点的呼吸光也统一成圆 */
+.invite-page .screen-emoji::before {
+  border-radius: 50% !important;
+}
+
+/*
+  ② 纸的最大宽度：桌面上不能只有 340px。
+
+  用户的两张截图都是桌面（1317 宽）。min(76vw, 340px) 在桌面上取 340，
+  于是纸只占屏幕的 26%，小得可怜 —— 一封信摊在桌上，不该只有巴掌大。
+
+  改成 clamp(300px, 76vw, 620px)：
+    手机 430 宽  -> 76vw  = 327px（和之前一样，够窄，四周留白）
+    平板 820 宽  -> 76vw  = 623px -> 取 620
+    桌面 1317 宽 -> 620px（占 47%，像一张摊开的信纸）
+*/
+.screen-inner,
+.icard,
+.invite-letter {
+  width: clamp(300px, 76vw, 620px) !important;
+}
+
+/* 请柬卡本来就该窄一点（它是卡片不是整页） */
+.icard,
+.invite-letter {
+  width: clamp(280px, 76vw, 460px) !important;
+}
+
+/* 展开过程里那张纸的终点也要跟着放大 */
+@keyframes op-paper {
+  0%, 54% { opacity: 0; transform: translateY(0) scale(1); }
+  58% { opacity: 1; transform: translateY(-8px) scale(1); }
+  72% { transform: translateY(-54px) scale(1.10); }
+  80% { transform: translateY(-92px) scale(1.26) rotate(-2deg); }
+  90% { transform: translateY(-104px) scale(1.70) rotate(0deg); }
+  100% { transform: translateY(-108px) scale(1.95) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes op-paper-fade {
+    0%, 44% { opacity: 0; transform: none; }
+    56% { opacity: 1; transform: translateY(-20px) scale(1.06); }
+    80% { opacity: 1; transform: translateY(-40px) scale(1.4); }
+    100% { opacity: 1; transform: translateY(-48px) scale(1.8); }
+  }
+}

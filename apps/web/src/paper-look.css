@@ -1,0 +1,113 @@
+/* ==========================================================================
+   纸要有「纸」的样子
+   --------------------------------------------------------------------------
+   用户发了实机截图，一句话点破：
+     「纸张怎么跟背景是一个颜色的？没有那个框呀，没有那个纸的质感呀。」
+
+   根因很简单也很蠢：卡片和页面**用的是同一个 --paper**。
+   于是"纸"和"垫纸的桌面"是一个颜色，只剩一圈几乎看不见的 1px 边 ——
+   那不叫一张纸，那叫一块颜色。
+
+   真的一张纸需要三样东西：
+     ① **比背景亮** —— 纸是白的，桌布是有色的
+     ② **看得见的边** —— 纸有厚度，边上有影
+     ③ **纸纹** —— 一点点极淡的纤维感，让它不是纯色块
+   ========================================================================== */
+
+/* ---------- ① 章：完整的圆，压在翻盖上 ---------- */
+
+.env-flap + .invite-seal,
+.envelope .invite-seal {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  /* 必须比翻盖高 —— 火漆是压在折口上的 */
+  z-index: 8;
+  border-radius: 50%;
+  clip-path: none !important;
+  /* 章自己带一点投影，才有"压上去"的实感 */
+  filter: drop-shadow(0 4px 8px rgba(80, 20, 10, 0.32));
+}
+
+/* ---------- ② 纸：比背景亮 + 看得见的边 + 纸纹 ---------- */
+
+/*
+  给"纸"一套独立的颜色，和页面背景分开。
+  --sheet 是纸，--paper 是桌布 —— 两者必须不一样。
+*/
+:root,
+.invite-page,
+.opening {
+  --sheet: #fffdf8;
+  --sheet-edge: #e3d5b8;
+  --sheet-shadow: rgba(120, 92, 56, 0.18);
+}
+
+.invite-page[data-theme='brother'],
+[data-theme='brother'] { --sheet: #fffaf0; --sheet-edge: #ddca9f; --sheet-shadow: rgba(110, 82, 40, 0.2); }
+
+.invite-page[data-theme='sister'],
+[data-theme='sister'] { --sheet: #fffbfd; --sheet-edge: #eccfdd; --sheet-shadow: rgba(150, 90, 120, 0.18); }
+
+.invite-page[data-theme='baby'],
+[data-theme='baby'] { --sheet: #fffcf3; --sheet-edge: #ebd5a8; --sheet-shadow: rgba(150, 105, 40, 0.2); }
+
+.invite-page[data-theme='dadmam'],
+[data-theme='dadmam'] { --sheet: #fffefb; --sheet-edge: #d8d2c2; --sheet-shadow: rgba(80, 78, 70, 0.18); }
+
+/* 内容页那张纸 */
+.screen-inner {
+  background: var(--sheet, #fffdf8) !important;
+  border: 1px solid var(--sheet-edge, #e3d5b8) !important;
+  border-radius: 3px !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px var(--sheet-shadow, rgba(120, 92, 56, 0.18)),
+    0 14px 30px -8px var(--sheet-shadow, rgba(120, 92, 56, 0.18)),
+    0 30px 60px -24px rgba(90, 70, 40, 0.22) !important;
+  /* 纸纹：两层极淡的斜纹，几乎看不见，但让它不是纯色块 */
+  background-image:
+    repeating-linear-gradient(
+      118deg,
+      rgba(150, 125, 90, 0.028) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(
+      28deg,
+      rgba(150, 125, 90, 0.022) 0 1px,
+      transparent 1px 7px
+    ) !important;
+  padding: 26px 20px 30px !important;
+}
+
+/* 请柬那张卡也照样 */
+.icard,
+.invite-letter {
+  background: var(--sheet, #fffdf8) !important;
+  border-color: var(--sheet-edge, #e3d5b8) !important;
+}
+
+/* 展开过程里那张纸也一样亮 */
+.op-env-paper {
+  background: var(--sheet, #fffdf8) !important;
+  border-color: var(--sheet-edge, #e3d5b8) !important;
+  box-shadow:
+    0 2px 6px var(--sheet-shadow, rgba(120, 92, 56, 0.18)),
+    0 16px 34px -10px rgba(90, 70, 40, 0.26) !important;
+}
+
+/* 「看全部」那一版的卡片 */
+.invite-all .all-card {
+  background: var(--sheet, #fffdf8);
+  border-color: var(--sheet-edge, #e3d5b8);
+}
+
+/* ---------- ③ 纸比背景亮，那背景就得稍微压一层 ---------- */
+
+.invite-page::before {
+  /* 把桌布压暗一点点，纸就"浮"起来了 */
+  background: rgba(120, 100, 70, 0.05);
+}

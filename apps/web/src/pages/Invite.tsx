@@ -60,6 +60,23 @@ import '../invite-shape.css';
 import '../reduced-motion-is-not-delete.css';
 /* 排查用的最后一道：?motion=on 强制走完整动画 */
 import '../motion-debug.css';
+/*
+  纸的观感（比背景亮的纸色 + 看得见的边 + 纸影 + 纸纹）。
+  用户看实机截图说「纸张怎么跟背景是一个颜色的？没有那个框呀，没有纸的质感呀」——
+  根因是卡片和页面用了同一个 --paper。这个文件给"纸"一套自己的颜色。
+*/
+import '../paper-look.css';
+/*
+  「小人很费劲地拖纸」，4.5 秒。
+
+  用户：「之后的翻页都不是小人很费劲地拖着走呀……整个过程要持续 4 到 5 秒，
+  那个感知就很强。」关键是**前两次使劲纸纹丝不动** ——
+  观众看到"拉不动"才会觉得重；省了这一步，就只是"滑过去"。
+*/
+import '../puller-struggle.css';
+/* 看实机截图之后的微调：徽章统一成圆、纸在桌面上放大 */
+import '../paper-look-2.css';
+import '../paper-look-3.css';
 
 /**
  * 好友点开邀请链接看到的页面。
@@ -192,7 +209,15 @@ const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', press: '
        小人拖屏 1100ms（表演比反馈慢，得一步一步看得清）。
   JS 这个时点跟着最长的那一段走。
 */
-const MOVE_MS = 1600;
+/*
+  ⚠️ 这个数必须 ≥ CSS 里 .puller / .card-leaving-* 的动画时长（现在是 4500ms）。
+
+  用户明确要求：「整个过程要持续 4 到 5 秒，那个感知就很强。」
+  之前是 1600ms —— 快到只看得见"换了一屏"，看不见"有人在用力"。
+
+  （CSS 和 JS 各存一份时长这件事已经踩过两次坑，注释里写死。）
+*/
+const MOVE_MS = 4500;
 
 export function InvitePage() {
   const config = useConfig();
@@ -757,13 +782,25 @@ function ScreenBody({
             <span className="env-fold env-fold-r" />
             <span className="env-fold env-fold-bottom" />
 
-            {/* 三角形翻盖（尖朝下）—— 章盖在它中间 */}
-            <span className="env-flap">
-              <span className="invite-seal">
-                <span className="invite-seal-wax" />
-                <span className="invite-seal-face">{roleEmoji}</span>
-                <span className="invite-seal-rim" />
-              </span>
+            {/* 三角形翻盖（尖朝下） */}
+            <span className="env-flap" />
+
+            {/*
+              ⚠️ 章必须在翻盖**外面**，而且排在它后面。
+
+              用户发的实机截图里，章子是**缺的**（一个下缘被切成 V 形的红块）——
+              因为它原来写在 <span className="env-flap"> 里面，
+              而翻盖有 clip-path: polygon(0 0, 100% 0, 50% 58%)，
+              **章被那道裁切一起切掉了**。
+
+              火漆是盖在折口上的、是压在翻盖**上面**的一坨蜡，
+              它天然就该比翻盖高一层、并且不被翻盖的形状约束。
+              所以移出来做兄弟节点，用 z-index 压住翻盖。
+            */}
+            <span className="invite-seal">
+              <span className="invite-seal-wax" />
+              <span className="invite-seal-face">{roleEmoji}</span>
+              <span className="invite-seal-rim" />
             </span>
           </div>
           <p className="screen-kicker">有一封邀请</p>
