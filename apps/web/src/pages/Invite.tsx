@@ -581,10 +581,14 @@ export function InvitePage() {
             演完（2400ms）**直接切到下一屏**，不走普通翻页 ——
             因为这时纸已经铺满整屏了，再演一次拖屏反而多余。
           */}
-          <Opening active={opening} onDone={() => {
-            setOpening(false);
-            setIndex((current) => Math.min(current + 1, SCREENS.length - 1));
-          }} />
+          <Opening
+            active={opening}
+            gender={config.invite.hostGender}
+            onDone={() => {
+              setOpening(false);
+              setIndex((current) => Math.min(current + 1, SCREENS.length - 1));
+            }}
+          />
 
           {justAccepted && <Burst role={invite.role} />}
 
@@ -727,9 +731,6 @@ function ScreenBody({
       return (
         <>
           <div className="envelope" aria-hidden="true">
-            {/* 信封里的纸 —— 露一个白边，暗示"里面有东西" */}
-            <span className="env-paper-peek" />
-
             {/* 信封主体 */}
             <span className="env-body" />
 

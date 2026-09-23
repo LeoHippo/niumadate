@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Puppet } from './puppet';
 import './opening.css';
 
 /**
@@ -23,9 +24,9 @@ import './opening.css';
   **看起来就是"动画没做到"**（实际是做了一半被掐了）。
   这种"CSS 和 JS 各存一份时长"的地方最容易对不上，MOVE_MS 已经踩过一次。
 */
-export const OPENING_MS = 3400;
+export const OPENING_MS = 4300;
 
-export function Opening({ active, onDone }: { active: boolean; onDone: () => void }) {
+export function Opening({ active, onDone, gender }: { active: boolean; onDone: () => void; gender: 'male' | 'female' }) {
   /*
     ⚠️ onDone 要用 ref 存。
 
@@ -59,6 +60,15 @@ export function Opening({ active, onDone }: { active: boolean; onDone: () => voi
   */
   return createPortal(
     <div className="opening" aria-hidden="true">
+      {/*
+        小人：从**左边跑进来**，站到信封左边，然后把纸抽走。
+        用户：「这时候小人跑过来、跑进来，然后把纸张抽出来。」
+        它是"过来帮忙的人"，所以比信封靠下一点、靠左一站。
+      */}
+      <div className="op-puppet">
+        <Puppet gender={gender} mood="run" />
+      </div>
+
       <div className="op-env">
         <span className="op-env-body" />
         {/* 主角：那张纸 */}

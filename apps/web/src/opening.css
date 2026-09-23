@@ -1,17 +1,30 @@
 /* ==========================================================================
-   展开信封
+   展开信封 —— 用户给的完整动作脚本
    --------------------------------------------------------------------------
-   用户思路里的关键一步：
-     「然后做一个**展开信封**的动作，从里面**掏出来一张纸** —— 这就是一个页面。」
+   用户的原话：
+     「你的信有问题，最开始的时候就漏了一点点纸张出来。我给你讲一下这个逻辑：
+      应该是**完整的一封信、没被拆封**、有一个火漆；
+      然后动作应该是那个**火漆按照四种不同方式消失**；
+      然后把那个信的**三角翻开、露出那个纸张**；
+      这时候**小人跑过来、跑进来**，然后把**纸张抽出来**；
+      **抽出来的同时纸张就开始放大**，然后展示我的内容；
+      然后这一页有背景，然后有那一张纸，而不是整个页就是纸；
+      之后的动作都是小人对这个纸张进行的。
+      **而且你是把这个动画时间放长，而不是把那个过长时间加载放长。**」
 
-   分四拍，每一拍都要看得清（用户明确要求"动作更清楚、持续更久"）：
+   最后那句最要命。我照镜子照出来的：
+     上一版 op-flap-open 的关键帧是 15%→46% 在动、**46%→100% 完全静止** ——
+     3.4 秒里 1.8 秒是在干等。那不是"演得慢"，那是"加载慢"。
+     观众分得清这两件事：**动作停了就是停了**，停多久都不叫慢动作。
 
-     0.00s ~ 0.45s   火漆**裂开**：先一颤，然后裂成两半往两边滑开
-     0.35s ~ 1.05s   **三角形翻盖掀起来**（rotateX -168°，真有 3D）
-     1.00s ~ 1.95s   **那张纸从信封口慢慢抽出来**（一边升一边立起来）
-     1.85s ~ 2.45s   纸**铺满屏幕** —— 从此刻起，这一屏就是那张纸
+   所以这一版的铁律：**关键帧从头到尾都在变**；段与段之间允许重叠，不允许空档。
 
-   总计约 2.4 秒。慢是故意的：这个动作是整页的"开场"，它得配得上。
+   时间表（总长 4300ms，和 opening.tsx 的 OPENING_MS 对齐）：
+     0.00 ~ 0.55s  完整信封 + 火漆，静置（很短，只让人看清"这是封信"）
+     0.55 ~ 1.75s  火漆消失（**四种身份四种方式**）
+     1.55 ~ 2.75s  三角形翻盖翻开（rotateX 0 → -172°）
+     2.55 ~ 3.30s  小人从左跑进来
+     3.10 ~ 4.30s  抽纸 + **同时放大**：边升边放大，直接铺成内容页
    ========================================================================== */
 
 .opening {
@@ -22,30 +35,29 @@
   align-items: center;
   justify-content: center;
   background: var(--paper, #fdf8ee);
-  /* 3D：翻盖要能真的"掀"起来，父层必须有 perspective */
   perspective: 1100px;
-  perspective-origin: 50% 40%;
+  perspective-origin: 50% 42%;
   overflow: hidden;
 }
 
-/* ---------- 信封 ---------- */
+/* ---------- 信封：整段都在动 ---------- */
 
 .op-env {
   position: relative;
   width: 268px;
   height: 186px;
   transform-style: preserve-3d;
-  animation: op-env-settle 3.4s ease-in-out both;
+  animation: op-env 4.3s ease-in-out both;
 }
 
-@keyframes op-env-settle {
-  0% { transform: rotate(-1.2deg) scale(1); }
-  /* 火漆裂开时整只信封跟着一震 */
-  10% { transform: rotate(-1.2deg) scale(1.012) translateY(-2px); }
-  22% { transform: rotate(-1.2deg) scale(1); }
-  /* 纸被抽出去之后，信封自己缩小退场 */
-  78% { transform: rotate(-1.2deg) scale(1); opacity: 1; }
-  100% { transform: rotate(-1.2deg) scale(0.94) translateY(14px); opacity: 0; }
+@keyframes op-env {
+  0%, 13% { transform: rotate(-1.2deg) scale(1); }
+  20% { transform: rotate(-0.6deg) scale(1.012); }
+  34% { transform: rotate(-1.6deg) scale(1); }
+  56% { transform: rotate(-1.2deg) scale(1); }
+  /* 纸被抽走的时候信封被带得往前一倾，然后瘪下去 —— 一路都在变 */
+  80% { transform: rotate(-2.4deg) translateY(-4px) scale(1.01); }
+  100% { transform: rotate(-3deg) translateY(26px) scale(0.9); opacity: 0; }
 }
 
 .op-env-body {
@@ -57,49 +69,48 @@
   z-index: 1;
 }
 
-/* 里面的那张纸 —— 主角 */
+/*
+  ⚠️ 这里面**不放纸**。
+
+  用户第一条反馈就是「最开始的时候就漏了一点点纸张出来」——
+  一封没拆封的信，外面什么都不该露。纸只在翻盖掀开之后才出现。
+*/
 .op-env-paper {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 4px;
-  height: 176px;
+  left: 9%;
+  right: 9%;
+  top: 6px;
+  height: 174px;
   background: var(--paper, #fdf8ee);
   border: 1px solid var(--paper-edge, #e6d9c2);
   border-radius: 3px;
-  box-shadow: 0 6px 18px rgba(90, 70, 40, 0.16);
+  box-shadow: 0 8px 22px rgba(90, 70, 40, 0.18);
   z-index: 2;
+  opacity: 0;
   transform-origin: 50% 100%;
-  animation: op-paper-out 3.4s cubic-bezier(0.3, 0.9, 0.3, 1) both;
+  animation: op-paper 4.3s cubic-bezier(0.3, 0.9, 0.3, 1) both;
 }
 
-@keyframes op-paper-out {
-  /* 前 40% 它还在信封里，跟着信封一起抖 */
-  0%, 40% { transform: translateY(0) scale(1); opacity: 0.98; }
-  /* 开始往外抽：先往上顶出来一截 */
-  52% { transform: translateY(-46px) scale(1.01); opacity: 1; }
-  /* 抽到一半，整个立起来一点（像手里捏着一角往外拉） */
-  70% { transform: translateY(-118px) scale(1.06) rotate(-3deg); }
-  /* 完全抽出来 */
-  84% { transform: translateY(-168px) scale(1.14) rotate(0deg); }
-  /* 铺满屏幕：放大到盖住整屏 */
-  100% { transform: translateY(-120px) scale(4.4); }
+@keyframes op-paper {
+  /* 54% 之前它还没露头（翻盖刚掀开） */
+  0%, 54% { opacity: 0; transform: translateY(0) scale(1); }
+  58% { opacity: 1; transform: translateY(-8px) scale(1); }
+  /* 往外抽（72%~86%），**一边抽一边就在长** */
+  72% { transform: translateY(-54px) scale(1.06); }
+  80% { transform: translateY(-92px) scale(1.18) rotate(-2deg); }
+  /* 抽出来之后**立刻**放大铺开 —— 这一段没有停顿，一直长到结束 */
+  88% { transform: translateY(-96px) scale(1.9) rotate(0deg); }
+  100% { transform: translateY(-88px) scale(4.2) rotate(0deg); }
 }
 
 /* ---------- 三片折角 ---------- */
 
-.op-env-fold {
-  position: absolute;
-  inset: 0;
-  border-radius: 4px;
-  z-index: 3;
-}
+.op-env-fold { position: absolute; inset: 0; border-radius: 4px; z-index: 3; }
+.op-env-fold-l { clip-path: polygon(0 0, 0 100%, 62% 100%); background: linear-gradient(115deg, rgba(255,255,255,0.55), rgba(120,95,60,0.1)); }
+.op-env-fold-r { clip-path: polygon(100% 0, 100% 100%, 38% 100%); background: linear-gradient(245deg, rgba(255,255,255,0.55), rgba(120,95,60,0.1)); }
+.op-env-fold-b { clip-path: polygon(0 100%, 100% 100%, 50% 22%); background: linear-gradient(0deg, rgba(255,255,255,0.5), rgba(120,95,60,0.08)); z-index: 4; }
 
-.op-env-fold-l { clip-path: polygon(0 0, 0 100%, 62% 100%); background: linear-gradient(115deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1)); }
-.op-env-fold-r { clip-path: polygon(100% 0, 100% 100%, 38% 100%); background: linear-gradient(245deg, rgba(255, 255, 255, 0.55), rgba(120, 95, 60, 0.1)); }
-.op-env-fold-b { clip-path: polygon(0 100%, 100% 100%, 50% 22%); background: linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(120, 95, 60, 0.08)); z-index: 4; }
-
-/* ---------- 三角形翻盖：会掀起来 ---------- */
+/* ---------- 三角形翻盖：36%~64% 全在转，没有一秒静止 ---------- */
 
 .op-env-flap {
   position: absolute;
@@ -107,22 +118,22 @@
   clip-path: polygon(0 0, 100% 0, 50% 58%);
   background: linear-gradient(178deg, var(--env-flap-hi, #fbf3e2), var(--env-flap-lo, #e6d6b6));
   z-index: 5;
-  /* 折痕在上边 —— 掀开就是绕这条边转 */
   transform-origin: 50% 0;
   backface-visibility: visible;
-  animation: op-flap-open 3.4s cubic-bezier(0.5, 0, 0.3, 1) both;
+  animation: op-flap 4.3s cubic-bezier(0.45, 0, 0.3, 1) both;
 }
 
-@keyframes op-flap-open {
-  /* 前 15%（火漆还在裂）它先绷着 */
-  0%, 15% { transform: rotateX(0deg); }
-  /* 掀起来：绕过顶 —— 到 -168° 基本贴在后面了 */
-  28% { transform: rotateX(-38deg); }
-  40% { transform: rotateX(-120deg); }
-  46%, 100% { transform: rotateX(-168deg); }
+@keyframes op-flap {
+  0%, 36% { transform: rotateX(0deg); }
+  /* 火漆一没就开始掀 —— 一路转到 64%，每一帧都在变 */
+  40% { transform: rotateX(-22deg); }
+  45% { transform: rotateX(-62deg); }
+  51% { transform: rotateX(-106deg); }
+  58% { transform: rotateX(-148deg); }
+  64% { transform: rotateX(-172deg); }
+  100% { transform: rotateX(-172deg); }
 }
 
-/* 翻盖掀起来之后，背面得能看见（不然会"消失"） */
 .op-env-flap::after {
   content: '';
   position: absolute;
@@ -132,63 +143,142 @@
   opacity: 0.92;
 }
 
-/* ---------- 火漆：先裂开 ---------- */
+/* ==========================================================================
+   火漆：**四种身份、四种消失方式**（用户点名要求）
+     好兄弟  干脆 —— 被一巴掌拍飞，斜着甩出去
+     好姐妹  优雅 —— 像花瓣一样散开、飘落
+     好宝宝  梦幻 —— 化成一团光，胀开然后散掉
+     DAD&MUM 规矩 —— 从中间裂成两半，直直落下去
+   ========================================================================== */
 
 .op-env-seal {
   position: absolute;
   left: 50%;
   top: 48%;
-  width: 84px;
-  height: 84px;
-  margin: -42px 0 0 -42px;
-  animation: op-seal-break 3.4s ease-in both;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
+  animation: op-seal-gone-brother 4.3s ease-in both;
 }
 
-/* 用两半拼一枚章：裂开就是两半往两边滑 */
 .op-env-seal::before,
 .op-env-seal::after {
   content: '';
   position: absolute;
   top: 0;
-  width: 52%;
+  width: 50%;
   height: 100%;
   background: radial-gradient(circle at 40% 34%, var(--seal-hi, #e0714a), var(--seal, #c4472a) 62%, var(--seal-dark, #8f2c17));
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
 }
 
-.op-env-seal::before { left: 0; border-radius: 42px 0 0 42px; transform-origin: right center; }
-.op-env-seal::after { right: 0; border-radius: 0 42px 42px 0; transform-origin: left center; }
+.op-env-seal::before { left: 0; border-radius: 50% 0 0 50%; transform-origin: right center; }
+.op-env-seal::after { right: 0; border-radius: 0 50% 50% 0; transform-origin: left center; }
 
-@keyframes op-seal-break {
-  /* 先绷一下（要裂没裂的那一下最抓人） */
-  0% { transform: rotate(6deg) scale(1); }
-  8% { transform: rotate(6deg) scale(1.07); }
-  12% { transform: rotate(6deg) scale(0.99); }
-  /* 然后两半分开 */
-  22% { transform: rotate(6deg) scale(1); opacity: 1; }
-  38% { opacity: 0.9; }
-  100% { transform: rotate(6deg) scale(0.92); opacity: 0; }
+/* 好兄弟：被拍飞，斜着甩出去 */
+@keyframes op-seal-gone-brother {
+  0%, 13% { transform: rotate(6deg) scale(1); }
+  17% { transform: rotate(6deg) scale(1.08); }
+  21% { transform: rotate(-4deg) scale(0.96) translateX(-6px); }
+  28% { transform: rotate(-26deg) scale(0.9) translate(-40px, -34px); opacity: 1; }
+  36% { transform: rotate(-64deg) scale(0.7) translate(-130px, -10px); opacity: 0.7; }
+  42%, 100% { transform: rotate(-92deg) scale(0.5) translate(-210px, 40px); opacity: 0; }
 }
 
-/* 两半各自往外滑 —— 用 before/after 自己的动画 */
-.op-env-seal::before { animation: op-seal-l 3.4s ease-in both; }
-.op-env-seal::after { animation: op-seal-r 3.4s ease-in both; }
-
-@keyframes op-seal-l {
-  0%, 12% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  30% { transform: translate(-26px, 10px) rotate(-22deg); opacity: 1; }
-  60% { transform: translate(-54px, 26px) rotate(-52deg); opacity: 0; }
-  100% { transform: translate(-54px, 26px) rotate(-52deg); opacity: 0; }
+/* 好姐妹：像花瓣一样散开、各自飘落 */
+@keyframes op-seal-gone-sister {
+  0%, 13% { transform: rotate(6deg) scale(1); opacity: 1; }
+  19% { transform: rotate(8deg) scale(1.06); opacity: 1; }
+  28% { transform: rotate(10deg) scale(1.12); opacity: 1; }
+  40%, 100% { transform: rotate(4deg) scale(1.02) translateY(10px); opacity: 0; }
 }
 
-@keyframes op-seal-r {
-  0%, 12% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  30% { transform: translate(26px, 10px) rotate(22deg); opacity: 1; }
-  60% { transform: translate(54px, 26px) rotate(52deg); opacity: 0; }
-  100% { transform: translate(54px, 26px) rotate(52deg); opacity: 0; }
+/* 好宝宝：化成一团光，胀开然后散掉 */
+@keyframes op-seal-gone-baby {
+  0%, 13% { transform: rotate(6deg) scale(1); opacity: 1; }
+  22% { transform: rotate(6deg) scale(1.3); opacity: 1; filter: brightness(1.5); }
+  30% { transform: rotate(6deg) scale(1.7); opacity: 0.8; filter: brightness(2.1) blur(1px); }
+  40%, 100% { transform: rotate(6deg) scale(2.2); opacity: 0; filter: brightness(2.4) blur(4px); }
 }
 
-/* 裂开那一刻崩出来的碎屑 */
+/* DAD&MUM：从中间裂成两半，直直落下去 */
+@keyframes op-seal-gone-dadmam {
+  0%, 13% { transform: rotate(6deg) scale(1); opacity: 1; }
+  18% { transform: rotate(6deg) scale(1.02); opacity: 1; }
+  24% { transform: rotate(6deg) scale(1); opacity: 1; }
+  44%, 100% { transform: rotate(6deg); opacity: 0; }
+}
+
+/* 按身份选消失方式（主题挂在 <html> 上，所以能选到） */
+[data-theme='brother'] .op-env-seal { animation-name: op-seal-gone-brother; }
+[data-theme='sister'] .op-env-seal { animation-name: op-seal-gone-sister; }
+[data-theme='baby'] .op-env-seal { animation-name: op-seal-gone-baby; }
+[data-theme='dadmam'] .op-env-seal { animation-name: op-seal-gone-dadmam; }
+
+/* 两半各自的走法 */
+.op-env-seal::before { animation: seal-l-brother 4.3s ease-in both; }
+.op-env-seal::after { animation: seal-r-brother 4.3s ease-in both; }
+
+@keyframes seal-l-brother {
+  0%, 21% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  36% { transform: translate(-44px, -18px) rotate(-40deg); opacity: 0.6; }
+  42%, 100% { transform: translate(-70px, 6px) rotate(-70deg); opacity: 0; }
+}
+
+@keyframes seal-r-brother {
+  0%, 21% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  36% { transform: translate(30px, -14px) rotate(34deg); opacity: 0.6; }
+  42%, 100% { transform: translate(56px, 10px) rotate(62deg); opacity: 0; }
+}
+
+@keyframes seal-l-sister {
+  0%, 17% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  28% { transform: translate(-14px, -12px) rotate(-16deg); opacity: 1; }
+  44%, 100% { transform: translate(-34px, 46px) rotate(-52deg); opacity: 0; }
+}
+
+@keyframes seal-r-sister {
+  0%, 17% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  28% { transform: translate(16px, -16px) rotate(18deg); opacity: 1; }
+  44%, 100% { transform: translate(38px, 52px) rotate(58deg); opacity: 0; }
+}
+
+@keyframes seal-l-baby {
+  0%, 14% { transform: translate(0, 0) scale(1); opacity: 1; }
+  30% { transform: translate(-6px, -4px) scale(1.24); opacity: 0.7; }
+  42%, 100% { transform: translate(-10px, -10px) scale(1.5); opacity: 0; }
+}
+
+@keyframes seal-r-baby {
+  0%, 14% { transform: translate(0, 0) scale(1); opacity: 1; }
+  30% { transform: translate(6px, -4px) scale(1.24); opacity: 0.7; }
+  42%, 100% { transform: translate(10px, -10px) scale(1.5); opacity: 0; }
+}
+
+@keyframes seal-l-dadmam {
+  0%, 20% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  30% { transform: translate(-8px, 6px) rotate(-4deg); opacity: 1; }
+  44%, 100% { transform: translate(-12px, 74px) rotate(-6deg); opacity: 0; }
+}
+
+@keyframes seal-r-dadmam {
+  0%, 20% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  30% { transform: translate(8px, 6px) rotate(4deg); opacity: 1; }
+  44%, 100% { transform: translate(12px, 74px) rotate(6deg); opacity: 0; }
+}
+
+[data-theme='sister'] .op-env-seal::before { animation-name: seal-l-sister; }
+[data-theme='sister'] .op-env-seal::after { animation-name: seal-r-sister; }
+[data-theme='baby'] .op-env-seal::before { animation-name: seal-l-baby; }
+[data-theme='baby'] .op-env-seal::after { animation-name: seal-r-baby; }
+[data-theme='dadmam'] .op-env-seal::before { animation-name: seal-l-dadmam; }
+[data-theme='dadmam'] .op-env-seal::after { animation-name: seal-r-dadmam; }
+
+/* 宝宝那套在火漆消失的地方留一团光 */
+[data-theme='baby'] .op-env-seal::after { box-shadow: 0 0 24px rgba(255, 214, 140, 0.9); }
+
+/* ---------- 碎屑（八片，八个方向）---------- */
+
 .op-env-dust {
   position: absolute;
   left: 50%;
@@ -199,17 +289,16 @@
   border-radius: 50%;
   background: var(--seal-dark, #8f2c17);
   opacity: 0;
-  animation: op-dust 3.4s ease-out both;
+  animation: op-dust 4.3s ease-out both;
 }
 
 @keyframes op-dust {
-  0%, 12% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-  20% { opacity: 0.9; transform: translate(0, 0) scale(1); }
-  46% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.5); }
+  0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  19% { opacity: 0.9; transform: translate(calc(var(--dx) * 0.2), calc(var(--dy) * 0.2)) scale(1); }
+  30% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.5); }
   100% { opacity: 0; }
 }
 
-/* 八片碎屑，八个方向 */
 .op-env-dust:nth-child(1) { --dx: -34px; --dy: -22px; }
 .op-env-dust:nth-child(2) { --dx: 30px; --dy: -26px; }
 .op-env-dust:nth-child(3) { --dx: -42px; --dy: 4px; }
@@ -219,47 +308,86 @@
 .op-env-dust:nth-child(7) { --dx: -8px; --dy: -40px; }
 .op-env-dust:nth-child(8) { --dx: 12px; --dy: -36px; }
 
-/* ---------- 那一层"光":纸被抽出来的时候有一道光掠过 ---------- */
+/* ==========================================================================
+   小人：从**左边跑进来**，站到信封左边，把纸抽走
+   --------------------------------------------------------------------------
+   用户：「这时候**小人跑过来、跑进来**，然后把**纸张抽出来**。」
+   它比信封靠下一点、靠左一站 —— 是"过来帮忙的人"，不是装饰。
+   ========================================================================== */
+
+.op-puppet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 172px;
+  margin-left: -246px;
+  margin-top: -30px;
+  animation: op-puppet-run 4.3s cubic-bezier(0.25, 0.9, 0.4, 1) both;
+  pointer-events: none;
+}
+
+@keyframes op-puppet-run {
+  /* 前 55% 它不在画面里（让观众先看完火漆和翻盖） */
+  0%, 55% { opacity: 0; transform: translateX(-320px) rotate(6deg); }
+  60% { opacity: 1; transform: translateX(-200px) rotate(4deg); }
+  /* 跑进来 —— 一路都在移动，没有停 */
+  72% { transform: translateX(-40px) rotate(-2deg); }
+  78% { transform: translateX(-6px) rotate(-4deg); }
+  /* 抓住纸、往后拽（身体后仰） */
+  86% { transform: translateX(2px) rotate(-14deg); }
+  93% { transform: translateX(-8px) rotate(-18deg); }
+  100% { transform: translateX(-14px) rotate(-14deg); }
+}
+
+/* 跑动时脚下带一点土 */
+.op-puppet::before {
+  content: '';
+  position: absolute;
+  left: 26px;
+  bottom: 12px;
+  width: 18px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(150, 130, 100, 0.24);
+  animation: op-puppet-dust 4.3s ease-out both;
+}
+
+@keyframes op-puppet-dust {
+  0%, 56% { opacity: 0; transform: translateX(-40px) scale(0.4); }
+  62% { opacity: 0.7; transform: translateX(-18px) scale(1); }
+  78% { opacity: 0.45; transform: translateX(-6px) scale(1.2); }
+  88%, 100% { opacity: 0; transform: translateX(0) scale(1.4); }
+}
+
+/* ---------- 光：纸被抽出来的时候掠过 ---------- */
 
 .opening-shine {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    100deg,
-    transparent 38%,
-    rgba(255, 252, 240, 0.85) 50%,
-    transparent 62%
-  );
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 252, 240, 0.85) 50%, transparent 62%);
   opacity: 0;
-  animation: op-shine 3.4s ease-out both;
+  animation: op-shine 4.3s ease-out both;
 }
 
 @keyframes op-shine {
-  0%, 62% { opacity: 0; transform: translateX(-60%); }
-  72% { opacity: 0.9; }
-  88% { opacity: 0.5; transform: translateX(40%); }
+  0%, 70% { opacity: 0; transform: translateX(-60%); }
+  80% { opacity: 0.9; }
+  92% { opacity: 0.4; transform: translateX(40%); }
   100% { opacity: 0; transform: translateX(90%); }
 }
 
-/* ---------- 减少动效：直接跳 ---------- */
+/* ---------- 减少动效：动作还在，只是不拖沓 ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .opening { display: none; }
-}
-
-
-/* ==========================================================================
-   展开的时候，把底下那一屏藏起来
-   --------------------------------------------------------------------------
-   不藏的话屏幕上会同时出现两个信封（原地一个、展开层一个），
-   看起来就像出了 bug —— 实测截图里就是这样：上面一个、下面一个。
-
-   展开层已经 portal 到 <body> 了，所以这里可以用 body:has() 选到它，
-   纯 CSS 就能把底下的 .invite-page 收掉，不用再加一个 state。
-   ========================================================================== */
-
-body:has(.opening) .invite-page {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms linear;
+  .op-env,
+  .op-env-paper,
+  .op-env-flap,
+  .op-env-seal,
+  .op-env-seal::before,
+  .op-env-seal::after,
+  .op-puppet,
+  .opening-shine {
+    animation-duration: 1.2s !important;
+  }
 }

@@ -76,37 +76,12 @@
   animation-duration: 3.6s !important;
 }
 
-/* ---------- ② 展开信封：每一拍都拉到 1~2 秒 ---------- */
-
 /*
-  原来的四拍（总计 2.4s）里，翻盖只有 0.7s、纸只有 0.95s —— 都偏快。
-  现在放到：火漆 0.5s、翻盖 1.4s、纸 1.5s，总计约 3.4s。
-  用户要的是"看清"，那就一拍拍看清楚。
+  ⚠️ 这里原来有一组 .opening .op-env-flap { animation-duration: 3.4s !important } 之类。
+  它们现在**必须删掉** —— 因为展开动画已经改成 4.3 秒、而且由 opening.css
+  自己管时长。留着的话就会把新时长压回 3.4s，动画又被切掉一截。
+  （这正是"两处都在管同一个时长"的老毛病，这次直接不让它管。）
 */
-.opening .op-env {
-  animation-duration: 3.4s !important;
-}
-
-.opening .op-env-flap {
-  animation-duration: 3.4s !important;
-}
-
-.opening .op-env-paper {
-  animation-duration: 3.4s !important;
-}
-
-.opening .op-env-seal {
-  animation-duration: 3.4s !important;
-}
-
-.opening .op-env-seal::before,
-.opening .op-env-seal::after {
-  animation-duration: 3.4s !important;
-}
-
-.opening .opening-shine {
-  animation-duration: 3.4s !important;
-}
 
 /* ---------- ③ 转场：卡片本身 1.1 秒，小人拖屏 1.6 秒 ---------- */
 
