@@ -718,15 +718,16 @@ body .invite-page[data-theme] .card-entering-fly {
   26% { transform: translateY(9px) scale(1.012, 0.975); }
   /* 第 1 次：看得见地陷下去 */
   38% { transform: translateY(34px) scale(1.03, 0.9); }
-  46% { transform: translateY(40px) scale(1.036, 0.875); }
+  46% { transform: translateY(40px) scale(1.036, 0.875); filter: brightness(0.99); }
   /* 弹回来（纸有韧性）—— 回弹比下压快，这一下最像纸 */
   52% { transform: translateY(12px) scale(1.012, 0.965); }
   /* 第 2 次，更深 */
   64% { transform: translateY(104px) scale(1.05, 0.79); }
   70% { transform: translateY(88px) scale(1.045, 0.815); }
   /* 第 3 次：一路压出底边 */
-  82% { transform: translateY(232px) scale(1.06, 0.66); }
-  93% { transform: translateY(330px) scale(1.07, 0.6); opacity: 1; }
+  /* 压到底的时候纸也**暗一点**（受压的印子），不是只变形 */
+  82% { transform: translateY(232px) scale(1.06, 0.66); filter: brightness(0.98) saturate(1.03); }
+  93% { transform: translateY(330px) scale(1.07, 0.6); opacity: 1; filter: brightness(0.97) saturate(1.05); }
   100% { transform: translateY(360px) scale(1.06, 0.62); opacity: 0.42; }
 }
 
