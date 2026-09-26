@@ -91,3 +91,302 @@ body .invite-page[data-theme] .puller-push,
 body .invite-page[data-theme] .puller-fly {
   animation-duration: var(--move-ms) !important;
 }
+
+/* ==========================================================================
+   三支过渡的完整重写（按 PRD 定稿的那套分镜）
+   --------------------------------------------------------------------------
+   用户定稿的分镜（docs/INVITE.md「内容页之间的翻页」）：
+
+     左 / 右（拉）
+       小人从左边（或右边）进场 → **侧对着用户**（面朝信纸）→ 走到纸边站定
+       （这段时间纸一动不动）→ 伸手抓住、后仰使劲**拽三下**
+       （第 1 下不动 / 第 2 下一点 / 第 3 下动）→ **从哪边来拖回哪边去**
+       小人跟着出去 → 再从同一边回来，把新的那一页拖进来（右边完全镜像）
+
+     上（压）
+       小人从上面落到纸上、**坐在上面往下压**（压扁→弹回→再压到底）
+       → 信纸**从最底下被压出去** → 回来时**从上面掉一根绳子**把新页拉上来
+
+   ★ 之前错在哪（用户一眼就看出来的那条）：
+     小人一直在**左边**、往左使劲（.puller-drag-left 终点 translateX(-190px)），
+     而卡片却往**右边**飞出去（card-pull-heavy 终点 translateX(136%)）——
+     **一个往左拉、一个往右飞**，方向是反的。
+     现在两边统一：从左边来，就往左边拖走；新的那一页也从左边回来。
+
+   ★ 为什么整套写在这里，而不是改散在 6 个文件里的旧规则：
+     这些动作以前被改过四五轮，旧规则散在 invite-motion / puller-choreography /
+     puller-struggle / motion-floor / timing-truth 里，互相打架。
+     这一份排在最后，用明确的优先级（body .invite-page[data-theme] … = 0,3,1）
+     一次性定稿，旧规则全部被盖掉，以后只改这一处。
+   ========================================================================== */
+
+/* ---------- 小人：进场、站定、侧身、使劲、退出 ---------- */
+
+.invite-page .puller {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  /* 让"侧身"能看出来（rotate 写在小人身上，见下） */
+  perspective: 900px;
+}
+
+/*
+  侧对用户：小人是正面画法的，所以靠"整体绕 Y 轴转一点 + 头转向信纸"来表达
+  「他在看那张纸，不是在看镜头」。
+
+  ⚠️ 用独立的 rotate 属性，不用 transform ——
+     .puller 的 transform 被上面的关键帧动画占着（translate/rotate/scale），
+     写 transform 会被动画直接盖掉；独立属性是和动画**叠加**的。
+*/
+.invite-page .puller-pull .puppet,
+.invite-page .puller-fly .puppet {
+  transform-style: preserve-3d;
+}
+.invite-page .puller-pull .puppet { rotate: 0 1 0 -26deg; }
+.invite-page .puller-fly .puppet { rotate: 0 1 0 26deg; }
+.invite-page .puller-push .puppet { rotate: none; }
+
+/* 头也转一点，朝向他要去够的那张纸 */
+.invite-page .puller-pull .puppet-head-group { rotate: -12deg; }
+.invite-page .puller-fly .puppet-head-group { rotate: 12deg; }
+
+/* ---------- 拉（左）：从左边来，把纸拖回左边 ---------- */
+
+.invite-page .puller-pull {
+  left: -10px;
+  bottom: 13%;
+  right: auto;
+  animation: mv-pull-doll 4.5s linear both !important;
+}
+
+@keyframes mv-pull-doll {
+  /* 0~28%：从屏外走进来 → 站到纸边 → 站定。这段时间纸一动不动 */
+  0% { transform: translateX(-170px) rotate(2deg); opacity: 0; }
+  7% { opacity: 1; }
+  16% { transform: translateX(-40px) rotate(1deg); }
+  28% { transform: translateX(0) rotate(0deg); }
+  /* 34%：伸手抓住 */
+  34% { transform: translateX(6px) rotate(-3deg); }
+  /* 44~54%：第 1 次使劲 —— 整个人往后坐，纸几乎不动 */
+  44% { transform: translateX(-14px) rotate(-12deg) scale(1.02); }
+  52% { transform: translateX(-19px) rotate(-15deg) scale(1.03); }
+  /* 56%：力竭，往前喘一下（手也滑了一点） */
+  56% { transform: translateX(-4px) rotate(-3deg) scale(1); }
+  /* 64~76%：第 2 次 */
+  64% { transform: translateX(-16px) rotate(-13deg) scale(1.03); }
+  74% { transform: translateX(-26px) rotate(-20deg) scale(1.05); }
+  78% { transform: translateX(-12px) rotate(-8deg) scale(1.01); }
+  /* 86~100%：第 3 次，整个人快躺下去，被纸带着滑出左边 */
+  86% { transform: translateX(-28px) rotate(-22deg) scale(1.04); }
+  100% { transform: translateX(-96px) rotate(-30deg) scale(0.95); opacity: 0.25; }
+}
+
+/* 纸：先不动，被拽三下，最后拖出左边 */
+.invite-page .card-leaving-pull {
+  animation: mv-card-pull 4.5s linear both !important;
+}
+
+@keyframes mv-card-pull {
+  0%, 30% { transform: translate(0, 0) rotate(0deg); }
+  /* 被抓住：轻轻一颤 */
+  34% { transform: translate(-7px, 1px) rotate(-1deg); }
+  /* 第 1 下：几乎不动（"拉不动"这件事只能是这么演出来的） */
+  44% { transform: translate(-9px, 1px) rotate(-1.2deg); }
+  52% { transform: translate(-11px, 1px) rotate(-1.4deg); }
+  /* 手滑，缩回一点 */
+  56% { transform: translate(-3px, 0) rotate(-0.4deg); }
+  /* 第 2 下：动了 */
+  64% { transform: translate(-14%, 1px) rotate(-3.4deg); }
+  74% { transform: translate(-24%, 2px) rotate(-6deg); }
+  /* 顿住 */
+  78% { transform: translate(-25%, 2px) rotate(-6.2deg); }
+  /* 第 3 下：一路拖出去 */
+  86% { transform: translate(-58%, 4px) rotate(-10deg) scale(0.98); }
+  100% { transform: translate(-136%, 6px) rotate(-14deg) scale(0.9); opacity: 0.1; }
+}
+
+/* ---------- 右：完全镜像（用同一套关键帧，整块 scaleX(-1) 会连字一起翻，
+              所以这里把位移取反、旋转取反，纸面本身不翻） ---------- */
+
+.invite-page .puller-fly {
+  right: -10px;
+  left: auto;
+  bottom: 13%;
+  animation: mv-pull-doll-r 4.5s linear both !important;
+}
+
+@keyframes mv-pull-doll-r {
+  0% { transform: translateX(170px) rotate(-2deg); opacity: 0; }
+  7% { opacity: 1; }
+  16% { transform: translateX(40px) rotate(-1deg); }
+  28% { transform: translateX(0) rotate(0deg); }
+  34% { transform: translateX(-6px) rotate(3deg); }
+  44% { transform: translateX(14px) rotate(12deg) scale(1.02); }
+  52% { transform: translateX(19px) rotate(15deg) scale(1.03); }
+  56% { transform: translateX(4px) rotate(3deg) scale(1); }
+  64% { transform: translateX(16px) rotate(13deg) scale(1.03); }
+  74% { transform: translateX(26px) rotate(20deg) scale(1.05); }
+  78% { transform: translateX(12px) rotate(8deg) scale(1.01); }
+  86% { transform: translateX(28px) rotate(22deg) scale(1.04); }
+  100% { transform: translateX(96px) rotate(30deg) scale(0.95); opacity: 0.25; }
+}
+
+.invite-page .card-leaving-fly {
+  animation: mv-card-pull-r 4.5s linear both !important;
+}
+
+@keyframes mv-card-pull-r {
+  0%, 30% { transform: translate(0, 0) rotate(0deg); }
+  34% { transform: translate(7px, 1px) rotate(1deg); }
+  44% { transform: translate(9px, 1px) rotate(1.2deg); }
+  52% { transform: translate(11px, 1px) rotate(1.4deg); }
+  56% { transform: translate(3px, 0) rotate(0.4deg); }
+  64% { transform: translate(14%, 1px) rotate(3.4deg); }
+  74% { transform: translate(24%, 2px) rotate(6deg); }
+  78% { transform: translate(25%, 2px) rotate(6.2deg); }
+  86% { transform: translate(58%, 4px) rotate(10deg) scale(0.98); }
+  100% { transform: translate(136%, 6px) rotate(14deg) scale(0.9); opacity: 0.1; }
+}
+
+/* ---------- 上（压）：从上面落下来、坐在纸上往下压、从底下压出去 ---------- */
+
+.invite-page .puller-push {
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  top: 0;
+  margin-left: -58px;
+  animation: mv-press-doll 4.5s linear both !important;
+}
+
+@keyframes mv-press-doll {
+  /* 从屏幕上方落下来 */
+  0% { transform: translateY(-230px) rotate(2deg); opacity: 0; }
+  7% { opacity: 1; }
+  /* 落到纸上、坐住（28% 之前纸不动） */
+  22% { transform: translateY(-26px) rotate(1deg); }
+  30% { transform: translateY(0) scale(1, 1) rotate(0deg); }
+  /* 第 1 次压 */
+  40% { transform: translateY(9px) scale(1.06, 0.94); }
+  48% { transform: translateY(12px) scale(1.07, 0.92); }
+  /* 抬起来蓄力（屁股离纸一点） */
+  54% { transform: translateY(-16px) scale(1, 1); }
+  /* 第 2 次 */
+  66% { transform: translateY(34px) scale(1.1, 0.86); }
+  72% { transform: translateY(12px) scale(1.04, 0.96); }
+  /* 第 3 次：压到底 */
+  84% { transform: translateY(74px) scale(1.14, 0.78); }
+  /* 纸被压出去了，它自己弹回上方等着拉绳子 */
+  100% { transform: translateY(-70px) scale(1.02, 0.98); opacity: 0.9; }
+}
+
+.invite-page .card-leaving-push {
+  animation: mv-card-push 4.5s linear both !important;
+}
+
+@keyframes mv-card-push {
+  0%, 30% { transform: translateY(0) scale(1, 1); }
+  /* 坐上去：整页被压得扁一点 */
+  40% { transform: translateY(10px) scale(1.02, 0.965); }
+  48% { transform: translateY(12px) scale(1.024, 0.96); }
+  /* 弹回来一点（纸有韧性） */
+  54% { transform: translateY(6px) scale(1.012, 0.98); }
+  /* 第 2 次 */
+  66% { transform: translateY(52px) scale(1.036, 0.89); }
+  /* 又弹 */
+  72% { transform: translateY(44px) scale(1.03, 0.905); }
+  /* 第 3 次，从最底下压出去 */
+  84% { transform: translateY(150px) scale(1.06, 0.72); }
+  100% { transform: translateY(230px) scale(1.08, 0.5) rotate(0.6deg); opacity: 0; }
+}
+
+/* ---------- 新的一页怎么回来：**从哪边被拿走，就从哪边回来** ---------- */
+
+/* 拉（左）：从左边滑回来 */
+body .invite-page[data-theme] .card-entering-pull {
+  animation: mv-enter-from-left 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both !important;
+}
+/* 右：从右边滑回来 */
+body .invite-page[data-theme] .card-entering-fly {
+  animation: mv-enter-from-right 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both !important;
+}
+/* 上：被绳子从底下拉上来（绳子先垂下来，所以延后一点开始升） */
+body .invite-page[data-theme] .card-entering-push {
+  animation: mv-enter-by-rope 1.15s cubic-bezier(0.2, 0.9, 0.3, 1) 0.34s both !important;
+}
+
+@keyframes mv-enter-from-left {
+  from { transform: translateX(-46%) rotate(-4deg) scale(0.95); opacity: 0; }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
+@keyframes mv-enter-from-right {
+  from { transform: translateX(46%) rotate(4deg) scale(0.95); opacity: 0; }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
+@keyframes mv-enter-by-rope {
+  from { transform: translateY(66%) rotate(-2deg) scale(0.96); opacity: 0; }
+  /* 快到位的时候轻轻一悠，像被绳子吊着 */
+  72% { transform: translateY(-3%) rotate(0.8deg) scale(1.01); opacity: 1; }
+  to { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
+}
+
+/* ---------- 那根绳子 ---------- */
+
+.invite-page .move-rope {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  margin-left: -2px;
+  /* 要在纸下面（-1）—— 绳子只该出现在纸上方的空处，不该压在纸面上 */
+  z-index: -1;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(180, 150, 105, 0) 0%,
+    rgba(185, 154, 106, 0.95) 8%,
+    #8f7146 100%
+  );
+  /* 从顶端往下长：transform-origin 在顶 */
+  transform-origin: 50% 0;
+  animation: mv-rope 1.5s cubic-bezier(0.35, 0, 0.25, 1) both;
+}
+
+/* 底下那个小钩子 */
+.invite-page .move-rope::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  bottom: -5px;
+  width: 14px;
+  height: 12px;
+  border: 2px solid #8f7146;
+  border-top: none;
+  border-radius: 0 0 9px 9px;
+}
+
+@keyframes mv-rope {
+  0% { transform: scaleY(0); opacity: 0; }
+  /* 先垂下来 */
+  22% { transform: scaleY(0.74); opacity: 1; }
+  34% { transform: scaleY(0.74); opacity: 1; }
+  /* 勾住之后跟着新页一起收上去 */
+  100% { transform: scaleY(0.1); opacity: 0; }
+}
+
+/* ---------- 信封向下隐藏（PRD：滑下去，不是原地淡掉） ---------- */
+
+.opening .op-env {
+  animation-name: op-env-slide-down !important;
+}
+
+@keyframes op-env-slide-down {
+  0%, 13% { transform: rotate(-1.2deg) scale(1); }
+  20% { transform: rotate(-0.6deg) scale(1.012); }
+  34% { transform: rotate(-1.6deg) scale(1); }
+  56% { transform: rotate(-1.2deg) scale(1); }
+  80% { transform: rotate(-2deg) translateY(-4px) scale(1.01); }
+  /* 往下滑出去，纸留在原地 */
+  100% { transform: rotate(-2.4deg) translateY(240px) scale(0.94); opacity: 0; }
+}
