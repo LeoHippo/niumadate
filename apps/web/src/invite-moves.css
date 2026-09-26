@@ -43,7 +43,7 @@
   animation: veil-cover-end 0.5s var(--ease, ease) both !important;
   /* 提前 0.65 秒开始盖：卡片是在 93% 之后才滑出画面的，
      纱要正好接上那一下，中间不能留出一帧空屏。 */
-  animation-delay: calc(var(--move-ms) - 0.65s) !important;
+  animation-delay: calc(var(--move-ms) - 0.62s) !important;
 }
 
 @keyframes veil-cover-end {
@@ -254,7 +254,9 @@ body .invite-page[data-theme] .puller-fly {
   78% { transform: translate(-25%, 2px) rotate(-6.2deg); }
   /* 第 3 下：一路拖出去 */
   86% { transform: translate(-58%, 4px) rotate(-10deg) scale(0.98); }
-  100% { transform: translate(-136%, 6px) rotate(-10deg) scale(0.92); opacity: 0.12; }
+  /* 到 100% 还看得见它在走（opacity 0.45）：换屏那一瞬由过渡纱盖住，
+     这样"旧页走"和"新页来"之间没有一段真正的空白。 */
+  100% { transform: translate(-118%, 6px) rotate(-9deg) scale(0.94); opacity: 0.45; }
 }
 
 /* ---------- 右：完全镜像（用同一套关键帧，整块 scaleX(-1) 会连字一起翻，
@@ -297,7 +299,7 @@ body .invite-page[data-theme] .puller-fly {
   74% { transform: translate(24%, 2px) rotate(6deg); }
   78% { transform: translate(25%, 2px) rotate(6.2deg); }
   86% { transform: translate(58%, 4px) rotate(10deg) scale(0.98); }
-  100% { transform: translate(136%, 6px) rotate(14deg) scale(0.9); opacity: 0.1; }
+  100% { transform: translate(118%, 6px) rotate(9deg) scale(0.94); opacity: 0.45; }
 }
 
 /* ---------- 上（压）：从上面落下来、坐在纸上往下压、从底下压出去 ---------- */
@@ -375,7 +377,7 @@ body .invite-page[data-theme] .puller-fly {
   /* 第 3 次：一路压出底边 */
   82% { transform: translateY(168px) scale(1.04, 0.76); }
   93% { transform: translateY(268px) scale(1.05, 0.68); opacity: 1; }
-  100% { transform: translateY(360px) scale(1.05, 0.62); opacity: 0; }
+  100% { transform: translateY(340px) scale(1.05, 0.64); opacity: 0.4; }
 }
 
 /* ---------- 新的一页怎么回来：**从哪边被拿走，就从哪边回来** ---------- */
@@ -678,10 +680,12 @@ body .invite-page[data-theme] .puller-return-push {
 /* 新页要**跟在小人后面**进门，所以起手延后到 0.30s；
    压那一支绳子先垂下来（0.34s 保持原样）。 */
 body .invite-page[data-theme] .card-entering-pull {
-  animation-delay: 0.30s !important;
+  /* 新页**立刻**跟上（原来等 0.30s）—— 那 0.3 秒就是"空屏"的来源。
+     仍然比小人晚一点点：小人先进画，纸跟着滑进来。 */
+  animation-delay: 0.08s !important;
 }
 body .invite-page[data-theme] .card-entering-fly {
-  animation-delay: 0.30s !important;
+  animation-delay: 0.08s !important;
 }
 
 /* ==========================================================================
@@ -723,7 +727,7 @@ body .invite-page[data-theme] .card-entering-fly {
   /* 第 3 次：一路压出底边 */
   82% { transform: translateY(232px) scale(1.06, 0.66); }
   93% { transform: translateY(330px) scale(1.07, 0.6); opacity: 1; }
-  100% { transform: translateY(430px) scale(1.07, 0.56); opacity: 0; }
+  100% { transform: translateY(360px) scale(1.06, 0.62); opacity: 0.42; }
 }
 
 /* ==========================================================================
