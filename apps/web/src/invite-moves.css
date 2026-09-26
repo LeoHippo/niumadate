@@ -951,3 +951,56 @@ body .invite-page[data-theme] .card-entering-fly {
 .invite-page .puller-return-pull[data-step='8'] {
   animation-name: mv-return-pull-alt !important;
 }
+
+/* ==========================================================================
+   ⑳ 换页的光，按身份上色（目标②：四套身份的差异再拉开）
+   --------------------------------------------------------------------------
+   前面那道光是一律的暖金 —— 四套身份看起来还是"同一次过渡"。
+   现在第二道光用**身份自己的色**（--glow：兄弟暖红 / 姐妹玫粉 / 宝宝琥珀 /
+   家人灰红），所以同样一个"压下去、拉出来"的动作，四套身份的观感是不一样的：
+   兄弟那下是暖红的、姐妹是玫粉的、宝宝是金黄的、家人是灰红的。
+   这比"再换一个动画"省得多，却直接服务于"四套身份要拉开"。
+   ========================================================================== */
+
+.invite-page .screen-veil::before {
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 241, 205, 0) 30%,
+      rgba(255, 238, 192, 0.55) 47%,
+      rgba(255, 246, 222, 0) 62%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 22%,
+      var(--glow, rgba(240, 170, 90, 0.34)) 46%,
+      rgba(255, 255, 255, 0) 70%
+    );
+  background-size:
+    260% 100%,
+    200% 100%;
+  background-repeat: no-repeat, no-repeat;
+  animation: mv-page-light 3.4s linear infinite;
+}
+
+@keyframes mv-page-light {
+  0% { background-position: 180% 0, 150% 0; }
+  100% { background-position: -80% 0, -70% 0; }
+}
+
+/* 收尾那一道也带上身份的色（它本来是固定的暖白） */
+.invite-page .screen-veil::after {
+  background-image:
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 18%,
+      rgba(255, 255, 255, 0.9) 42%,
+      rgba(255, 255, 255, 0) 58%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 36%,
+      var(--glow, rgba(240, 170, 90, 0.34)) 60%,
+      rgba(255, 255, 255, 0) 80%
+    ) !important;
+}
