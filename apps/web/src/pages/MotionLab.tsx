@@ -197,9 +197,20 @@ export function MotionLab() {
 
         <Card title="05 小人拉纸，很费劲" note="关键在前两次使劲纸纹丝不动。那才叫拉不动，一路滑出去不叫。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
-            <div className="lab-paper-demo" key={'pull' + round}>
-              <div className="lab-demo-paper pull-demo" />
-              <div className="op-puppet lab-puppet-pull">
+            {/*
+              ★ 05 卡改成**直接渲染线上的结构**（单一出处）：
+                同一个 .screen-inner.card-leaving-pull，同一个 .puller.puller-pull。
+                于是它跑的就是线上的 mv-card-pull（0~30% 纸纹丝不动、三次使劲）
+                和 mv-pull-doll —— 和好友看到的是同一条路径。
+                实验室里只多一条：把 .puller 的 position:fixed 本地化到这张卡里。
+            */}
+            <div className="lab-move-stage" key={'pull' + round}>
+              <div className="screen-inner card-leaving-pull">
+                <span className="screen-emoji">🥰</span>
+                <p className="screen-kicker">在哪儿见</p>
+                <p className="screen-big">楼下那家火锅</p>
+              </div>
+              <div className="puller puller-pull">
                 <Puppet gender={gender as 'male' | 'female'} mood="pull" />
               </div>
             </div>

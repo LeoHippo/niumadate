@@ -614,3 +614,40 @@
 
 .lab-foil { background-color: #c08a34; }
 [data-theme='brother'] .lab-foil { background-color: #c08a34; }
+/* ==========================================================================
+   05 卡：线上那套「拖屏」，本地化之后放进卡片
+   ========================================================================== */
+.lab .lab-move-stage { position: relative; width: 400px; height: 300px; overflow: visible; }
+.lab .lab-move-stage .screen-inner {
+  position: absolute !important;
+  left: 84px !important;
+  top: 37px !important;
+  width: 200px !important;
+  height: 190px !important;
+  padding: 16px 14px !important;
+}
+/* 线上是 position: fixed（贴视口），放进卡片必须变回绝对定位 */
+.lab .lab-move-stage .puller {
+  position: absolute !important;
+  top: auto !important;
+  right: auto !important;
+  left: -6px !important;
+  bottom: 4% !important;
+}
+/* 线上是一次性的（both），实验室里靠「全部重播」再看一遍 */
+.lab .lab-move-stage .card-leaving-pull,
+.lab .lab-move-stage .puller-pull {
+  animation-iteration-count: 1 !important;
+}
+/* ⚠️ 关键一步：把实验室这张卡**指到线上那套关键帧名下**。
+   invite-moves.css 里的规则是挂在 .invite-page[data-theme] 上的（线上那条路径），
+   实验室里没有 .invite-page，所以刚才探针查到的还是旧那套：
+     card-pull-heavy 0.6s / puller-strain-left —— 也就是"实验室在演旧版"。
+   这里只做**绑定**、不复制关键帧：名字用的就是线上那份 mv-card-pull / mv-pull-doll，
+   所以"关键帧只定义一次"这件事是真的。 */
+.lab .lab-move-stage .card-leaving-pull { animation: mv-card-pull 4.5s linear both !important; }
+.lab .lab-move-stage .puller-pull { animation: mv-pull-doll 4.5s linear both !important; }
+.lab .lab-move-stage .card-leaving-push { animation: mv-card-push-2 4.5s linear both !important; }
+.lab .lab-move-stage .puller-push { animation: mv-press-doll 4.5s linear both !important; }
+.lab .lab-move-stage .card-leaving-fly { animation: mv-card-pull-r 4.5s linear both !important; }
+.lab .lab-move-stage .puller-fly { animation: mv-pull-doll-r 4.5s linear both !important; }
