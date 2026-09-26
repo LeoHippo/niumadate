@@ -817,3 +817,34 @@ body .invite-page[data-theme] .card-entering-fly {
   88% { transform: translateX(0.7%) rotate(0.3deg) scale(0.998); }
   to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
 }
+
+/* ==========================================================================
+   ⑰ 华丽：整段过渡里有一道**暖金色的光**在走
+   --------------------------------------------------------------------------
+   前面只解决了"换屏那一拍不能是静止的纸色"（扫光只在 3.85~5.0s）。
+   但用户要的是「华丽」—— 那道光应该**贯穿整段过渡**，而且是暖金的
+   （和四套身份的鎏金同一个色系），而不是一条冷白。
+   挂在 .screen-veil::before 上：展开层和收尾层都有 .screen-veil 这个类，
+   所以"旧页走、新页来"整段都有光在走。
+   ========================================================================== */
+
+.invite-page .screen-veil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 241, 205, 0) 30%,
+    rgba(255, 236, 186, 0.62) 48%,
+    rgba(255, 246, 222, 0) 64%
+  );
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  animation: mv-page-light 3.4s linear infinite;
+}
+
+@keyframes mv-page-light {
+  0% { background-position: 180% 0; }
+  100% { background-position: -80% 0; }
+}
