@@ -651,3 +651,17 @@
 .lab .lab-move-stage .puller-push { animation: mv-press-doll 4.5s linear both !important; }
 .lab .lab-move-stage .card-leaving-fly { animation: mv-card-pull-r 4.5s linear both !important; }
 .lab .lab-move-stage .puller-fly { animation: mv-pull-doll-r 4.5s linear both !important; }
+/* 压 / 右拉两张卡的小人站位（线上那两套是照视口算的，这里按卡片重摆） */
+.lab .lab-move-stage-press .puller {
+  top: -46px !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  margin-left: -80px !important;
+}
+.lab .lab-move-stage-fly .puller {
+  left: auto !important;
+  right: -6px !important;
+  top: auto !important;
+  bottom: 4% !important;
+}

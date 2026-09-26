@@ -219,9 +219,14 @@ export function MotionLab() {
 
         <Card title="06 小人压纸" note="从屏幕上方落下来，压扁，弹回一点，再压，最后压到底。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
-            <div className="lab-paper-demo" key={'press' + round}>
-              <div className="lab-demo-paper press-demo" />
-              <div className="op-puppet lab-puppet-press">
+            {/* ★ 06 卡同样改成渲染线上结构（见 05 卡那段说明） */}
+            <div className="lab-move-stage lab-move-stage-press" key={'press' + round}>
+              <div className="screen-inner card-leaving-push">
+                <span className="screen-emoji">🗓</span>
+                <p className="screen-kicker">先把日子定下来</p>
+                <p className="screen-big">2026 年 12 月 20 日</p>
+              </div>
+              <div className="puller puller-push">
                 <Puppet gender={gender as 'male' | 'female'} mood="press" />
               </div>
             </div>
@@ -230,9 +235,14 @@ export function MotionLab() {
 
         <Card title="07 小人抛纸" note="拎起来，拎不动放下，再拎，半空顿一下，最后甩出去。">
           <div className="lab-stage lab-stage-tall lab-stage-motion">
-            <div className="lab-paper-demo" key={'fly' + round}>
-              <div className="lab-demo-paper fly-demo" />
-              <div className="op-puppet lab-puppet-fly">
+            {/* ★ 07 卡：线上这一支是「从右边拉」，和 05 镜像 */}
+            <div className="lab-move-stage lab-move-stage-fly" key={'fly' + round}>
+              <div className="screen-inner card-leaving-fly">
+                <span className="screen-emoji">🎯</span>
+                <p className="screen-kicker">干啥去</p>
+                <p className="screen-big">走走</p>
+              </div>
+              <div className="puller puller-fly">
                 <Puppet gender={gender as 'male' | 'female'} mood="fly" />
               </div>
             </div>
