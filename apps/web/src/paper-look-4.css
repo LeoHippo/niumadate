@@ -236,4 +236,26 @@
   background-image:
     repeating-linear-gradient(88deg, rgba(120, 95, 60, 0.045) 0 1px, transparent 1px 5px),
     linear-gradient(178deg, var(--env-flap-hi, #fbf3e2), var(--env-flap-lo, #e6d6b6));
+}/* ==========================================================================
+   第一屏：信封直接放在背景上
+   --------------------------------------------------------------------------
+   用户在 PRD 里写得很明确：
+     「第一页页面是背景加上一个信封，这是两个主体……这个信封就直接放在背景上，
+       不需要后面加任何东西。」
+   现在第一屏的信封是放在一张白色信纸卡（.screen-inner）上的 —— 三个主体，
+   不是两个。所以这一屏把那张卡整个撤掉：底色、边、影、内框线、页脚小饰
+   全部去掉，只留信封和两行字，直接落在背景上。
+   ========================================================================== */
+
+.invite-page .screen-seal .screen-inner {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-top: 8px !important;
+}
+
+/* 内框线和页脚小饰是给"一页纸"用的，这一屏没有纸 */
+.invite-page .screen-seal .screen-inner::before,
+.invite-page .screen-seal .screen-inner::after {
+  display: none !important;
 }
