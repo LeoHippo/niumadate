@@ -789,7 +789,17 @@ export function InvitePage() {
           )}
 
           {leaving === null && enterFrom !== null && (
-            <div className={`puller puller-return-${enterFrom}`} aria-hidden="true">
+            <div
+              className={`puller puller-return-${enterFrom}`}
+              /*
+                data-step：这一次翻页是第几步。
+                用途是**让重复的动作不完全一样**（用户：「让人点了还想点」）——
+                三支过渡轮换只能保证每三次不重样；同一个身份看到第二次时，
+                小人退场的方向换一边，观感上就不是「重播」。
+              */
+              data-step={index}
+              aria-hidden="true"
+            >
               <Puppet gender={config.invite.hostGender} mood="pull" />
             </div>
           )}
