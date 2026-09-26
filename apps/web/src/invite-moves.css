@@ -41,7 +41,9 @@
 
 .invite-page .screen-veil-cover {
   animation: veil-cover-end 0.5s var(--ease, ease) both !important;
-  animation-delay: calc(var(--move-ms) - 0.5s) !important;
+  /* 提前 0.65 秒开始盖：卡片是在 93% 之后才滑出画面的，
+     纱要正好接上那一下，中间不能留出一帧空屏。 */
+  animation-delay: calc(var(--move-ms) - 0.65s) !important;
 }
 
 @keyframes veil-cover-end {
@@ -150,6 +152,54 @@ body .invite-page[data-theme] .puller-fly {
 .invite-page .puller-pull .puppet-head-group { rotate: -12deg; }
 .invite-page .puller-fly .puppet-head-group { rotate: 12deg; }
 
+/* ---------- 走路：移动的那两段，腿必须交替 ----------
+   --------------------------------------------------------------------------
+   ★ 这条是照着网上的做法补的（Codrops《Reverse-Engineering Claude AI 的吉祥物动画》）：
+     「腿用 rotation + scaleY 弯进地里 —— 那才是让倾斜有重量的原因」，
+     而且「腿不落地，角色就是在滑」。
+   我原来让小人**平移 1.3 秒但腿一动不动** —— 看着就是在滑冰，
+     这就是「动作很奇怪」里最明显的一条。
+   做法：给腿一段循环的步子，跑 4 步（约 1.4 秒）之后停在自然姿势上，
+     正好覆盖"走进来"的那一段；站定之后腿就不动了。
+   -------------------------------------------------------------------------- */
+@keyframes mv-step-a {
+  0%, 100% { transform: rotate(-15deg) translateY(-2px); }
+  50% { transform: rotate(13deg) translateY(0); }
+}
+@keyframes mv-step-b {
+  0%, 100% { transform: rotate(13deg) translateY(0); }
+  50% { transform: rotate(-15deg) translateY(-2px); }
+}
+
+.invite-page .puller-pull .puppet-leg-l,
+.invite-page .puller-fly .puppet-leg-l,
+.invite-page .puller-return-pull .puppet-leg-l,
+.invite-page .puller-return-fly .puppet-leg-l {
+  animation: mv-step-a 0.34s ease-in-out 4 both !important;
+}
+.invite-page .puller-pull .puppet-leg-r,
+.invite-page .puller-fly .puppet-leg-r,
+.invite-page .puller-return-pull .puppet-leg-r,
+.invite-page .puller-return-fly .puppet-leg-r {
+  animation: mv-step-b 0.34s ease-in-out 4 both !important;
+}
+
+/* 手臂也跟着摆一点，走起来才不像雕塑 */
+@keyframes mv-arm-a { 0%,100% { transform: rotate(10deg); } 50% { transform: rotate(-12deg); } }
+@keyframes mv-arm-b { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(10deg); } }
+.invite-page .puller-pull .puppet-arm-back,
+.invite-page .puller-fly .puppet-arm-back,
+.invite-page .puller-return-pull .puppet-arm-back,
+.invite-page .puller-return-fly .puppet-arm-back {
+  animation: mv-arm-a 0.34s ease-in-out 4 both !important;
+}
+.invite-page .puller-pull .puppet-arm-front,
+.invite-page .puller-fly .puppet-arm-front,
+.invite-page .puller-return-pull .puppet-arm-front,
+.invite-page .puller-return-fly .puppet-arm-front {
+  animation: mv-arm-b 0.34s ease-in-out 4 both !important;
+}
+
 /* ---------- 拉（左）：从左边来，把纸拖回左边 ---------- */
 
 .invite-page .puller-pull {
@@ -164,7 +214,9 @@ body .invite-page[data-theme] .puller-fly {
   0% { transform: translateX(-170px) rotate(2deg); opacity: 0; }
   7% { opacity: 1; }
   16% { transform: translateX(-40px) rotate(1deg); }
-  28% { transform: translateX(0) rotate(0deg); }
+  /* 26%：落地那一下压一下（有重量） */
+  26% { transform: translateX(3px) rotate(0deg) scale(1.05, 0.94); }
+  28% { transform: translateX(0) rotate(0deg) scale(1); }
   /* 34%：伸手抓住 */
   34% { transform: translateX(6px) rotate(-3deg); }
   /* 44~54%：第 1 次使劲 —— 整个人往后坐，纸几乎不动 */
@@ -177,8 +229,8 @@ body .invite-page[data-theme] .puller-fly {
   74% { transform: translateX(-26px) rotate(-20deg) scale(1.05); }
   78% { transform: translateX(-12px) rotate(-8deg) scale(1.01); }
   /* 86~100%：第 3 次，整个人快躺下去，被纸带着滑出左边 */
-  86% { transform: translateX(-28px) rotate(-22deg) scale(1.04); }
-  100% { transform: translateX(-96px) rotate(-30deg) scale(0.95); opacity: 0.25; }
+  86% { transform: translateX(-30px) rotate(-16deg) scale(1.04); }
+  100% { transform: translateX(-104px) rotate(-19deg) scale(0.96); opacity: 0.28; }
 }
 
 /* 纸：先不动，被拽三下，最后拖出左边 */
@@ -202,7 +254,7 @@ body .invite-page[data-theme] .puller-fly {
   78% { transform: translate(-25%, 2px) rotate(-6.2deg); }
   /* 第 3 下：一路拖出去 */
   86% { transform: translate(-58%, 4px) rotate(-10deg) scale(0.98); }
-  100% { transform: translate(-136%, 6px) rotate(-14deg) scale(0.9); opacity: 0.1; }
+  100% { transform: translate(-136%, 6px) rotate(-10deg) scale(0.92); opacity: 0.12; }
 }
 
 /* ---------- 右：完全镜像（用同一套关键帧，整块 scaleX(-1) 会连字一起翻，
@@ -266,45 +318,64 @@ body .invite-page[data-theme] .puller-fly {
   animation: mv-press-doll 4.5s linear both !important;
 }
 
+/*
+  ★ 重排过：原来 0~22% 是小人**慢慢飘下来**、纸一动不动 ——
+    整整一秒"什么都没有发生"，截图里就是小人悬在半空。
+    现在：砸下来（12%）→ 落地压扁一下（就是"重量"）→ 弹起 → 坐稳（26%），
+    全程每一帧都在动，而且 26% 之后马上开始压。
+*/
 @keyframes mv-press-doll {
-  /* 从屏幕上方落下来 */
-  0% { transform: translateY(-230px) rotate(2deg); opacity: 0; }
-  7% { opacity: 1; }
-  /* 落到纸上、坐住（28% 之前纸不动） */
-  22% { transform: translateY(-26px) rotate(1deg); }
-  30% { transform: translateY(0) scale(1, 1) rotate(0deg); }
-  /* 第 1 次压 */
-  40% { transform: translateY(9px) scale(1.06, 0.94); }
-  48% { transform: translateY(12px) scale(1.07, 0.92); }
+  0% { transform: translateY(-280px) rotate(3deg); opacity: 0; }
+  5% { opacity: 1; }
+  /* 砸下来：落地那一下横向撑开、纵向压扁 —— 这一下就是"重量" */
+  12% { transform: translateY(6px) scale(1.12, 0.86) rotate(0deg); }
+  /* 弹起 */
+  18% { transform: translateY(-8px) scale(0.96, 1.05); }
+  /* 坐稳 */
+  26% { transform: translateY(0) scale(1, 1); }
+  /* 第 1 次压（浅） */
+  38% { transform: translateY(12px) scale(1.07, 0.92); }
+  46% { transform: translateY(16px) scale(1.08, 0.9); }
   /* 抬起来蓄力（屁股离纸一点） */
-  54% { transform: translateY(-16px) scale(1, 1); }
-  /* 第 2 次 */
-  66% { transform: translateY(34px) scale(1.1, 0.86); }
-  72% { transform: translateY(12px) scale(1.04, 0.96); }
-  /* 第 3 次：压到底 */
-  84% { transform: translateY(74px) scale(1.14, 0.78); }
+  52% { transform: translateY(-18px) scale(1, 1); }
+  /* 第 2 次（更深） */
+  64% { transform: translateY(40px) scale(1.1, 0.84); }
+  70% { transform: translateY(14px) scale(1.04, 0.96); }
+  /* 第 3 次：一路压到底 */
+  82% { transform: translateY(80px) scale(1.14, 0.76); }
+  92% { transform: translateY(110px) scale(1.15, 0.72); }
   /* 纸被压出去了，它自己弹回上方等着拉绳子 */
-  100% { transform: translateY(-70px) scale(1.02, 0.98); opacity: 0.9; }
+  100% { transform: translateY(-84px) scale(1.02, 0.98); opacity: 0.9; }
 }
 
 .invite-page .card-leaving-push {
   animation: mv-card-push 4.5s linear both !important;
 }
 
+/*
+  ★ 两个毛病一起改：
+    1) 原来 30% 之前纸**一动不动**（配上小人慢慢飘下来 = 一秒死画面）；
+       现在 26% 起就被坐得微微下陷，一开场就有反应。
+    2) 原来结尾是 scale(1.08, 0.5) —— 纸被**压扁**成一条，看着像"捏碎"，
+       不像"压出去"。现在主要是**往下位移**、只留一点点形变，
+       而且一直到 93% 还看得见，正好接上过渡纱 —— 中间不再出现空屏。
+*/
 @keyframes mv-card-push {
-  0%, 30% { transform: translateY(0) scale(1, 1); }
-  /* 坐上去：整页被压得扁一点 */
-  40% { transform: translateY(10px) scale(1.02, 0.965); }
-  48% { transform: translateY(12px) scale(1.024, 0.96); }
+  0%, 22% { transform: translateY(0) scale(1, 1); }
+  /* 小人坐上来：微微下陷 */
+  26% { transform: translateY(5px) scale(1.008, 0.99); }
+  38% { transform: translateY(16px) scale(1.02, 0.955); }
+  46% { transform: translateY(20px) scale(1.024, 0.945); }
   /* 弹回来一点（纸有韧性） */
-  54% { transform: translateY(6px) scale(1.012, 0.98); }
+  52% { transform: translateY(8px) scale(1.01, 0.975); }
   /* 第 2 次 */
-  66% { transform: translateY(52px) scale(1.036, 0.89); }
+  64% { transform: translateY(62px) scale(1.032, 0.87); }
   /* 又弹 */
-  72% { transform: translateY(44px) scale(1.03, 0.905); }
-  /* 第 3 次，从最底下压出去 */
-  84% { transform: translateY(150px) scale(1.06, 0.72); }
-  100% { transform: translateY(230px) scale(1.08, 0.5) rotate(0.6deg); opacity: 0; }
+  70% { transform: translateY(54px) scale(1.028, 0.885); }
+  /* 第 3 次：一路压出底边 */
+  82% { transform: translateY(168px) scale(1.04, 0.76); }
+  93% { transform: translateY(268px) scale(1.05, 0.68); opacity: 1; }
+  100% { transform: translateY(360px) scale(1.05, 0.62); opacity: 0; }
 }
 
 /* ---------- 新的一页怎么回来：**从哪边被拿走，就从哪边回来** ---------- */
@@ -611,4 +682,46 @@ body .invite-page[data-theme] .card-entering-pull {
 }
 body .invite-page[data-theme] .card-entering-fly {
   animation-delay: 0.30s !important;
+}
+
+/* ==========================================================================
+   ⑭ 「压」这一支：把两处"看着奇怪"的东西修掉
+   --------------------------------------------------------------------------
+   我把自己这套动作用**每 300ms 一帧**密集截了一遍（不是隔几秒抽一帧）——
+   这种看法才看得出"怪"在哪。看到两处：
+
+   ① 小人头顶上方一直挂着一个**椭圆形的圈**（第 300~900ms 最明显）。
+      那是 puppet-acts.css 给 .puller-push 加的 ::after（原本想做"脚下的土"），
+      在这一支里它被拉成一个悬空的大椭圆，看着像呼啦圈。
+      压这一支不需要它 —— 落地那一下的挤压已经能表达重量。
+
+   ② 「压」几乎看不出来：纸只是抖了一下（纵向 0.945 就到头了），
+      而"压"这个动作要**看得见地陷下去**。所以把每次压的下沉量和形变都加大，
+      压完再弹回来 —— 有下沉、有回弹，才叫压。
+   ========================================================================== */
+
+.invite-page .puller-push::after {
+  display: none !important;
+}
+
+.invite-page .card-leaving-push {
+  animation-name: mv-card-push-2 !important;
+}
+
+@keyframes mv-card-push-2 {
+  0%, 22% { transform: translateY(0) scale(1, 1); }
+  /* 坐上来 */
+  26% { transform: translateY(9px) scale(1.012, 0.975); }
+  /* 第 1 次：看得见地陷下去 */
+  38% { transform: translateY(34px) scale(1.03, 0.9); }
+  46% { transform: translateY(40px) scale(1.036, 0.875); }
+  /* 弹回来（纸有韧性）—— 回弹比下压快，这一下最像纸 */
+  52% { transform: translateY(12px) scale(1.012, 0.965); }
+  /* 第 2 次，更深 */
+  64% { transform: translateY(104px) scale(1.05, 0.79); }
+  70% { transform: translateY(88px) scale(1.045, 0.815); }
+  /* 第 3 次：一路压出底边 */
+  82% { transform: translateY(232px) scale(1.06, 0.66); }
+  93% { transform: translateY(330px) scale(1.07, 0.6); opacity: 1; }
+  100% { transform: translateY(430px) scale(1.07, 0.56); opacity: 0; }
 }
