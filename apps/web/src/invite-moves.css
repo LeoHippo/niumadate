@@ -852,3 +852,45 @@ body .invite-page[data-theme] .card-entering-fly {
   0% { background-position: 180% 0; }
   100% { background-position: -80% 0; }
 }
+
+/* ==========================================================================
+   ⑱ 彩蛋：小人砸到纸上那一下，扬起一圈尘
+   --------------------------------------------------------------------------
+   目标②里要的"彩蛋"。用的还是 .puller-push::after 那个元素 ——
+   之前它被 puppet-acts.css 拉成一个悬空的大椭圆（像呼啦圈），所以我把它 display:none 了。
+   现在改成**只在落地那一下出现的一小圈土**：从 0 放大到 1、再由 1 散到 1.5 并消失，
+   时间点正好压在 12%（砸下来）那一帧上。
+   这样它既不是悬空的圈，也给了"重量"一个可见的落点。
+   ========================================================================== */
+
+.invite-page .puller-push::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -4px !important;
+  top: auto !important;
+  width: 66px !important;
+  height: 16px !important;
+  margin: 0 0 0 -33px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(158, 126, 86, 0.5) 0%,
+    rgba(158, 126, 86, 0.28) 45%,
+    rgba(158, 126, 86, 0) 72%
+  ) !important;
+  opacity: 0;
+  animation: mv-land-dust 4.5s linear both !important;
+  pointer-events: none;
+}
+
+@keyframes mv-land-dust {
+  0%, 7% { opacity: 0; transform: scale(0.35); }
+  /* 砸到纸上：一下扬起来 */
+  14% { opacity: 0.95; transform: scale(1); }
+  /* 散掉 */
+  26% { opacity: 0; transform: scale(1.55); }
+  100% { opacity: 0; transform: scale(1.55); }
+}
