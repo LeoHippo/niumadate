@@ -250,12 +250,19 @@ body .invite-page[data-theme] .puller-fly {
 
 /* ---------- 上（压）：从上面落下来、坐在纸上往下压、从底下压出去 ---------- */
 
+/*
+  「坐在纸上」：落点要**正好坐在信纸的上沿**。
+  原来写的是 top: 0 —— 小人只是从屏幕顶端往下挪了 70px，
+  离信纸还差得远（截图上它一直悬在纸的上方，像在"隔空发功"）。
+  信纸的上沿大约在视口 26% 处，小人盒子高约 190px，
+  所以 top = 26% - 190px，translateY(0) 那一刻它的屁股正好压在纸的上沿。
+*/
 .invite-page .puller-push {
   left: 50%;
   right: auto;
   bottom: auto;
-  top: 0;
-  margin-left: -58px;
+  top: calc(26% - 190px);
+  margin-left: -80px;
   animation: mv-press-doll 4.5s linear both !important;
 }
 
@@ -389,4 +396,124 @@ body .invite-page[data-theme] .card-entering-push {
   80% { transform: rotate(-2deg) translateY(-4px) scale(1.01); }
   /* 往下滑出去，纸留在原地 */
   100% { transform: rotate(-2.4deg) translateY(240px) scale(0.94); opacity: 0; }
+}
+
+/* ==========================================================================
+   ⑪ 火漆的四种「形态」：轮廓也分开
+   --------------------------------------------------------------------------
+   （PRD：「这个火漆有四种展现形式」）
+   之前四种只有颜色 / 图案 / 消失方式不同，轮廓完全一样 ——
+   放大看还是同一枚章换了色。现在按四套材质各给一个外形：
+
+     好兄弟  不规则的圆（蜡自己摊开的形状）
+     好姐妹  略扁的椭圆，边更圆润（珠光信笺的蜡更"流"）
+     好宝宝  圆角方形（软的、厚的）
+     家人    方形钢印（红头文件那套是钢印，不是蜡）
+
+   ⚠️ 两半的圆角要用 **px**，不能用百分比 ——
+     百分比是按每一半自己的宽高算的（这个坑在前面踩过一次：
+     88px 的圆切成两半，每半 44×88，写 50% 得到的是"横轴只有一半"的椭圆角，
+     拼起来是圆角方块而不是圆）。所以这里按实际尺寸写 px。
+       · 封面上那枚 .invite-seal-wax 是 92px
+       · 开场里那只 .op-env-seal 是 88px
+   ========================================================================== */
+
+/* 好兄弟：不规则的圆 */
+[data-theme='brother'] .invite-seal-wax {
+  border-radius: 47% 53% 52% 48% / 51% 46% 54% 49% !important;
+}
+[data-theme='brother'] .invite-seal-rim {
+  border-radius: 49% 51% 50% 50% / 52% 45% 55% 48% !important;
+}
+
+/* 好姐妹：略扁的椭圆 */
+[data-theme='sister'] .invite-seal-wax {
+  border-radius: 52% 48% 50% 50% / 46% 46% 54% 54% !important;
+}
+[data-theme='sister'] .invite-seal-rim {
+  border-radius: 54% 46% 48% 52% / 48% 44% 56% 52% !important;
+}
+
+/* 好宝宝：圆角方形 */
+[data-theme='baby'] .invite-seal-wax,
+[data-theme='baby'] .invite-seal {
+  border-radius: 30% !important;
+}
+[data-theme='baby'] .invite-seal-rim {
+  border-radius: 34% !important;
+}
+
+/* 家人：方形钢印 */
+[data-theme='dadmam'] .invite-seal-wax,
+[data-theme='dadmam'] .invite-seal {
+  border-radius: 10% !important;
+}
+[data-theme='dadmam'] .invite-seal-rim {
+  border-radius: 14% !important;
+}
+
+/* 开场里那只（两半拼起来）：底面和两半都要跟着同样收角 */
+[data-theme='baby'] .op-env-seal { border-radius: 30% !important; }
+[data-theme='baby'] .op-env-seal::before { border-radius: 26px 0 0 26px !important; }
+[data-theme='baby'] .op-env-seal::after { border-radius: 0 26px 26px 0 !important; }
+
+[data-theme='dadmam'] .op-env-seal { border-radius: 10% !important; }
+[data-theme='dadmam'] .op-env-seal::before { border-radius: 9px 0 0 9px !important; }
+[data-theme='dadmam'] .op-env-seal::after { border-radius: 0 9px 9px 0 !important; }
+
+[data-theme='sister'] .op-env-seal::before {
+  border-radius: 100% 0 0 100% / 46% 0 0 54% !important;
+}
+[data-theme='sister'] .op-env-seal::after {
+  border-radius: 0 100% 100% 0 / 0 46% 54% 0 !important;
+}
+
+/* ==========================================================================
+   ⑫ 「不允许拒绝」：把「不去」揉成团、把「同意」拉大，都要有细节
+   --------------------------------------------------------------------------
+   用户：「把那个按钮揉成团，这个揉成团的动作可以细致一点，然后像扔东西一样
+   给扔出去。之后就把那个同意的按钮给拉大，这个动作也都要很细致。」
+
+   原来「揉成团」是一个**静态状态类**（.invite-btn-crumpled 直接给一个 transform），
+   靠 transition 一步到位 —— 只有一个节拍，看不出"揉"。
+   现在拆成四拍：攥住 → 对折 → 团起来 → 捏实，每一步都变一次形。
+
+   「拉大」原来是内联 style 的 scale(1.28)，一步到位（内联样式会盖掉动画，
+   已在 JSX 里删掉）。现在也是四拍：一顿 → 撑开 → 回弹 → 稳住。
+   ========================================================================== */
+
+.invite-page .invite-btn-crumpled {
+  animation: mv-crumple 0.72s cubic-bezier(0.35, 0, 0.3, 1) both !important;
+}
+
+@keyframes mv-crumple {
+  /* 0% 还是完整的按钮 */
+  0% { transform: scale(1) rotate(0deg); border-radius: 999px; opacity: 1; }
+  /* 18%：被攥住 —— 横向收窄、上下起皱 */
+  18% { transform: scale(0.88, 0.96) rotate(-3deg); border-radius: 46% 54% 50% 50% / 50% 48% 52% 50%; }
+  /* 40%：对折一下 */
+  40% { transform: scale(0.66, 0.74) rotate(11deg); border-radius: 44% 56% 58% 42% / 56% 44% 52% 48%; }
+  /* 62%：团起来 */
+  62% { transform: scale(0.5, 0.44) rotate(21deg); border-radius: 54% 46% 44% 56% / 44% 58% 42% 56%; }
+  /* 82%：再捏实一点，皱褶乱一点 */
+  82% { transform: scale(0.44, 0.4) rotate(27deg); border-radius: 40% 60% 57% 43% / 55% 42% 58% 45%; }
+  /* 100%：一个纸团 —— 和原来的静态状态一致，扔出去时接得上 */
+  100% { transform: scale(0.42) rotate(24deg); border-radius: 42% 58% 55% 45% / 52% 44% 56% 48%; opacity: 0.85; }
+}
+
+.invite-page .invite-btn-seated {
+  animation: mv-grow 1.05s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
+@keyframes mv-grow {
+  0% { transform: scale(1); }
+  /* 16%：先一顿（蓄力，也是给观众一个"要变了"的预告） */
+  16% { transform: scale(0.93, 0.96) rotate(-1deg); }
+  /* 46%：撑开，稍微过头一点 */
+  46% { transform: scale(1.34, 1.3) rotate(0.8deg); }
+  /* 64%：回弹 */
+  64% { transform: scale(1.21, 1.23); }
+  /* 82%：再稳一下 */
+  82% { transform: scale(1.3, 1.29); }
+  100% { transform: scale(1.28); }
 }

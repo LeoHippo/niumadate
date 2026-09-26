@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { RoleKey } from '@niumadate/shared';
-import { Puppet } from './puppet';
 import { ROLE_EMOJI } from './role-emoji';
 import './opening.css';
 
@@ -31,12 +30,10 @@ export const OPENING_MS = 4300;
 export function Opening({
   active,
   onDone,
-  gender,
   role,
 }: {
   active: boolean;
   onDone: () => void;
-  gender: 'male' | 'female';
   role: RoleKey;
 }) {
   /*
@@ -87,13 +84,17 @@ export function Opening({
     */
     <div className="opening" data-theme={role} aria-hidden="true">
       {/*
-        小人：从**左边跑进来**，站到信封左边，然后把纸抽走。
-        用户：「这时候小人跑过来、跑进来，然后把纸张抽出来。」
-        它是"过来帮忙的人"，所以比信封靠下一点、靠左一站。
+        ⚠️ 这里原来有一个小人：跑进来 → 站到信封左边 → 把纸抽走。
+
+        用户看过之后说：「首页换到第二页是**纸被抽出来**的那个动作，
+        现在还是用**小人**在过渡。」
+
+        对。第一屏到第二屏的过渡就是**拆信**这件事本身：
+        火漆消失 → 翻盖外翻 → 信封下滑 → 纸被抽出来。
+        这一段不需要有人来「演」，纸自己出来就够了 ——
+        小人是**内容页之间**翻页时的角色（拉 / 压），不该跑进拆信里抢戏。
+        所以这一块整段删掉：纸被抽出来，就是这一段的主角。
       */}
-      <div className="op-puppet">
-        <Puppet gender={gender} mood="run" />
-      </div>
 
       {/*
         ★ 纸必须**在信封外面**。

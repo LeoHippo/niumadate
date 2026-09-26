@@ -55,7 +55,8 @@ class CDP {
       this.pending.set(id, { resolve, reject });
       setTimeout(() => {
         if (this.pending.delete(id)) reject(new Error('CDP 超时: ' + method));
-      }, 30000);
+      // 页面里跑长循环（比如一路点到回答屏）需要更久，30 秒不够
+      }, spec.evalTimeoutMs ?? 180000);
     });
   }
   async eval(expression, sessionId) {

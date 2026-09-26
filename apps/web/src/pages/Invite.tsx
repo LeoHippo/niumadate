@@ -360,8 +360,15 @@ export function InvitePage() {
         [1300, 'grab'],
         [1600, 'pull'],
       ],
-      // 压：从上面落下来，落到纸上才开始压（前面是下落，不用换姿势）
-      push: [[0, 'press']],
+      /*
+        压：从上面落下来 → **落到纸上坐住** → 再往下压。
+        用户：「他就会像那样**坐在这个信的最上面**往下压压」——
+        所以 1250ms（= 28% 就位）之后换成 sit 姿势；挤压的细节交给关键帧。
+      */
+      push: [
+        [0, 'press'],
+        [1250, 'sit'],
+      ],
       // 飞（这一支现在是「从右边拉」，和 pull 镜像）
       fly: [
         [0, 'reach'],
@@ -720,7 +727,6 @@ export function InvitePage() {
           <Opening
             active={opening}
             role={invite.role}
-            gender={config.invite.hostGender}
             onDone={() => {
               setOpening(false);
               setIndex((current) => Math.min(current + 1, SCREENS.length - 1));
@@ -1187,9 +1193,29 @@ function Answer({
     const holder = puppetRef.current;
     if (holder === null) return;
     const box = holder.getBoundingClientRect();
-    // 目标：左上角留 12px 边距
-    setPupX((current) => current + (12 - box.left));
-    setPupY(14 - box.top);
+    const btn = yesRef.current;
+    /*
+      用户后来改了口径：
+        「之后把那个同意的按钮给拉大……我们还是以后就**坐在上面**，
+          或者是怎么样去让这个用户选择这个同意。」
+      所以要坐到**「同意」按钮上面**，不是退到左上角（那是上一版的要求）。
+
+      量按钮的 getBoundingClientRect 拿到的是**放大之后**的可视框，
+      所以小人会正好坐在那个已经变大的按钮上沿。
+      时机也对得上：按钮 3600ms 开始放大、4650ms 停稳，
+      而这套退场是 6000ms 才发生 —— 量到的是稳下来的位置。
+    */
+    if (btn === null) {
+      setPupX((current) => current + (12 - box.left));
+      setPupY(14 - box.top);
+      return;
+    }
+    const b = btn.getBoundingClientRect();
+    const targetLeft = b.left + b.width / 2 - box.width / 2;
+    /* 0.78：大半个身子在按钮上方，屁股正好压在按钮的上沿 */
+    const targetTop = b.top - box.height * 0.78;
+    setPupX((current) => current + (targetLeft - box.left));
+    setPupY(targetTop - box.top);
   }, [docked]);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -1351,7 +1377,13 @@ function Answer({
             type="button"
             ref={yesRef}
             className={`invite-btn invite-btn-yes ${seated ? 'invite-btn-seated' : ''}`}
-            style={act === 'grow' || seated ? { transform: 'scale(1.28)' } : undefined}
+            /*
+              ⚠️ 这里原来有一句内联 style={{ transform: 'scale(1.28)' }}。
+              内联样式**优先级高于动画**，所以「拉大」只能一步到位，做不出细节
+              （用户要求「这个动作也都要很细致」）。
+              现在拿掉，放大交给 .invite-btn-seated 的关键帧：
+              先一顿 → 撑开 → 回弹 → 稳稳停住。
+            */
             onClick={() => onAnswer('accepted')}
           >
             {ANSWER_WORDS[invite.role].yes} →
