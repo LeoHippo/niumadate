@@ -1004,3 +1004,45 @@ body .invite-page[data-theme] .card-entering-fly {
       rgba(255, 255, 255, 0) 80%
     ) !important;
 }
+
+/* ==========================================================================
+   ㉑ 新页落位时，影子"压一下再松开"
+   --------------------------------------------------------------------------
+   纸落下来是有重量的：接触桌面那一下，影子最深、最贴；停稳之后松开一点。
+   原来只有位移的过头回弹，影子是恒定的 —— 少了一半的"落地感"。
+   （纸的 box-shadow 是 !important 的、动画改不动，所以用 filter: drop-shadow，
+     它是可动画的，而且不会和那三层 box-shadow 打架。）
+   ========================================================================== */
+
+.invite-page .card-entering-pull {
+  animation-name: mv-enter-left-settle !important;
+}
+.invite-page .card-entering-fly {
+  animation-name: mv-enter-right-settle !important;
+}
+.invite-page .card-entering-push {
+  animation-name: mv-enter-rope-settle !important;
+}
+
+@keyframes mv-enter-left-settle {
+  from { transform: translateX(-46%) rotate(-4deg) scale(0.95); opacity: 0; filter: none; }
+  62% { transform: translateX(3%) rotate(0.8deg) scale(1.015); opacity: 1; filter: none; }
+  /* ★ 触地：影子最深 */
+  78% { transform: translateX(0) rotate(0) scale(1); opacity: 1; filter: drop-shadow(0 16px 22px rgba(90, 68, 40, 0.34)); }
+  /* ★ 松开：回到常态 */
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; filter: none; }
+}
+
+@keyframes mv-enter-right-settle {
+  from { transform: translateX(46%) rotate(4deg) scale(0.95); opacity: 0; filter: none; }
+  62% { transform: translateX(-3%) rotate(-0.8deg) scale(1.015); opacity: 1; filter: none; }
+  78% { transform: translateX(0) rotate(0) scale(1); opacity: 1; filter: drop-shadow(0 16px 22px rgba(90, 68, 40, 0.34)); }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; filter: none; }
+}
+
+@keyframes mv-enter-rope-settle {
+  from { transform: translateY(66%) rotate(-2deg) scale(0.96); opacity: 0; filter: none; }
+  58% { transform: translateY(2%) rotate(0.6deg) scale(1.01); opacity: 1; filter: none; }
+  76% { transform: translateY(0) rotate(0) scale(1); opacity: 1; filter: drop-shadow(0 16px 22px rgba(90, 68, 40, 0.34)); }
+  to { transform: translateY(0) rotate(0) scale(1); opacity: 1; filter: none; }
+}
