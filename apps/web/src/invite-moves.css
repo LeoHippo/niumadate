@@ -216,7 +216,11 @@ body .invite-page[data-theme] .puller-fly {
   16% { transform: translateX(-40px) rotate(1deg); }
   /* 26%：落地那一下压一下（有重量） */
   26% { transform: translateX(3px) rotate(0deg) scale(1.05, 0.94); }
-  28% { transform: translateX(0) rotate(0deg) scale(1); }
+  /* ★ 落地之后的二次小弹（follow-through）：压下去 → 弹起 3px → 落下 → 停稳。
+     只有一次挤压会显得"顿"住；多这一下才有活物的感觉。 */
+  30% { transform: translateX(-1px) rotate(0deg) scale(0.985, 1.035); }
+  34% { transform: translateX(1px) rotate(0deg) scale(1.012, 0.99); }
+  38% { transform: translateX(0) rotate(0deg) scale(1); }
   /* 34%：伸手抓住 */
   34% { transform: translateX(6px) rotate(-3deg); }
   /* 44~54%：第 1 次使劲 —— 整个人往后坐，纸几乎不动 */
@@ -332,7 +336,9 @@ body .invite-page[data-theme] .puller-fly {
   /* 砸下来：落地那一下横向撑开、纵向压扁 —— 这一下就是"重量" */
   12% { transform: translateY(6px) scale(1.12, 0.86) rotate(0deg); }
   /* 弹起 */
-  18% { transform: translateY(-8px) scale(0.96, 1.05); }
+  18% { transform: translateY(-10px) scale(0.95, 1.06); }
+  /* 再落一下、再弹一下（两次递减，就是"砸下去"的手感） */
+  22% { transform: translateY(2px) scale(1.05, 0.96); }
   /* 坐稳 */
   26% { transform: translateY(0) scale(1, 1); }
   /* 第 1 次压（浅） */
