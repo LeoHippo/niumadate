@@ -7,8 +7,8 @@ import type { RoleKey } from '@niumadate/shared';
 import '../motion-lab.css';
 import '../lab-3d.css';
 import '../lab-fix.css';
-import '../lab-fix2.css';
-import '../lab-fix3.css';
+/* lab-fix2 / lab-fix3 已摘掉：还需要的东西（05/06/07 纸时间表）搬进了 lab-scenes.css，
+   其余的和 lab-fix.css 重复或被它覆盖。四层互相覆盖是「dev 好看、线上不一样」的根源。 */
 import '../lab-scenes.css';
 
 /**
