@@ -8,7 +8,8 @@ import '../motion-lab.css';
 /* lab-3d.css 已摘掉：01 卡的信封用的是线上那套 .envelope / .env-* / .invite-seal，
    原来那一层只额外给了尺寸和一个实验室专用的 flap-open-3d。删掉之后
    它回落成线上原尺寸（268×186），落下的动作仍然是线上的 env-drop。 */
-import '../lab-fix.css';
+/* lab-fix.css 也摘掉了：05/06/07 的尺寸站位和 09 卡的鎏金打底搬进了 lab-scenes.css，
+   其余关键帧都已被 lab-scenes.css 或线上那套取代。 */
 /* lab-fix2 / lab-fix3 已摘掉：还需要的东西（05/06/07 纸时间表）搬进了 lab-scenes.css，
    其余的和 lab-fix.css 重复或被它覆盖。四层互相覆盖是「dev 好看、线上不一样」的根源。 */
 import '../lab-scenes.css';
