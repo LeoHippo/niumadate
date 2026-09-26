@@ -21,6 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 
 const PUBLIC = process.argv.includes('--public');
+const IMAGE = process.argv.includes('--image');
 const DIST_HTML = 'apps/web/dist/index.html';
 const CONTAINER = 'niumadate';
 
@@ -111,6 +112,25 @@ try {
   }
 } catch (cause) {
   console.log('（清旧产物跳过：' + String(cause).slice(0, 80) + '）');
+}
+
+/*
+  ---- 4c. 把新产物**烘进镜像**（--image） ----
+
+  为什么需要这一步（用户的原话：「没有上线 docker 吧，我看不到」）：
+    docker compose cp 是把文件拷进**正在运行的那个容器**，它活在容器的可写层里。
+    容器一旦被**重建**（docker compose up -d / --force-recreate / 换配置），
+    它会从**镜像**重新起来 —— 而镜像还是几天前构建的，于是页面"退回旧版"。
+    实测：改这一步之前，镜像 niumadate:latest 是 5 天前的，
+    而容器里是我刚拷进去的新产物；一重建就全没了。
+
+  最干净的做法当然是 docker compose build（在镜像里重新构建前端），
+  但那需要联网装依赖（关了 VPN 就会失败）。所以给一个离线也行的兜底：
+  把当前容器的状态 commit 成同一个 tag，重建时就从这份新镜像起来。
+  ---- */
+if (IMAGE) {
+  run('docker', ['commit', CONTAINER, 'niumadate:latest']);
+  console.log('✓ 已把当前产物烘进 niumadate:latest（重建容器不会退回旧版）。');
 }
 
 // ---- 5. 公网（可选） ----
