@@ -151,15 +151,35 @@ export function MotionLab() {
               **选择器根本没匹配**，所以这张卡的翻盖一直不翻（实测 getComputedStyle
               查 .env-flap3d 得到"没有"）。改成和 01 卡同一套 3D 结构。
             */}
-            <div className="lab-env-wrap" key={'rise' + round}>
-              <span className="op-env-body" />
-              <span className="op-env-fold op-env-fold-l" />
-              <span className="op-env-fold op-env-fold-r" />
-              {/* 纸：一开始**藏在信封里**（top 在信封内），翻盖让开之后才往上冒 */}
-              <span className="op-env-paper" />
-              <span className="env-flap3d">
-                <span className="env-flap" />
+            {/*
+              ★ 03 卡现在**直接渲染线上的拆信结构**（单一出处）：
+                同一个 .opening、同一套 .op-env / .op-env-flap-face/back / .op-paper-stage。
+                所以这里跑的就是线上的 op-flap3d-flip（外层只转、内层只裁、背面是另一副样子）
+                和 paper-rise —— 和好友看到的完全是同一条路径。
+
+                以前这张卡用的是实验室自己的 env-flap3d（还留着 lab-3d.css 里那份补丁）；
+                摘掉那层补丁之后它回落成 2D 上抬版，所以这一步等于把它接回线上。
+            */}
+            <div className="opening lab-opening lab-env-opening" key={'rise' + round} data-theme={theme}>
+              <span className="op-paper-stage">
+                <span className="op-env-paper" />
               </span>
+              <div className="op-env">
+                <span className="op-env-body" />
+                <span className="op-env-fold op-env-fold-l" />
+                <span className="op-env-fold op-env-fold-r" />
+                <span className="op-env-flap">
+                  <span className="op-env-flap-face" />
+                  <span className="op-env-flap-back" />
+                </span>
+                <span className="op-env-seal">
+                  <span className="op-env-seal-face">{ROLE_EMOJI[theme]}</span>
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <span key={i} className="op-env-dust" />
+                  ))}
+                </span>
+                <span className="op-env-fold op-env-fold-b" />
+              </div>
             </div>
           </div>
         </Card>

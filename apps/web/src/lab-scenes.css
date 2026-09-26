@@ -556,3 +556,28 @@
 .lab .lab-paper-demo .lab-demo-paper.fly-demo {
   animation: mvp-paper-fly calc(4.5s / var(--lab-speed, 1)) linear both !important;
 }
+/* ==========================================================================
+   03 卡：线上那套拆信结构放进卡片里（把 fixed 全屏层变回普通盒子）
+   ========================================================================== */
+.lab .lab-opening.lab-env-opening {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 330px;
+  height: 270px;
+  overflow: visible;
+}
+
+/* 线上这些是一次性的（both），实验室里循环播才看得清 */
+.lab .lab-env-opening .op-env,
+.lab .lab-env-opening .op-env-flap,
+.lab .lab-env-opening .op-env-paper,
+.lab .lab-env-opening .op-env-seal,
+.lab .lab-env-opening .op-env-seal::before,
+.lab .lab-env-opening .op-env-seal::after,
+.lab .lab-env-opening .op-env-seal-face,
+.lab .lab-env-opening .op-env-dust {
+  animation-iteration-count: infinite !important;
+}
