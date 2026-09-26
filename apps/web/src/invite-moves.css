@@ -517,3 +517,98 @@ body .invite-page[data-theme] .card-entering-push {
   82% { transform: scale(1.3, 1.29); }
   100% { transform: scale(1.28); }
 }
+
+/* ==========================================================================
+   ⑬ 回来那一趟：小人从同一边回来，把新页**拖进来**
+   --------------------------------------------------------------------------
+   用户：「按 PRD 是「从哪边拿走就从哪边回来，把新的那页拖进来」——
+          现在新页确实从同一边回来了，但回来的路上没有小人，只有页自己在滑。」
+
+   之前只在 leaving 那一段渲染小人，换屏那一刻就把它卸了；新页进门是"页自己在滑"。
+   现在小人跨越换屏继续存在（JSX 里拆成 puller-<move> / puller-return-<move> 两段），
+   这一段就是**回程**：
+
+     0~34%   自己先走回来（它比新页先到，看起来才是它在拖）
+     34~70%  新页跟进的时候它往后仰着使劲（"拖"的力气感）
+     70~86%  松开手、站直
+     86~100% 退开、淡出
+
+   ⚠️ 这一段是 2.0s，和 Invite.tsx 里的 RETURN_MS 是一对 —— 改一个要改另一个。
+   ========================================================================== */
+
+/* ⚠️ 这里的选择器必须带 body + [data-theme]（0,3,1）：
+   上面那条「所有 .puller 都跑 --move-ms（4.5s）」也是 (0,3,1)，
+   而且元素同时挂着 .puller 和 .puller-return-*，
+   所以回程那一条必须优先级相等、位置更靠后，否则会被拉长到 4.5s ——
+   而 JS 2 秒后就把小人卸了，回程会被拦腰砍断。 */
+body .invite-page[data-theme] .puller-return-pull,
+body .invite-page[data-theme] .puller-return-fly,
+body .invite-page[data-theme] .puller-return-push {
+  animation-duration: 2s !important;
+  animation-timing-function: cubic-bezier(0.3, 0.8, 0.3, 1) !important;
+  animation-fill-mode: both !important;
+}
+
+/* 拉（左）：从左边走回来 */
+.invite-page .puller-return-pull {
+  left: -10px;
+  right: auto;
+  bottom: 13%;
+  animation-name: mv-return-pull !important;
+}
+@keyframes mv-return-pull {
+  0% { transform: translateX(-132px) rotate(3deg); opacity: 0.25; }
+  10% { opacity: 1; }
+  34% { transform: translateX(-6px) rotate(-8deg); }
+  52% { transform: translateX(-17px) rotate(-14deg); }
+  70% { transform: translateX(-3px) rotate(-3deg); }
+  86% { transform: translateX(-26px) rotate(-7deg); opacity: 1; }
+  100% { transform: translateX(-92px) rotate(-14deg); opacity: 0; }
+}
+
+/* 右：镜像 */
+.invite-page .puller-return-fly {
+  right: -10px;
+  left: auto;
+  bottom: 13%;
+  animation-name: mv-return-fly !important;
+}
+@keyframes mv-return-fly {
+  0% { transform: translateX(132px) rotate(-3deg); opacity: 0.25; }
+  10% { opacity: 1; }
+  34% { transform: translateX(6px) rotate(8deg); }
+  52% { transform: translateX(17px) rotate(14deg); }
+  70% { transform: translateX(3px) rotate(3deg); }
+  86% { transform: translateX(26px) rotate(7deg); opacity: 1; }
+  100% { transform: translateX(92px) rotate(14deg); opacity: 0; }
+}
+
+/* 上：在上面拉绳子 —— 拉绳子的动作做不出来（手没有分节），
+   所以用"身体一上一下地起伏 + 微微左右晃"表达"在一把一把地拉"。 */
+.invite-page .puller-return-push {
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  top: calc(26% - 190px);
+  margin-left: -80px;
+  animation-name: mv-return-push !important;
+}
+@keyframes mv-return-push {
+  0% { transform: translateY(-78px) rotate(1deg); opacity: 0.35; }
+  12% { opacity: 1; }
+  30% { transform: translateY(-34px) rotate(-2deg); }
+  44% { transform: translateY(-56px) rotate(2deg); }
+  58% { transform: translateY(-26px) rotate(-2deg); }
+  72% { transform: translateY(-42px) rotate(1deg); }
+  88% { transform: translateY(-18px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-64px) rotate(-3deg); opacity: 0; }
+}
+
+/* 新页要**跟在小人后面**进门，所以起手延后到 0.30s；
+   压那一支绳子先垂下来（0.34s 保持原样）。 */
+body .invite-page[data-theme] .card-entering-pull {
+  animation-delay: 0.30s !important;
+}
+body .invite-page[data-theme] .card-entering-fly {
+  animation-delay: 0.30s !important;
+}

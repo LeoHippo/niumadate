@@ -264,6 +264,12 @@ const MOVE_MOOD: Record<Move, PuppetMood> = { pull: 'pull', fly: 'fly', push: 'p
 */
 const MOVE_MS = 4500;
 
+/**
+ * 小人把新页拖进来之后，还要在场上待多久才卸掉。
+ * 要和 invite-moves.css 里 mv-return-* 的时长对齐（那边是 2.0s）。
+ */
+const RETURN_MS = 2000;
+
 export function InvitePage() {
   const config = useConfig();
   const params = useParams();
@@ -384,7 +390,13 @@ export function InvitePage() {
       for (const timer of timers) window.clearTimeout(timer);
     };
   }, [leaving]);
-  /** 刚过去的那一下是什么动作 —— 决定**新进来的这一屏从哪边滑进来**。 */
+  /**
+   * 刚过去的那一下是什么动作 —— 决定**新进来的这一屏从哪边滑进来**，
+   * 以及**小人从哪边回来把它拖进来**。
+   *
+   * ⚠️ 它必须在一段之后自己清掉，否则小人会一直站在那儿不卸。
+   *    RETURN_MS 要比「新页进门」那一段长一点，让小人演完"松开手"再走。
+   */
   const [enterFrom, setEnterFrom] = useState<Move | null>(null);
   /** 刚刚答应了吗 —— 只在「没回应 → 接受」那一下放爆发，回头再看不再炸。 */
   const justAcceptedRef = useRef(false);
@@ -420,10 +432,28 @@ export function InvitePage() {
     window.setTimeout(() => {
       setIndex(next);
       setLeaving(null);
-      // 新的一屏从**相反方向**补上来，接得上「被拖走」那个动作
+      /*
+        新的一屏**从同一边**回来 —— 被从哪边拿走，就从哪边送回。
+        （用户定稿：「从哪边拿走就从哪边回来，把新的那页拖进来」。
+          原来是「从相反方向补上来」，方向是反的。）
+        同时小人**不卸**：它换成 puller-return-<move> 继续演「把新页拖进来」，
+        由下面那个 RETURN_MS 定时器收尾。
+      */
       setEnterFrom(picked);
     }, MOVE_MS);
   }, []);
+
+  /*
+    回来那一趟的收尾。
+    RETURN_MS 要 ≥ 「新页进门」那一段动画的时长（现在是 1.15s + 0.34s 延迟 ≈ 1.5s），
+    再留一点让小人松手、退开，然后才把它卸掉。
+    这个数和 invite-moves.css 里 mv-return-* 的时长是一对，改一个要改另一个。
+  */
+  useEffect(() => {
+    if (enterFrom === null) return;
+    const timer = window.setTimeout(() => setEnterFrom(null), RETURN_MS);
+    return () => window.clearTimeout(timer);
+  }, [enterFrom]);
 
   if (error !== null) {
     return (
@@ -735,13 +765,32 @@ export function InvitePage() {
 
           {justAccepted && <Burst role={invite.role} />}
 
+          {/*
+            拖屏的小人：**跨越换屏那一刻继续存在**。
+
+            用户：「按 PRD 是「从哪边拿走就从哪边回来，把新的那页拖进来」——
+                  现在新页确实从同一边回来了，但回来的路上没有小人，只有页自己在滑。」
+
+            对。原来只在 leaving（旧页被拖走那一段）渲染小人，换屏那一刻它就被卸掉了；
+            新页进门是「页自己在滑」。现在分成两段：
+              leaving  → puller-<move>          把旧页拖走 / 压走
+              enterFrom → puller-return-<move>   从同一边回来，把新页**拖进来**
+            两段是**同一个 .puller 元素**（只是换 class），所以小人不会闪、不会重挂，
+            换屏那一刻它就在场，正好被过渡纱盖住的那 0.5 秒遮过去。
+
+            回来的姿势一律用 pull（往后仰着使劲）—— 送新页回来也是「拖」，
+            不是「轻飘飘地飘过来」；压那一支回来时是在上面**拉绳子**，也用 pull。
+          */}
           {leaving !== null && (
             <div className={`puller puller-${leaving}`} aria-hidden="true">
               {/* 姿态分阶段切（见上面那个 effect）—— 整段一个姿势的话，位置在动但人没在演 */}
-              <Puppet
-                gender={config.invite.hostGender}
-                mood={acting ?? MOVE_MOOD[leaving]}
-              />
+              <Puppet gender={config.invite.hostGender} mood={acting ?? MOVE_MOOD[leaving]} />
+            </div>
+          )}
+
+          {leaving === null && enterFrom !== null && (
+            <div className={`puller puller-return-${enterFrom}`} aria-hidden="true">
+              <Puppet gender={config.invite.hostGender} mood="pull" />
             </div>
           )}
         </>
