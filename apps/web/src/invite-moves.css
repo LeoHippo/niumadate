@@ -899,7 +899,10 @@ body .invite-page[data-theme] .card-entering-fly {
   14% { opacity: 0.95; transform: scale(1); }
   /* 散掉 */
   26% { opacity: 0; transform: scale(1.55); }
-  100% { opacity: 0; transform: scale(1.55); }
+  /* ★ 第二次：压到底、纸被压出画面那一瞬，再扬一次（更大、更淡） */
+  80% { opacity: 0; transform: scale(0.6); }
+  87% { opacity: 0.7; transform: scale(1.7); }
+  96%, 100% { opacity: 0; transform: scale(2.3); }
 }
 
 /* ==========================================================================
@@ -939,7 +942,10 @@ body .invite-page[data-theme] .card-entering-fly {
   0%, 20% { opacity: 0; transform: scale(0.4); }
   27% { opacity: 0.85; transform: scale(1); }
   40% { opacity: 0; transform: scale(1.5); }
-  100% { opacity: 0; transform: scale(1.5); }
+  /* ★ 第二次：纸被拖走那一瞬，起一层更大的尘 */
+  78% { opacity: 0; transform: scale(0.6); }
+  88% { opacity: 0.75; transform: scale(1.8); }
+  98%, 100% { opacity: 0; transform: scale(2.4); }
 }
 /* 退场方向按步数换边 —— 同一个动作不重播的观感就靠这个 */
 @keyframes mv-return-pull-alt {
