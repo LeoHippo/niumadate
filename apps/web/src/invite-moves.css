@@ -725,3 +725,95 @@ body .invite-page[data-theme] .card-entering-fly {
   93% { transform: translateY(330px) scale(1.07, 0.6); opacity: 1; }
   100% { transform: translateY(430px) scale(1.07, 0.56); opacity: 0; }
 }
+
+/* ==========================================================================
+   ⑮ 换屏那一拍不能是"一块静止的纸色"
+   --------------------------------------------------------------------------
+   用户：「不要有那种一点以后会**重复出现一个画面**的情况」。
+   我密集截帧看到的确是这样：约 4150~4600ms 之间，旧页已经走了、新页还没上来，
+   过渡纱在这个窗口里是 **opacity: 1 的一整块纸色** —— 静止、无内容，
+   看上去就像"画面卡住/重复了一下"。
+
+   纱本身没错（它负责把换屏那一瞬盖住），错在**它上面什么都没有**。
+   所以给它加一道**扫过去的光**：盖住的那 0.5 秒里，光从左到右掠过，
+   眼睛看到的是"翻页时那一下反光"，而不是"白屏"。
+   ========================================================================== */
+
+/*
+   实测第一版（一条 0.85 的白光带）太弱：4100 / 4300 两帧看上去还是"两块差不多的纸色"。
+   所以加强到**两条光带**（一条宽的主光 + 一条窄的跟光）、更亮、扫得更快 ——
+   盖住的那 0.4 秒里画面上是"一道光刷过去"，不再是静止的一块纸。
+*/
+.invite-page .screen-veil::after {
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 18%,
+      rgba(255, 255, 255, 0.95) 42%,
+      rgba(255, 255, 255, 0) 58%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(255, 252, 236, 0) 40%,
+      rgba(255, 246, 214, 0.8) 62%,
+      rgba(255, 252, 236, 0) 78%
+    ) !important;
+  background-size:
+    200% 100%,
+    260% 100%;
+  background-repeat: no-repeat, no-repeat;
+  animation: mv-veil-sheen 0.5s cubic-bezier(0.35, 0, 0.5, 1) both !important;
+}
+
+@keyframes mv-veil-sheen {
+  0% {
+    background-position: 160% 0, 200% 0;
+    opacity: 0.35;
+  }
+  30% { opacity: 1; }
+  100% {
+    background-position: -70% 0, -90% 0;
+    opacity: 0.35;
+  }
+}
+
+/* 纱落下去（新页进场）的时候再来一道，方向相反 —— 一进一出都有光 */
+.invite-page .screen-veil-reveal::after {
+  animation: mv-veil-sheen-back 0.7s cubic-bezier(0.4, 0, 0.6, 1) both !important;
+}
+
+@keyframes mv-veil-sheen-back {
+  0% { background-position: -60% 0; opacity: 0.15; }
+  40% { opacity: 0.9; }
+  100% { background-position: 150% 0; opacity: 0.15; }
+}
+
+/* ==========================================================================
+   ⑯ 新页落位要有"轻弹"（跟纸一样有韧性）
+   --------------------------------------------------------------------------
+   原来左边/右边滑进来是**一路减速停住**，停得太"死"。
+   网上那套吉祥物动画讲的 weight 就是这个：到位的时候得**过头一点再回来**。
+   ========================================================================== */
+
+.invite-page .card-entering-pull {
+  animation-name: mv-enter-left-bounce !important;
+}
+.invite-page .card-entering-fly {
+  animation-name: mv-enter-right-bounce !important;
+}
+
+@keyframes mv-enter-left-bounce {
+  from { transform: translateX(-46%) rotate(-4deg) scale(0.95); opacity: 0; }
+  /* 冲过一点点 */
+  74% { transform: translateX(1.6%) rotate(0.7deg) scale(1.012); opacity: 1; }
+  /* 收回来 */
+  88% { transform: translateX(-0.7%) rotate(-0.3deg) scale(0.998); }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
+
+@keyframes mv-enter-right-bounce {
+  from { transform: translateX(46%) rotate(4deg) scale(0.95); opacity: 0; }
+  74% { transform: translateX(-1.6%) rotate(-0.7deg) scale(1.012); opacity: 1; }
+  88% { transform: translateX(0.7%) rotate(0.3deg) scale(0.998); }
+  to { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+}
