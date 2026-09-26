@@ -894,3 +894,43 @@ body .invite-page[data-theme] .card-entering-fly {
   26% { opacity: 0; transform: scale(1.55); }
   100% { opacity: 0; transform: scale(1.55); }
 }
+
+/* ==========================================================================
+   ⑲ 落地扬尘：三支过渡都有（原来只有"压"那一支有）
+   --------------------------------------------------------------------------
+   目标②要的彩蛋应该三支一致：小人是**走进来站定**的，站定那一刻脚下也应该有土。
+   拉/右拉的就位点在 26%（和"压"的落地同一个节拍），所以同一套关键帧直接复用，
+   只把元素换到 .puller-pull / .puller-fly 的 ::after 上。
+   ========================================================================== */
+
+.invite-page .puller-pull::after,
+.invite-page .puller-fly::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -2px !important;
+  top: auto !important;
+  width: 58px !important;
+  height: 14px !important;
+  margin: 0 0 0 -29px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(158, 126, 86, 0.45) 0%,
+    rgba(158, 126, 86, 0.24) 45%,
+    rgba(158, 126, 86, 0) 72%
+  ) !important;
+  opacity: 0;
+  animation: mv-land-dust-side 4.5s linear both !important;
+  pointer-events: none;
+}
+
+/* 就位点在 26%（小人站定那一刻） */
+@keyframes mv-land-dust-side {
+  0%, 20% { opacity: 0; transform: scale(0.4); }
+  27% { opacity: 0.85; transform: scale(1); }
+  40% { opacity: 0; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
