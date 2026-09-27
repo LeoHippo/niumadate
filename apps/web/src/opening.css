@@ -429,3 +429,90 @@
   90% { transform: translateY(-104px) scale(1.42) rotate(0deg); }
   100% { transform: translateY(-108px) scale(1.45) rotate(0deg); }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   ★ 手指提示 + 拖拽手势的底层开关（第二轮改版）
+   「按住火漆往下拉」——拆信不再自己演，进度由手指决定。
+   · touch-action: none 是必须的：不写的话在手机上往下拉会变成滚动页面，
+     指针事件会被浏览器中途抢走（pointercancel），动画停在半路。
+   · user-select / -webkit-user-select 同理，防长按选中文字、弹出复制菜单。
+   ───────────────────────────────────────────────────────────── */
+.opening {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.opening-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(9vh, 46px);
+  translate: -50% 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  color: var(--seal-hi, #ffe6c4);
+  background: color-mix(in srgb, var(--seal-dark, #6b1010) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--seal-hi, #ffd9a8) 34%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 26px -12px #000;
+  /* 呼吸：不是装饰，是"这里能动"的邀请 */
+  animation: op-hint-breath 2.1s ease-in-out infinite;
+  transition: opacity 0.45s ease, translate 0.45s ease;
+}
+
+.opening-hint[data-gone='true'] {
+  opacity: 0;
+  translate: -50% 14px;
+  animation: none;
+}
+
+.opening-hint-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* 手指从提示处往下走的箭头感 */
+.opening-hint::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-left: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -2px;
+  animation: op-hint-arrow 2.1s ease-in-out infinite;
+}
+
+@keyframes op-hint-breath {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+@keyframes op-hint-arrow {
+  0%, 100% { translate: 0 -2px; opacity: 0.7; }
+  50% { translate: 0 3px; opacity: 1; }
+}
+
+/* 火漆是"可以按"的那一处：光标与小回弹 */
+.op-env-seal {
+  cursor: grab;
+}
+.op-env-seal:active {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-hint { animation: none; }
+  .opening-hint::after { animation: none; }
+}

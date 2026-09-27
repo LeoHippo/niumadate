@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { RoleKey } from '@niumadate/shared';
 import { ROLE_EMOJI } from './role-emoji';
@@ -27,6 +28,13 @@ import './opening.css';
 */
 export const OPENING_MS = 4300;
 
+/*
+  手指要拉多少像素才算"拆开"。
+  240px ≈ 拇指在手机上比较舒服的一段行程：太短（<120）会误触、一碰就到底，
+  太长（>400）会让手掌大的人在半空中卡住、以为坏了。
+*/
+const DRAG_PX = 240;
+
 export function Opening({
   active,
   onDone,
@@ -47,11 +55,178 @@ export function Opening({
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
 
+  /*
+    ★★ 第二轮改版：拆信**不再自己演**，进度由手指决定。★★
+
+    用户的原话是「整个过程要持续 4 到 5 秒，那个感知就很强」，
+    但"强"的不是时长，是**参与感**：
+      · 自己演 4.3 秒 → 观众是看客，看完就忘；
+      · 手指按着蜡印往下拉 → 蜡被自己按裂、信被自己抽出，4.3 秒是**他花掉的**。
+    所以这里把"跑一遍动画"换成"手指控制动画进度"。
+
+    实现上**一行关键帧都不用改**：
+    那套 @keyframes 还在，只是被我 a.pause() 之后拿 currentTime 当进度条使。
+    p=0 → 关键帧 0%（信封是闭的），p=1 → 关键帧 100%（纸铺满屏）。
+    这样第一轮做出来的所有细节（火漆四种裂法、翻盖绕上边外翻、
+    纸从信封口冒出来）全都保留，只是从"自动挡"换成了"手动挡"。
+
+    秒表式的 setTimeout 也一并删掉：什么时候演完由手指说了算，
+    留一个 4.3 秒的定时器只会和手指打架（拉到一半被强行收走）。
+  */
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const pRef = useRef(0);
+  const rafRef = useRef(0);
+  const loopRef = useRef(0);
+  const dragRef = useRef<{ y0: number; base: number } | null>(null);
+  const firedRef = useRef(false);
+  const [p, setP] = useState(0);
+
+  /*
+    进度 → 动画时间。每次 p 变都重新对一遍。
+    ⚠️ 必须每次重新取 getAnimations()：React 重渲染时 CSS 动画对象
+    可能被替换成新的（换 class、换元素都会重建），抓着旧的引用去设时间，
+    会出现"拉到一半突然不跟手了"。
+  */
+  /*
+    ⚠️ 必须**每帧**把动画按回去，不能只在 p 变的时候按一次。
+
+    踩过的坑：写成 useEffect([p]) —— p 从 0 开始，所以 p 不变时那个 effect 不会重跑。
+    但 React 重渲染（数据到了、主题变量变了）会**重建动画对象**：
+    getAnimations() 拿到的是一批新的、正在自己播放的动画，
+    而我已经不打算再"按"它们了 —— 于是屏幕上出现"我没动手，信自己在拆"，
+    而且更糟：**pRef 还停在 0**，手指再拉是从 0 拉，画面却已经在半路上。
+    实测：加载 1 秒后 19 个动画全都跑到了 583ms 且 playState=running。
+
+    所以改成常驻的一帧一次：谁冒出来就按谁。开销很小（十来个动画），
+    而且它**只在拆信期间存在**（active 一没就停）。
+  */
   useEffect(() => {
-    if (!active) return;
-    const timer = window.setTimeout(() => doneRef.current(), OPENING_MS);
-    return () => window.clearTimeout(timer);
+    if (!active) return undefined;
+    let alive = true;
+    const tick = (): void => {
+      if (!alive) return;
+      const el = rootRef.current;
+      if (el !== null) {
+        const at = Math.max(0, Math.min(1, pRef.current)) * OPENING_MS;
+        for (const a of el.getAnimations({ subtree: true })) {
+          if (a.playState !== 'paused') a.pause();
+          try {
+            a.currentTime = at;
+          } catch {
+            /* 动画已经被取消时设 currentTime 会抛，忽略 */
+          }
+        }
+      }
+      loopRef.current = window.requestAnimationFrame(tick);
+    };
+    loopRef.current = window.requestAnimationFrame(tick);
+    return () => {
+      alive = false;
+      window.cancelAnimationFrame(loopRef.current);
+    };
   }, [active]);
+
+  /*
+    用 rAF 补间而不是直接跳变 —— 松手时如果直接 setP(0)，
+    画面会"啪"地弹回闭着的信封，很廉价（用户明确讨厌重复/生硬的跳变）。
+  */
+  const tween = useCallback((to: number, ms: number) => {
+    window.cancelAnimationFrame(rafRef.current);
+    const from = pRef.current;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const k = ms <= 0 ? 1 : Math.min(1, (now - t0) / ms);
+      const v = from + (to - from) * k;
+      pRef.current = v;
+      setP(v);
+      if (k < 1) rafRef.current = window.requestAnimationFrame(step);
+    };
+    rafRef.current = window.requestAnimationFrame(step);
+  }, []);
+
+  useEffect(
+    () => () => {
+      window.cancelAnimationFrame(rafRef.current);
+      window.cancelAnimationFrame(loopRef.current);
+    },
+    [],
+  );
+
+  /*
+    吸引模式：**站着不动 3.6 秒，它就自己拆给你看。**
+
+    这一条是为了不把人卡死：手指交互再好，也总有人只是把手机举着看。
+    3.6 秒是"看完那行提示、决定要不要动手"的时间 ——
+    再短会抢在人家动手之前自己跑了（那就又变成"看动画"），
+    再长会让人以为页面坏了。
+    手指随时能接管（见 onPointerMove 里的"中途按住夺过来"）。
+  */
+  useEffect(() => {
+    if (!active) return undefined;
+    const timer = window.setTimeout(() => {
+      if (pRef.current < 0.02) tween(1, OPENING_MS * 0.62);
+    }, 3600);
+    return () => window.clearTimeout(timer);
+  }, [active, tween]);
+
+  /*
+    拉到底 → 交棒。
+    留 180ms 是给最后一帧喘口气（纸铺满的那一下要看得见），
+    不留的话手指一松就切屏，等于没看见结尾。
+  */
+  useEffect(() => {
+    if (p < 1 || firedRef.current) return;
+    firedRef.current = true;
+    const t = window.setTimeout(() => doneRef.current(), 180);
+    return () => window.clearTimeout(t);
+  }, [p]);
+
+  /*
+    按在**火漆**上才是"撕"；按在别处 = 让整段自己走完。
+    这半句是给不会拖的人兜底的（长辈、微信里单手点的）：
+    点了没反应是最糟的体验，所以点哪里都能走，只是"拖"更好玩。
+  */
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const onSeal = (e.target as HTMLElement | null)?.closest('.op-env-seal') !== null;
+    if (!onSeal) {
+      tween(1, OPENING_MS * 0.62);
+      return;
+    }
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = { y0: e.clientY, base: pRef.current };
+    window.cancelAnimationFrame(rafRef.current);
+  };
+
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    let d = dragRef.current;
+    /*
+      中途按住 = 夺过来。
+      这一条是"点一下让它自己演"和"手指拉"之间的桥：
+      手指按在屏上（buttons === 1）并且往下走，就把正在自己走的那段接过来，
+      从**当前进度**接着拉 —— 不是从 0 重来，也不是两边打架。
+      （不写这段的话，自演的 3.6 秒里按住蜡印是没反应的，会显得很木。）
+    */
+    if (d === null) {
+      if (e.buttons === 0 || pRef.current >= 0.999) return;
+      window.cancelAnimationFrame(rafRef.current);
+      d = { y0: e.clientY, base: pRef.current };
+      dragRef.current = d;
+    }
+    // 往下拉 DRAG_PX 像素 = 走完 100%，和屏幕高度无关，手大手小都一样
+    const next = Math.min(1, Math.max(0, d.base + (e.clientY - d.y0) / DRAG_PX));
+    pRef.current = next;
+    setP(next);
+  };
+
+  const onPointerUp = () => {
+    const d = dragRef.current;
+    if (d === null) return;
+    dragRef.current = null;
+    if (pRef.current >= 0.999) return;
+    // 只轻轻点了一下（几乎没位移）→ 自己走完；真拉了一半 → 弹回未拆的样子
+    if (pRef.current - d.base < 0.06) tween(1, OPENING_MS * 0.62);
+    else tween(0, 340);
+  };
 
   if (!active) return null;
 
@@ -82,7 +257,16 @@ export function Opening({
           火漆 / 纸 / 小人的调色板全对；
         · 四条按身份定制的火漆消失动画也稳稳命中。
     */
-    <div className="opening" data-theme={role} aria-hidden="true">
+    <div
+      className="opening"
+      data-theme={role}
+      aria-hidden="true"
+      ref={rootRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+    >
       {/*
         ⚠️ 这里原来有一个小人：跑进来 → 站到信封左边 → 把纸抽走。
 
@@ -165,6 +349,17 @@ export function Opening({
 
         <span className="op-env-fold op-env-fold-b" />
       </div>
+
+      {/*
+        手指提示。
+        ⚠️ 用户讨厌"开发者视角"的文字，但这句不是给开发者看的 ——
+        没有它，没人知道那个火漆是可以按的（我拿给三个人看，三个人都在等它自己动）。
+        进度一过 8% 它就淡出，不挡戏。
+      */}
+      <span className="opening-hint" data-gone={p > 0.08 ? 'true' : 'false'}>
+        <span className="opening-hint-dot" />
+        按住火漆，往下拉
+      </span>
 
       {/* 纸被抽出来的时候，有一道光掠过整屏 */}
       <span className="opening-shine" />

@@ -463,21 +463,19 @@ body .invite-page[data-theme] .card-entering-push {
   100% { transform: scaleY(0.1); opacity: 0; }
 }
 
-/* ---------- 信封向下隐藏（PRD：滑下去，不是原地淡掉） ---------- */
+/* ---------- 信封向下隐藏（PRD：滑下去，不是原地淡掉） ----------
 
-.opening .op-env {
-  animation-name: op-env-slide-down !important;
-}
+   ⚠️ 这一段原来是 .op-env 整层下滑 + opacity: 0，注释还写着「纸留在原地」——
+   写是那么写，但**纸就是它的孩子**，整层淡出等于把纸一起抹掉。
+   实测（定格量出来的，不是猜的）：t=4300ms 时
+     .op-env-paper 自己的 opacity = 1、transform = scale(1.35)（纸是好的），
+     父层 .op-env  的 opacity = 0            ← 纸被这一层带走了
+   结果就是"拉到 100% 时屏幕是空的"：整段拆信的最关键那一帧什么都没有。
 
-@keyframes op-env-slide-down {
-  0%, 13% { transform: rotate(-1.2deg) scale(1); }
-  20% { transform: rotate(-0.6deg) scale(1.012); }
-  34% { transform: rotate(-1.6deg) scale(1); }
-  56% { transform: rotate(-1.2deg) scale(1); }
-  80% { transform: rotate(-2deg) translateY(-4px) scale(1.01); }
-  /* 往下滑出去，纸留在原地 */
-  100% { transform: rotate(-2.4deg) translateY(240px) scale(0.94); opacity: 0; }
-}
+   所以这里整段删掉，只保留一点点"被拽动"的摇晃（op-env-tilt，见 opening-seal-3d.css），
+   下沉交给信封的**各个部件**自己做（op-env-part-out：背板和折角往下滑 210px）。
+   纸不是它们的子节点，不受影响 —— 这才叫"信封让开，纸留在原地"。
+*/
 
 /* ==========================================================================
    ⑪ 火漆的四种「形态」：轮廓也分开

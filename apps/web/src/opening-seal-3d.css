@@ -370,7 +370,9 @@
   56% { transform: rotate(-1.2deg) scale(1); }
   80% { transform: rotate(-1.8deg) scale(1.005); }
   /* ★ 注意：**没有 opacity**，也没有大位移 —— 纸在里面，不能让这层走掉 */
-  100% { transform: rotate(-2deg) scale(1); }
+  /* 收尾转回 0 度：此刻屏幕上只剩那张纸，而下一屏是方的，
+     留 2 度的歪斜，交接那一下会看出"纸是歪的"。 */
+  100% { transform: rotate(0deg) scale(1); }
 }
 
 /* ②′ 信封的各个部件自己往下滑走（纸不是它们的子节点，不受影响） */

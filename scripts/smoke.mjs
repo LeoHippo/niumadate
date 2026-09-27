@@ -315,6 +315,29 @@ async function main() {
 
   check('正确口令拿到 token', login.status === 200 && typeof token === 'string', `实际 ${login.status}`);
 
+  /*
+    口令不对就**立刻停下**，别一路跑到底。
+
+    踩过：本地 apps/server/data/admin-password 和容器里的口令不是同一个，
+    脚本于是拿了个错口令去登录 —— 401 之后每一条都红，最后还崩在
+    "Cannot read properties of undefined (reading 'find')"（配置接口返回的是错误对象）。
+    报出来像产品坏了，其实是测试自己的口令过期了，白折腾半小时。
+  */
+  if (typeof token !== 'string') {
+    console.error(
+      [
+        '',
+        '后台口令不对，后面的用例没法跑（不是产品坏了）。',
+        '  正在用的口令来自：' + (process.env.ADMIN_PASSWORD === undefined ? 'apps/server/data/admin-password' : 'ADMIN_PASSWORD 环境变量'),
+        '  容器里的口令：docker exec niumadate sh -c "cat /data/admin-password"',
+        '  跑法：$env:ADMIN_PASSWORD=... ; node scripts/smoke.mjs',
+        '',
+      ].join('\n'),
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const noAuth = await req('GET', '/admin/submissions');
   check('不带 token 访问后台返回 401', noAuth.status === 401, `实际 ${noAuth.status}`);
 

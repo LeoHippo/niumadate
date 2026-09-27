@@ -292,6 +292,31 @@ export function InvitePage() {
   const [showAll, setShowAll] = useState(false);
 
   /*
+    ★★ 这一版最重要的一处产品改动 ★★
+
+    原来：第一屏是一张"封面"（信封 + 「有一封邀请 / 拆开看看？」+ 「轻点继续 →」），
+    **点了以后才**演拆信。而且整个 <section> 上还有一句 onClick → goTo(index+1)，
+    所以绝大多数人是**点大标题**进来的 —— 他们直接跳到第二屏，
+    **拆信这段压根没看见**。
+
+    用户的原话就是：「你的设计如果不让人们看到的话那就等于没设计。」
+    一个要按对地方才看得到的开场，等于没有开场。实测也确实是：
+    我拿手机点「拆开看看？」，画面直接换页了。
+
+    现在：这一页**就是那封信**。邀请函一加载完，展开层立刻上来盖住整屏
+    （.opening 自带不透明的纸色底，所以背后那一屏看不见，不会出现"两个信封"），
+    屏幕上只剩下信封和一行「按住火漆，往下拉」。
+    拆开它 —— 用拉的也好、点它自己演也好 —— 才进到后面的内容。
+    这也是用户最早定稿的分镜：「第一页就是背景 + 信封，背后什么都没有」。
+  */
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (autoOpened.current || data === null || index !== 0 || showAll) return;
+    autoOpened.current = true;
+    setOpening(true);
+  }, [data, index, showAll]);
+
+  /*
     ★★ 这一行是这轮最重要的修复，必须写清楚 ★★
 
     展开层（Opening）是 createPortal 挂到 document.body 的 ——
@@ -595,6 +620,15 @@ export function InvitePage() {
             key={screen}
             onClick={() => {
               // 只在前面的「叙述屏」上点哪都能继续；按钮屏和对话屏不许误触
+              if (screen === 'seal') {
+                /*
+                  第一屏点哪都是"拆信"，**不是**翻到下一屏。
+                  原来这里会直接 goTo —— 于是"拆信"这段动画成了只有按对按钮
+                  才看得到的彩蛋（详见上面 autoOpened 那段注释）。
+                */
+                setOpening(true);
+                return;
+              }
               if (screen !== 'answer' && !last) goTo(index + 1);
             }}
           >
