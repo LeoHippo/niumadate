@@ -516,3 +516,88 @@
   .opening-hint { animation: none; }
   .opening-hint::after { animation: none; }
 }
+
+/* ==========================================================================
+   ★ 火漆：从"塑料球"改成"一坨蜡"（第三轮）
+
+   用户要的是「非常华丽非常好玩」。原来那颗章的问题不是颜色，是**材质**：
+   · 一个正圆 + 一个偏左上的大高光 = 塑料/玻璃球，不像蜡；
+   · 边缘太光滑，看不出"是压上去、摊开的"；
+   · 图案浮在表面，没有"被压进去"。
+   蜡的三个特征：**哑光**、**边缘不规则**（摊开的形状）、**图案是凹进去的**。
+   这里只改材质，不动任何动画名 —— 四种身份的裂法（::before/::after 两半往两边
+   滑开那套）完全不受影响，两半合起来仍然是一整块。
+
+   ⚠️ 选择器带 body 前缀是为了拿到更高优先级：
+   opening.css 在 Invite.tsx 里是**最早**被引入的之一，后面还有
+   opening-3d / opening-fixes / invite-moves 好几层，同等优先级下我这份会被压掉。
+   ========================================================================== */
+
+body .opening .op-env-seal {
+  /* 坐在纸上的投影，让它"贴"在信封上而不是飘着 */
+  filter: drop-shadow(0 3px 4px rgba(70, 34, 12, 0.38));
+  /*
+    一点点歪是"手盖上去的"证据。
+    原来写的是 6deg，配上正圆看起来只是"歪了"；现在轮廓不规则了，
+    3deg 就够了 —— 再大就不像盖章，像贴纸贴歪。
+  */
+  rotate: 3deg;
+}
+
+body .opening .op-env-seal::before,
+body .opening .op-env-seal::after {
+  /*
+    ① 哑光：高光收进去、暗部加深，并且**最外圈再暗一档**（蜡的边缘会先凝）。
+       原来那版高光半径大、衰减慢，正是球体反光的样子。
+    ② 蜡的纹理：repeating-conic 画出放射状的"摊开痕"，透明度压到 0.05 上下 ——
+       放大看得见，缩到手机上只是一层"不是纯色"的活气。
+  */
+  background-image:
+    radial-gradient(
+      circle at 42% 30%,
+      var(--seal-hi, #e0714a) 0%,
+      var(--seal, #c4472a) 30%,
+      var(--seal-dark, #8f2c17) 74%,
+      color-mix(in srgb, var(--seal-dark, #8f2c17) 66%, #1a0503) 100%
+    ),
+    repeating-conic-gradient(
+      from 11deg at 46% 42%,
+      rgba(255, 255, 255, 0.055) 0deg 7deg,
+      rgba(0, 0, 0, 0.05) 7deg 14deg
+    ) !important;
+  background-blend-mode: overlay, normal !important;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.16),
+    inset 0 -8px 15px rgba(52, 9, 4, 0.56),
+    inset 0 0 0 1px rgba(40, 6, 2, 0.16) !important;
+}
+
+/*
+  ③ 边缘不规则 —— 这是"蜡"和"球"最大的差别。
+  两个半圆各给一组不对称的圆角：外缘鼓一点、瘪一点，
+  中缝那两条边保持笔直（不然合起来中间会露出缝）。
+*/
+body .opening .op-env-seal::before {
+  border-radius: 54% 3% 5% 57% / 48% 4% 6% 52% !important;
+}
+body .opening .op-env-seal::after {
+  border-radius: 3% 54% 57% 5% / 4% 48% 52% 6% !important;
+}
+
+/* ④ 图案是"压"进去的：上缘一道暗、下缘一道亮 —— 阴刻的两个方向 */
+body .opening .op-env-seal-face {
+  filter: drop-shadow(0 -1px 1px rgba(48, 8, 3, 0.75)) drop-shadow(0 1px 1px rgba(255, 236, 210, 0.42));
+}
+
+/* ==========================================================================
+   ★ 开幕的空气：暗角 + 顶上那束暖光（第三轮）
+
+   原来整块背景是平的一个粉渐变，中间摆个信封 —— 干净，但"没有光"。
+   海报之所以像海报，往往是**有明暗层次**：光从上方来，四周收暗。
+   用 inset box-shadow 做，不需要多一个元素，也不会挡任何东西。
+   ========================================================================== */
+body .opening {
+  box-shadow:
+    inset 0 0 190px rgba(84, 38, 58, 0.16),
+    inset 0 78px 150px -70px rgba(255, 240, 214, 0.7);
+}
