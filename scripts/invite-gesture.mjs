@@ -28,6 +28,14 @@ const API = BASE + '/api';
 const OUT = '.shots';
 mkdirSync(OUT, { recursive: true });
 
+/*
+  ROLE：四套身份各跑一遍时要能选人（brother / sister / baby / dadmam）。
+  SHOT_PREFIX：四遍都落同一批文件名会互相覆盖，所以前缀也跟着身份走。
+  两者都只在跑验收时用，**断言一条都没动** —— 手势该验的还是那 13 条。
+*/
+const ROLE = process.env.ROLE ?? 'sister';
+const PREFIX = process.env.SHOT_PREFIX ?? 'gesture-';
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 class CDP {
@@ -82,7 +90,7 @@ async function createInvite() {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: 'Bearer ' + login.token },
     body: JSON.stringify({
-      role: 'sister',
+      role: ROLE,
       date,
       inviteeName: '手势验收',
       timeText: '周六下午三点',
@@ -140,7 +148,7 @@ async function main() {
   console.log('\n=== 拆信手势验收 ' + BASE + ' ===\n');
   const invite = await createInvite();
   const url = BASE + '/i/' + invite.code + '?v=' + Date.now();
-  console.log('  邀请：' + url + '\n');
+  console.log('  邀请：' + url + '（身份 ' + ROLE + '）\n');
 
   const port = 9400 + (process.pid % 300);
   const profile = mkdtempSync(path.join(tmpdir(), 'niumadate-gesture-'));
@@ -207,7 +215,7 @@ async function main() {
     console.log('[1] 按住火漆，往下拉 240 像素');
     await cdp.send('Page.navigate', { url });
     await waitFor("document.querySelector('.op-env-seal')", '火漆出现');
-    await sleep(600);
+    await sleep(1500);
 
     const start = await evaluate(READ);
     check(
@@ -217,7 +225,7 @@ async function main() {
     );
     check('屏幕上有火漆', start.seal !== null && start.seal.w > 20, JSON.stringify(start.seal));
     check('一上来就摆着「按住火漆，往下拉」的提示', start.hint === 'false', String(start.hint));
-    await shot('gesture-00-closed');
+    await shot(PREFIX + '00-closed');
 
     const rect = await evaluate(SEAL_CENTER);
     if (rect === null) throw new Error('拿不到火漆的位置');
@@ -231,7 +239,7 @@ async function main() {
       await sleep(90);
       const now = await evaluate(READ);
       frames.push(Object.assign({ i, p: i / STEPS }, now));
-      if (i % 2 === 0) await shot('gesture-' + String(i).padStart(2, '0') + '-drag');
+      if (i % 2 === 0) await shot(PREFIX + String(i).padStart(2, '0') + '-drag');
     }
 
     const mid = frames.find((f) => f.i === 6);
@@ -282,7 +290,7 @@ async function main() {
     }
     check('松手后拆信层自己退场，邀请函接管屏幕', gone === true, 'opening 还在');
     await sleep(500);
-    await shot('gesture-13-after');
+    await shot(PREFIX + '13-after');
 
     /* ── 第二场：不拖，只点一下（给不会拖的人兜底） ──────────── */
     console.log('');
@@ -315,7 +323,7 @@ async function main() {
     }
     check('点一下这条路子也能走到拆完', gone2 === true);
     await sleep(400);
-    await shot('gesture-14-tap-after');
+    await shot(PREFIX + '14-tap-after');
 
     console.log('');
     console.log('=== 通过 ' + passed + ' 项，失败 ' + failures.length + ' 项 ===');

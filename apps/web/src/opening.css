@@ -601,3 +601,89 @@ body .opening {
     inset 0 0 190px rgba(84, 38, 58, 0.16),
     inset 0 78px 150px -70px rgba(255, 240, 214, 0.7);
 }
+
+/* ==========================================================================
+   ★ 提示条：从"一个素色药丸"改成"一枚小牌"（第四轮）
+
+   它是第一屏唯一的一行字，也是"这封信可以动手"的唯一说明书 ——
+   素色药丸压在下面，像系统 toast，和白捡的信封不是一套东西。
+   改成：金线描边 + 一点内亮 + 走一道很慢的光，和火漆同一套配色语言。
+   （进度过 8% 它自己淡出，这里只管"没动手时"那一帧好不好看。）
+   ========================================================================== */
+body .opening-hint {
+  border-color: color-mix(in srgb, var(--seal-hi, #ffd9a8) 52%, transparent);
+  background:
+    linear-gradient(
+      172deg,
+      color-mix(in srgb, var(--seal-dark, #6b1010) 72%, transparent),
+      color-mix(in srgb, var(--seal-dark, #6b1010) 46%, transparent)
+    );
+  box-shadow:
+    0 12px 28px -14px rgba(60, 12, 24, 0.75),
+    inset 0 1px 0 rgba(255, 236, 206, 0.3),
+    inset 0 -1px 0 rgba(60, 12, 24, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 慢慢走过的一道高光：让静止的第一屏也"活着" */
+body .opening-hint::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 36%, rgba(255, 244, 224, 0.28) 50%, transparent 64%);
+  transform: translateX(-120%);
+  animation: op-hint-sheen 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes op-hint-sheen {
+  0%, 42% { transform: translateX(-120%); }
+  72%, 100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .opening-hint::before { animation: none; opacity: 0; }
+}
+
+/* ==========================================================================
+   ★ 拆信期间，背后那屏必须**真的什么都没有**（第四轮）
+
+   分镜定稿第一句就是「第一页就是背景 + 信封，背后什么都没有」。
+   但页面自己那一屏（封面：白色信封 + 那颗珠子 + 看全部/轻点继续那条）
+   仍然挂在展开层下面 —— 展开层只要有一瞬间没盖实（进场淡入的那几帧、
+   或者任何一次重绘），就会看到**两个信封叠在一起**。
+   实测：密集截帧里第一张就是"珠子信封 + 蜡印信封 + 底部按钮"三层同时在场。
+
+   为什么用 CSS 的 :has() 而不是在 React 里条件渲染：
+   React 那边要动的是 <section> 的开合标签（结构改动，容易碰坏过渡逻辑），
+   而这件事的本质是"只要展开层在，背后就不许画" —— 正好是 :has() 能表达的。
+   浏览器不支持时这条规则只是不生效，不会坏事。
+   ========================================================================== */
+/*
+  ⚠️ 别给这两条加 .invite-page 前缀 —— 我加过一次，结果只命中了底栏，
+  中间那张白卡片照样画着（实测：第一帧里白卡 + 底栏按钮 + 展开层的蜡同时在）。
+  这里只要求"展开层挂在 body 上"就够了，页面上所有屏一律让位。
+*/
+body:has(> .opening) .screen,
+body:has(> .opening) .screen-bar,
+body:has(> .opening) .screen-step {
+  opacity: 0;
+}
+
+/* ==========================================================================
+   ★ 纸的"出厂状态"必须也是看不见的（第四轮）
+
+   密集截帧抓到的：挂载后第一帧里，信封口上**白花花地插着一张纸**
+   （还带着纸纹），要过一拍才被动画按回 opacity 0 —— 也就是"信还没拆，
+   纸先露了"。原因很简单：动画还没应用的那一瞬间，元素按**自己的计算值**画，
+   而 .op-env-paper 从来没写过默认 opacity（默认 1）。
+
+   修法：把默认值就设成"看不见"。运行中的动画会盖过普通声明
+   （动画只输给 !important 声明），所以这里**不能**写 !important ——
+   写了就把 opacity 这条动画整个废掉，纸永远出不来。
+   这一条同时也兜住了"动画因为任何原因没跑起来"的情况。
+   ========================================================================== */
+body .opening .op-env-paper {
+  opacity: 0;
+}
