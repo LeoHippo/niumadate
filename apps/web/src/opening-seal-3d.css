@@ -342,3 +342,53 @@
     animation-timing-function: revert !important;
   }
 }
+
+/* ==========================================================================
+   ㉒ 让「信被抽出来」真的看得见
+   --------------------------------------------------------------------------
+   用户：「我怎么始终没看到信被抽出来……第一页放到第二页的时候就要用到这个动画。」
+
+   根因：纸被我挪到了信封**外面**（单独一个 .op-paper-stage，z-index 6）。
+   那样确实解决了"信封淡出把纸一起带走"，但代价是**纸永远画在信封上面** ——
+   它看起来是一张浮在信封上、自己在长大的白卡片，而不是"从信封口被抽出来"。
+
+   修法两步：
+     ① 纸挪回 .op-env 里面（JSX 已改），层次按 背板0 / 纸1 / 翻折2-3 / 翻盖4 / 火漆5：
+        纸升起来时只有高出信封口的那一截看得见 —— 这就是"被抽出来"。
+     ② 信封这层**不再淡出**（否则又会把纸带走）；改由信封的各个部件自己往下滑走。
+   ========================================================================== */
+
+/* ② 信封本体：不再整体淡出，只保留那点轻微的倾斜/缩放 */
+.opening .op-env {
+  animation-name: op-env-tilt !important;
+}
+
+@keyframes op-env-tilt {
+  0%, 13% { transform: rotate(-1.2deg) scale(1); }
+  20% { transform: rotate(-0.6deg) scale(1.012); }
+  34% { transform: rotate(-1.6deg) scale(1); }
+  56% { transform: rotate(-1.2deg) scale(1); }
+  80% { transform: rotate(-1.8deg) scale(1.005); }
+  /* ★ 注意：**没有 opacity**，也没有大位移 —— 纸在里面，不能让这层走掉 */
+  100% { transform: rotate(-2deg) scale(1); }
+}
+
+/* ②′ 信封的各个部件自己往下滑走（纸不是它们的子节点，不受影响） */
+.opening .op-env-body,
+.opening .op-env-fold {
+  animation-name: op-env-part-out !important;
+}
+
+@keyframes op-env-part-out {
+  0%, 74% { transform: translateY(0); opacity: 1; }
+  88% { transform: translateY(96px); opacity: 0.55; }
+  100% { transform: translateY(210px); opacity: 0; }
+}
+
+/* ① 层次：纸在背板前面、翻折后面 */
+.opening .op-env-body { z-index: 0 !important; }
+.opening .op-paper-stage { z-index: auto; }
+.opening .op-env-paper { z-index: 1 !important; }
+.opening .op-env-fold-l,
+.opening .op-env-fold-r,
+.opening .op-env-fold-b { z-index: 3 !important; }

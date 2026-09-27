@@ -107,12 +107,31 @@ export function Opening({
         这里给纸一个和信封完全重合的独立舞台（同尺寸、同中心），
         几何一点没变，但它不再被信封带走。
       */}
-      <span className="op-paper-stage">
-        <span className="op-env-paper" />
-      </span>
-
       <div className="op-env">
         <span className="op-env-body" />
+
+        {/*
+          ★ 纸必须待在信封**里面** —— 这是"从信封口被抽出来"能不能被看见的关键。
+
+          原来纸被我挪到信封外面（.op-paper-stage）单独一个层：那样确实不会被
+          "信封整体淡出"带走，但它也**永远画在信封上面** —— 于是它看起来是一张
+          "浮在信封上、自己在长大"的白卡片，不是"从信封口被抽出来"。
+          用户的原话就是：「我怎么始终没看到信被抽出来」。
+
+          现在的层次（都在 .op-env 这个 stacking context 里）：
+            背板 .op-env-body      z 0   ← 纸在它前面（能看见）
+            纸   .op-env-paper     z 1
+            翻折 .op-env-fold-*    z 2/3 ← 纸在它们后面（被信封口挡着）
+            翻盖 .op-env-flap      z 4
+            火漆 .op-env-seal      z 5
+          所以纸升起来的时候，只有高出信封口的那一截看得见 ——
+          这就是"从信封口冒出来"。
+          而"信封最后会不会把纸一起带走"这件事，改由**信封各部件自己**滑下去解决
+          （见 opening-seal-3d.css 里的 op-env-part-out），信封这层不再淡出。
+        */}
+        <span className="op-paper-stage">
+          <span className="op-env-paper" />
+        </span>
 
         {/* 三片折角 */}
         <span className="op-env-fold op-env-fold-l" />
