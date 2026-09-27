@@ -1469,6 +1469,14 @@ function Answer({
     timers.current.push(window.setTimeout(() => setGone(true), 3400));
   };
 
+  /*
+    这一整套编排（走→抓→团→扔→拉大→坐）先留着不动 —— 现在没有任何入口调用它了
+    （用户 2026-09-27：点完直接给结果，不要中间那个过程）。留着的理由是它本身就是
+    「不允许拒绝」的完整设计，将来想放回某个入口直接用；这里用 void 标记，
+    让 tsc 的 noUnusedLocals 知道这是**有意保留**，不是漏删。
+  */
+  void play;
+
   if (invite.status !== 'pending') {
     return (
       <div className="invite-answered">
@@ -1560,7 +1568,13 @@ function Answer({
               .join(' ')}
             onClick={() => {
               if (invite.noDecline) {
-                play();
+                /*
+                ★ 用户 2026-09-27：「点完以后就直接（给）结果和说两句，不需要中间那个过程」。
+                原来「不允许拒绝」这条线点婉拒会播一整套小人的戏（走→抓→团→扔→拉大→坐），
+                而这条线的结论本来就是「不能拒绝」—— 演完照样得答应，那一段就是多余的中间过程。
+                现在直接给结果：不允许拒绝 ⇒ 点它就等于答应。play() 和整套 CSS 都留着（别处还能用）。
+              */
+              onAnswer('accepted');
                 return;
               }
               onAnswer('declined');
