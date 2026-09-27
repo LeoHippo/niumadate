@@ -459,6 +459,20 @@ export function InvitePage() {
     void load();
   }, [load]);
 
+  /*
+    ★ 已经回过话的邀请，重新打开时**直接落到聊天那一屏**。
+
+    用户报：「好友那边时间看不到对话」。根因是打开链接永远从第一屏（拆信）开始，
+    而聊天在最后一屏 —— 回过话的好友再点开，要**把九屏再翻一遍**才看得到对话。
+    他不是来看请柬的，是来商量「几点到」的，所以直接把他放到对话上。
+    只对 status !== 'pending' 的邀请这么做：没回过的照旧从头看。
+  */
+  useEffect(() => {
+    if (data === null) return;
+    if (data.invite.status === 'pending') return;
+    setIndex(SCREENS.length - 1);
+  }, [data]);
+
   /**
    * 前进：先让**当前这一屏**被小人拉走 / 推走，再换下一屏。
    *
