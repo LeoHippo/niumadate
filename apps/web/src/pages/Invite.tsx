@@ -1487,7 +1487,7 @@ function Answer({
       {invite.noDecline && (
         <p className="invite-locked-hint">
           这份邀请<strong>不接受婉拒</strong> —— 小牛马已经把「
-          {ANSWER_WORDS[invite.role].no}」抓走扔了。
+          {ANSWER_WORDS[invite.role].no}」揉成团扔了。
         </p>
       )}
     </div>
