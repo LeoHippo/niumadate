@@ -278,6 +278,16 @@ export function InvitePage() {
   const [data, setData] = useState<{ invite: Invite; messages: InviteMessage[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
+  /**
+   * 好友**看过**的最远那一屏。
+   *
+   * 进度条点哪跳哪，但不能让人跳到还没看到的屏 —— 后半段有「去不去」和对话，
+   * 没回过话就跳过去会看到空壳（那里本来要等状态才渲染）。
+   * 所以只允许跳到"已经走到过"的范围里。
+   */
+  const [seenMax, setSeenMax] = useState(0);
+  /** 进度条上是不是正按着拖（手指/鼠标按住才算"滑"）。 */
+  const dotDragRef = useRef(false);
 
   /*
     正在**展开信封**。
@@ -487,6 +497,11 @@ export function InvitePage() {
       · 「整体看完之后可以滑动选择页数」：底部的进度条点/拖哪一格就跳哪一屏。
     跳之前要把换屏的中间状态清干净，否则上一次的 puller / 过渡纱会挂着。
   */
+  /* 走过的屏数只增不减 —— 进度条的可选范围靠它。 */
+  useEffect(() => {
+    setSeenMax((current) => (index > current ? index : current));
+  }, [index]);
+
   const jumpTo = useCallback((next: number) => {
     if (next < 0 || next >= SCREENS.length) return;
     window.clearTimeout(leaveTimerRef.current);
@@ -495,6 +510,25 @@ export function InvitePage() {
     setEnterFrom(null);
     setIndex(next);
   }, []);
+
+  /*
+    ★ 进度条选页：按下即跳、按住拖动连续跳（用户：「整体看完以后可以滑动去选择页数」）。
+
+    按 x 坐标比例算第几屏，而不是给每个点挂 onClick ——
+    这样「拖」才是连续的（手指从第 2 格滑到第 6 格，中间几屏跟着翻过去），
+    点一下只是拖动退化的情形。范围压在 seenMax 以内（没走到过的屏不给跳）。
+    ⚠️ 必须定义在 jumpTo **之后**：useCallback 之间是 const 引用，写前面会踩 TDZ。
+  */
+  const pickByPoint = useCallback(
+    (el: HTMLElement, clientX: number) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0) return;
+      const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+      const target = Math.round(ratio * (SCREENS.length - 1));
+      jumpTo(Math.min(target, seenMax));
+    },
+    [jumpTo, seenMax],
+  );
 
   const goTo = useCallback((next: number) => {
     if (next < 0 || next >= SCREENS.length) return;
@@ -752,7 +786,27 @@ export function InvitePage() {
 
           {/* ---------- 底部：进度 + 继续 + 看全部 ---------- */}
           <footer className="screen-bar">
-            <div className="screen-dots" aria-hidden="true">
+            <div
+              className="screen-dots"
+              role="tablist"
+              aria-label="翻到某一页"
+              title="按住拖动，或点某一格"
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                dotDragRef.current = true;
+                pickByPoint(event.currentTarget, event.clientX);
+              }}
+              onPointerMove={(event) => {
+                if (!dotDragRef.current) return;
+                pickByPoint(event.currentTarget, event.clientX);
+              }}
+              onPointerUp={() => {
+                dotDragRef.current = false;
+              }}
+              onPointerCancel={() => {
+                dotDragRef.current = false;
+              }}
+            >
               {SCREENS.map((item, i) => (
                 <span key={item} className={i <= index ? 'dot dot-on' : 'dot'} />
               ))}
