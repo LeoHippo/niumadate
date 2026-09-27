@@ -273,3 +273,21 @@
 
 /* 摊开看的时候也放得下 */
 .invite-all .save-poster-btn { margin: 0 auto 10px; display: block; }
+
+/* ==========================================================================
+   ★ 手机上的两个问题（用户 2026-09-27）
+   ① 「邀请函在手机上看不完整，右边的部分好像被遮挡了」
+      .icard-row 是 flex，而 .icard-row dd 默认 min-width:auto —— 不肯收缩。
+      地点/事由一长就把内容顶出卡片，而 .icard 又是 overflow:hidden，右边直接被切掉。
+      修法：给 dd 松开 min-width、允许断词；标题/落款/页脚同理。
+   ② 「保存那个按钮太低了在手机里面点不到」
+      它在正常流里，而底部那条固定栏（看全部 / 轻点继续）是 fixed —— 正好压在它上面。
+      修法：给这一屏的 .screen-inner 留出底部空间（132px，够那条栏加一点余量）。
+   ========================================================================== */
+.invite-page .icard-row { align-items: flex-start; }
+.invite-page .icard-row dd { min-width: 0; overflow-wrap: anywhere; }
+.invite-page .icard-title,
+.invite-page .icard-foot-text,
+.invite-page .icard-sign { overflow-wrap: anywhere; }
+.invite-page .screen-card .screen-inner { padding-bottom: 132px; }
+.invite-page .save-poster-btn { margin-top: 10px; }
