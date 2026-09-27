@@ -1209,12 +1209,36 @@ function ScreenBody({
 
     case 'chat':
     default:
+      /*
+        ★ 「结论」和「说两句」合到一页（用户 2026-09-27：「说两句跟结果还是没合到一页里面」）
+
+        原来答完之后是两块分开的内容：结论在 Answer 组件的 .invite-answered 里，
+        「说两句」是独立一屏 —— 用户看到的是"先看结论、再翻一页才见到聊天框"。
+        现在这一屏把结论放在聊天框**上面**：已经回过话（status !== 'pending'）就显示，
+        没回过就不显示（重新打开链接、直接来聊天的人不该看到"你答应了"这种话）。
+        ⚠️ 结论那几行和 Answer 里的是同一套文案，改一处要想着另一处。
+      */
       return (
-        <Chat
-          code={invite.code}
-          messages={messages}
-          onSent={onMessages}
-        />
+        <>
+          {invite.status !== 'pending' && (
+            <div className="invite-answered-head">
+              <span className="invite-answered-emoji">
+                {invite.status === 'accepted' ? '🎉' : '😔'}
+              </span>
+              <p className="invite-answered-title">
+                {invite.status === 'accepted' ? '好的，就这么定了' : '这次先不去了'}
+              </p>
+              <p className="invite-answered-hint">
+                {invite.status === 'accepted' ? '到时候见。' : '想改主意的话，点下面。'}
+              </p>
+            </div>
+          )}
+          <Chat
+            code={invite.code}
+            messages={messages}
+            onSent={onMessages}
+          />
+        </>
       );
   }
 }
