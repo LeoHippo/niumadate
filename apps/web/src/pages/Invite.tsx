@@ -1279,14 +1279,9 @@ function Answer({
     fixed 的包含块**，于是它根本到不了视口左上角（实测停在"左50 上269"）。
     所以位置一律由 JS 量、用 transform 推，跟祖先无关。
   */
-  const [pupY, setPupY] = useState(0);
-  /** 坐下去时顺便缩小的倍率 —— 由 JS 逐帧插值（见下面坐姿那段 effect）。 */
-  const [pupS, setPupS] = useState(1);
-  /* 逐帧插值要读「现在在哪」，但 effect 的依赖里不能放 pupX/pupY（每帧都会重跑）。用 ref 同步。 */
-  const pupXRef = useRef(0);
-  const pupYRef = useRef(0);
-  pupXRef.current = pupX;
-  pupYRef.current = pupY;
+  /* 竖直分量：坐姿不再需要它（位置由 placeAt 定），保留是为了 transform 里那一位。 */
+  const [pupY] = useState(0);
+
   /**
    * 婉拒按钮是不是已经被扔掉了。
    * 为什么要单独记：`crumpled`/`thrown` 是按**当前这一步**挂的，
@@ -1321,10 +1316,8 @@ function Answer({
    */
   useEffect(() => {
     if (!docked) return;
-    const holder = puppetRef.current;
-    if (holder === null) return;
-    const box = holder.getBoundingClientRect();
-    const btn = yesRef.current;
+    /* 坐下去 = 只换姿态（.puppet-sit 由 mood 给）。位置是上一拍 placeAt('yes') 放好的，
+       这里**不再重新量、不再挪、不再缩** —— 用户要的就是「简简单单一个坐下」。 */
     /*
       用户后来改了口径：
         「之后把那个同意的按钮给拉大……我们还是以后就**坐在上面**，
@@ -1348,30 +1341,21 @@ function Answer({
       反而把「一把坐下去」的利落感拆散了。这里只用一条时间线（rAF）同时插值
       位置和尺寸 —— 只有一个动作，所以看着是「坐下去」。
     */
-    const startX = pupXRef.current;
-    const startY = pupYRef.current;
-    const b = btn === null ? null : btn.getBoundingClientRect();
-    const endX = b === null
-      ? startX + (12 - box.left)
-      : startX + (b.left + b.width / 2 - box.width / 2 - box.left);
-    /* 0.78：大半个身子在按钮上方，屁股正好压在按钮的上沿 */
-    const endY = b === null
-      ? startY + (14 - box.top)
-      : startY + (b.top - box.height * 0.78 - box.top);
-    const DOCK_MS = 420;
-    const t0 = performance.now();
-    let raf = 0;
-    const step = (now: number): void => {
-      const k = Math.min(1, (now - t0) / DOCK_MS);
-      /* ease-out：先快后慢，最后一点点慢慢落座 */
-      const e = 1 - (1 - k) * (1 - k);
-      setPupX(startX + (endX - startX) * e);
-      setPupY(startY + (endY - startY) * e);
-      setPupS(1 - 0.22 * e);
-      if (k < 1) raf = window.requestAnimationFrame(step);
-    };
-    raf = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(raf);
+    /*
+      ★★ 用户最终口径：**不要那一下"挪过去 + 缩小"** ★★
+
+      原话：「我觉得不应该有后面这个跳进来飞进来这个动作呀，它就是坐在那个按钮上而已啊，
+      就简简单单一个坐下的动作就好。」
+
+      我前面绕了两圈（先加过渡 → 你说更难看；再改成一条 rAF 时间线 → 你还是觉得多了一个动作），
+      根子在于我一直在优化"那一下移动"，而你要的是**根本没有那一下**：
+      小人不重新量位置、也不缩小，只把姿态换成坐 —— 坐姿是 mood 给的（.puppet-sit），
+      位置是前面那一拍 placeAt('yes') 已经放好的。
+      按钮涨大 1.42 倍时上沿只会再抬高约 12px，坐着看完全够用，不值得为它再动一次。
+
+      所以这个 effect 现在**什么都不做**，只保留 docked 这个状态给 mood 用。
+    */
+
   }, [docked]);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -1497,7 +1481,7 @@ function Answer({
           <div
             ref={puppetRef}
             className={docked ? 'invite-puppet-holder puppet-docked' : 'invite-puppet-holder'}
-            style={{ transform: `translate(${pupX}px, ${pupY}px) scale(${pupS})` }}
+            style={{ transform: `translate(${pupX}px, ${pupY}px)` }}
           >
             {/* 退场之后是**坐在**左上角的 —— 用户说的就是"坐在左上角" */}
             <Puppet gender={hostGender} mood={docked ? 'sit' : moodFor(act)} />
