@@ -1123,3 +1123,30 @@ body .invite-page .card-leaving-fly {
   68% { transform: translate(140px, -70px) rotate(560deg) scale(0.26); opacity: 1; }
   100% { transform: translate(280px, 60px) rotate(900deg) scale(0.2); opacity: 0; }
 }
+/* ★ ③ 最后一拍：一屁股坐上去（第十二轮）
+   实拍里小人最后是**立**在涨大后的「好呀～」上沿，分镜要的是坐下去。
+   Puppet 组件按 mood 挂类（puppet-<mood>），坐姿就是 .puppet-sit ——
+   所以这一拍完全在 CSS 里解决：
+     · 整体下沉 + 纵向压扁（屁股着地，身体摊开一点）
+     · 两条腿朝前伸出去（坐着才看得到腿）
+     · 前臂搭在膝盖上
+   用 !important 是有意的：如果 invite-page.css 里已经有 .puppet-sit 的 transform，
+   不压过去就会互相抵消，看起来还是站着。 */
+.invite-page .puppet-sit {
+  transform: translateY(10px) scaleY(0.9) scaleX(1.06) !important;
+  transform-origin: 50% 100% !important;
+}
+.invite-page .puppet-sit .puppet-leg-l {
+  transform: rotate(64deg) translateY(2px) !important;
+  transform-origin: 50% 0 !important;
+}
+.invite-page .puppet-sit .puppet-leg-r {
+  transform: rotate(78deg) translateY(2px) !important;
+  transform-origin: 50% 0 !important;
+}
+.invite-page .puppet-sit .puppet-arm-front {
+  transform: rotate(-30deg) !important;
+}
+.invite-page .puppet-sit .puppet-arm-back {
+  transform: rotate(-16deg) !important;
+}
