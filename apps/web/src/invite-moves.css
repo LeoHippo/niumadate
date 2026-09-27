@@ -1191,3 +1191,15 @@ body .invite-page .invite-btn-thrown {
 .invite-page .puppet-docked .puppet-walk .puppet-head-group {
   animation: none !important;
 }
+
+/* ★ 第十七轮：坐定之后不许再飞进来一个更小的小人
+   用户：小人坐到放大的按钮上之后，又从旁边飞进来一个更小的，这个逻辑上不对。
+   查清楚了：那是「答应之后」那块 .invite-answered 里的欢呼小人（<Puppet mood=cheer>）——
+   不允许拒绝这条线走完，邀请就变成 accepted，整个回答屏换成回执版，
+   而回执里这只小人带着一套进场动画从旁边飞进来（.answered-puppet）。
+   上面那只已经坐在按钮上了，再来一只飞进来的确实讲不通 —— 把它的进场去掉。
+   只关动画、不动这只小人的存在（接受之后的欢呼本身是设计的一部分）。 */
+.invite-page .answered-puppet,
+.invite-page .answered-puppet .puppet {
+  animation: none !important;
+}
