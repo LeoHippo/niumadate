@@ -1058,3 +1058,71 @@ body .invite-page[data-theme] .card-entering-fly {
   76% { transform: translateY(0) rotate(0) scale(1); opacity: 1; filter: drop-shadow(0 16px 22px rgba(90, 68, 40, 0.34)); }
   to { transform: translateY(0) rotate(0) scale(1); opacity: 1; filter: none; }
 }
+
+/* ==========================================================================
+   ★★ 第六轮：把「压」重做成**一张会弯的纸被真的坐上去** ★★
+
+   实拍（scripts/turn-shot.mjs，每 250ms 一帧）看到的问题：
+     · 小人落地后**悬在纸上方**，连它脚下的那道影子都落在空白背景上 ——
+       远看就是"飘着的贴纸把人推开"，不是"坐上去把纸压走"；
+     · 纸从头到尾是一个**刚体矩形**：只有位移和纵向缩放，没有一处"弯曲"。
+       可它是纸。纸被压会弯、会亮一下、会在受力点附近起一道亮棱。
+
+   治法仍然是"共用一组数"（和当初修"手没抓到纸"同一个办法）：
+   小人每压一下下沉多少，纸就下沉多少 —— 两条 keyframes 的百分比对齐、数值相等，
+   另外把落地位置从 +6px 压到 +36px，让它真正**坐在纸的上沿**（影子也落在纸上）。
+
+   纸的弯曲用 rotateX（父层给 perspective，见下面 .screen 那条）：
+   没有 perspective 的 rotateX 只是纵向压扁，有了才是"上沿往后倒"的那种弯。
+   ========================================================================== */
+
+body .invite-page .screen {
+  /* 给翻页一个共同的透视原点：纸往后倒、往前来才是 3D 的，不然只是被压扁 */
+  perspective: 1000px;
+  perspective-origin: 50% 62%;
+}
+
+body .invite-page .puller-push {
+  animation-name: mv-press-doll-3 !important;
+}
+
+body .invite-page .card-leaving-push {
+  animation-name: mv-card-push-3 !important;
+}
+
+/* 小人：落点坐到纸上，之后每一次下压都与纸同步（12/26/38/46/52/64/82/92 这几个点一一对应） */
+@keyframes mv-press-doll-3 {
+  0% { transform: translateY(-280px) rotate(3deg); opacity: 0; }
+  5% { opacity: 1; }
+  /* 砸下来：横向撑开、纵向压扁 —— 这一下就是"重量" */
+  12% { transform: translateY(36px) scale(1.12, 0.86) rotate(0deg); }
+  18% { transform: translateY(20px) scale(0.95, 1.06); }
+  22% { transform: translateY(32px) scale(1.05, 0.96); }
+  /* 坐稳（影子正好落在纸上沿） */
+  26% { transform: translateY(30px) scale(1, 1); }
+  /* 第 1 次压：和纸的 38% 同值 */
+  38% { transform: translateY(56px) scale(1.07, 0.92); }
+  46% { transform: translateY(64px) scale(1.08, 0.9); }
+  /* 抬起来蓄力 */
+  52% { transform: translateY(30px) scale(1, 1); }
+  /* 第 2 次 */
+  64% { transform: translateY(96px) scale(1.1, 0.84); }
+  70% { transform: translateY(62px) scale(1.04, 0.96); }
+  /* 第 3 次：一路压到底 */
+  82% { transform: translateY(150px) scale(1.14, 0.76); }
+  92% { transform: translateY(186px) scale(1.15, 0.72); }
+  /* 纸被压出去了，小人自己弹回上方等着拉下一张 */
+  100% { transform: translateY(-20px) scale(1.02, 0.98); opacity: 0.9; }
+}
+
+/* 纸：每一次下沉的数值和小人一模一样；同时上沿往后倒（rotateX）+ 极轻的斜切 + 影子变长 */
+@keyframes mv-card-push-3 {
+  0%, 22% {
+    transform: translateY(0) rotateX(-0deg) skewX(0deg);
+    filter: drop-shadow(0 10px 12px rgba(70, 34, 58, 0.16));
+  }
+  /* 坐上来：先被砸出一个小坑 */
+  26% {
+    transform: translateY(30px) rotateX(-3deg) skewX(0deg);
+    filter: drop-shadow(0 14px 16px rgba(70, 34, 58, 0.2)) brightness(0.99);
+  }
