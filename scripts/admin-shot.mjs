@@ -60,6 +60,9 @@ try {
   /* 后台默认落在「申请」那一页，邀请列表在旁边那个 tab 里 —— 先切过去再检查。 */
   await evaluate('(() => { const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "邀请"); if (b) b.click(); })()');
   await sleep(900);
+  /* 截图要拍**列表**那一块：页面顶部是"邀请页上的小人"设置，滚下去才看得到勾选框和工具条。 */
+  await evaluate('(() => { const el = document.querySelector(".invite-toolbar") || document.querySelector(".invite-row"); if (el) el.scrollIntoView({ block: "start" }); })()');
+  await sleep(400);
   const before = await evaluate('JSON.stringify({ rows: document.querySelectorAll(".invite-row").length, editBtns: [...document.querySelectorAll("button")].filter((b) => b.textContent.trim() === "编辑").length, editor: document.querySelector(".invite-editor") !== null })');
   console.log('PROBE 截图前 ' + before);
   await shot('admin-01-list');

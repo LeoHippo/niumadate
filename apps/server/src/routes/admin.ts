@@ -89,6 +89,17 @@ function parseInviteBody(
 /** 一次最多创建多少条 —— 防的是「手滑粘了一万行」。 */
 const BATCH_MAX = 50;
 
+/*
+  删除的上限另算，而且大得多。
+
+  用户报「全选删除有问题」：他后台有 70+ 条，全选之后客户端把 70 个 id 一起发过来，
+  而删除这条路由**复用了创建那道的 50 上限** —— 于是直接 400「一次最多 50 条」，
+  点下去只会报错，一条也删不掉。
+  创建要防手滑（一次生成几百条垃圾是真的麻烦），删除不需要那么紧：
+  它是幂等的、不产生数据，选多了顶多多删几条测试数据。所以给 500。
+*/
+const DELETE_MAX = 500;
+
 function isStatus(value: unknown): value is SubmissionStatus {
   return typeof value === 'string' && (STATUSES as readonly string[]).includes(value);
 }
@@ -349,9 +360,9 @@ export function registerAdminRoutes(app: FastifyInstance, config: AppConfig): vo
           reply.code(400);
           return apiError('BAD_REQUEST', '没有选中的邀请');
         }
-        if (ids.length > BATCH_MAX) {
+        if (ids.length > DELETE_MAX) {
           reply.code(400);
-          return apiError('BAD_REQUEST', '一次最多 ' + BATCH_MAX + ' 条');
+          return apiError('BAD_REQUEST', '一次最多 ' + DELETE_MAX + ' 条');
         }
         let deleted = 0;
         const failed: { id: string; reason: string }[] = [];
