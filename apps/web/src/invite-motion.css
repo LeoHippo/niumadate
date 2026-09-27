@@ -474,10 +474,19 @@
 }
 
 /* 左上角会和大编号（01/09）重叠 —— 把编号让出来 */
-.invite-page:has(.puppet-docked) .screen-step {
-  left: auto;
-  right: 22px;
-}
+/*
+  ⚠️ 这里原本有一条 `.invite-page:has(.puppet-docked) .screen-step { ... }`：
+  小人坐定之后把大编号（08/09）挪到另一边，好给它让位。
+  用户看过之后说「这个动作有点多余了」—— 编号是版心的一部分，
+  它自己跑一下反而像是页面重新加载了一次（也就是用户说的"画面闪一下"）。
+  所以整条撤掉：编号不躲。
+
+  原文留着备查：
+  .invite-page:has(.puppet-docked) .screen-step {
+    left: auto;
+    right: 22px;
+  }
+*/
 
 @media (prefers-reduced-motion: reduce) {
   .invite-puppet-holder.puppet-docked { animation: none !important; }
