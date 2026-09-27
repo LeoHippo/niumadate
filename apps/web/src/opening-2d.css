@@ -92,8 +92,23 @@
   76% { opacity: 1; transform: translateY(-78px) scale(1.14); }
   /* 然后一边被拉出去、一边长大 */
   86% { opacity: 1; transform: translateY(-100px) scale(1.22); }
-  94% { opacity: 1; transform: translateY(-116px) scale(1.3); }
-  100% { opacity: 1; transform: translateY(-126px) scale(1.35); }
+  94% { opacity: 1; transform: translateY(-82px) scale(1.3); }
+  /*
+    ⚠️ 这三个数是**量出来的**，推导过程写在这儿，免得下次又靠猜：
+
+    纸的盒子没有任何 transform 时 top=299、高 174；
+    它的 transform-origin 在中心，所以
+        实际 top = 299 + translateY - (174×scale - 174) / 2
+    代入 100% 这帧（scale 1.35）：top = 299 + T - 30。
+
+    下一屏那张卡片（.screen-inner）在 430×932 上量出来是 top=270、高 263，
+    中心在 401。纸要接得顺，中心得对上：299 + T - 30 + 117 = 401 → T ≈ -60。
+
+    T 再往上拉（原来收到 -126）纸就飘到卡片上方 140px，切屏那一下会"跳"；
+    而 -60 之后纸会先冲到 -100 再落回 -60 —— 那 40px 的回坐正好是
+    "被抽出来、然后放到台面上"的那一下，不是抖动。
+  */
+  100% { opacity: 1; transform: translateY(-60px) scale(1.35); }
 }
 
 /* ---------- ③ 小人：从左边走进来，站在信封左下方 ---------- */
