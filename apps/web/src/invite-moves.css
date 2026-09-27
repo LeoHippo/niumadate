@@ -1105,3 +1105,21 @@ body .invite-page .card-leaving-fly {
   74% { transform: scale(1.27, 1.05); }
   100% { transform: scale(1.42, 1.14); }
 }
+/* ★ ③ 第二拍：揉成球之后**真的扔出去**（第十一轮）
+   原来揉完就淡出，没有飞的观感。这里给 .invite-btn-thrown 一条抛物线：
+   从「已经缩到 0.28 倍」接上（所以 scale 从 0.28 起步，不是突然出现），
+   先往后上方一挑（-14,-54），再往前上方抛（40,-96）→ 远（140,-70）→ 落出画面（280,60），
+   同时一路自转 900 度 —— 一个被揉皱的纸团丢出去就是这个样子。
+   类名如果不存在，这条规则只是不生效，不会坏事。 */
+.invite-page .invite-btn-thrown {
+  animation: mv-throw-2 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) both !important;
+  transform-origin: 50% 50%;
+}
+
+@keyframes mv-throw-2 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.28); opacity: 1; }
+  18% { transform: translate(-14px, -54px) rotate(-140deg) scale(0.34); opacity: 1; }
+  42% { transform: translate(40px, -96px) rotate(220deg) scale(0.3); opacity: 1; }
+  68% { transform: translate(140px, -70px) rotate(560deg) scale(0.26); opacity: 1; }
+  100% { transform: translate(280px, 60px) rotate(900deg) scale(0.2); opacity: 0; }
+}
