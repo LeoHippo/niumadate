@@ -1385,7 +1385,15 @@ function Answer({
     if (stage === null || target === null) return;
     const s = stage.getBoundingClientRect();
     const t = target.getBoundingClientRect();
-    setPupX(t.left - s.left + t.width / 2 - 80);
+    /*
+      横向落点 = 按钮中心 − 小人**自己宽度的一半**。
+      ⚠️ 这里原来写的是硬编码的 80（假设小人 160 宽）。小人后来变小过一次，
+      80 就不再是"一半"了 —— 于是它坐到了按钮中心的**左边**（实拍看得清清楚楚：
+      屁股压在「好」字左侧，而不是坐在按钮中间）。所以改成量它自己的宽度。
+    */
+    const box = puppetRef.current?.getBoundingClientRect();
+    const half = box === undefined ? 48 : box.width / 2;
+    setPupX(t.left - s.left + t.width / 2 - half);
   }, []);
 
   useEffect(() => {
@@ -1399,7 +1407,17 @@ function Answer({
       两个 effect 抢同一个状态，谁后跑谁说了算，这种 bug 最难查。
     */
     if (gone) {
-      setPupX(0);
+      /*
+        gone = 婉拒按钮已经被扔掉了。用户最终口径：「它就是坐在那个按钮上而已啊」——
+        所以这里把小人放到「同意」按钮上，而不是（上一版）退回舞台左边（setPupX(0)）。
+
+        为什么可以"直接量"：按钮涨到 1.42 倍是用 transform 做的，而
+        getBoundingClientRect 反映的就是**放大之后**的可视框，所以量到哪就是哪，
+        不用自己乘倍数（乘了反而会过头）。
+        这条在 act 变化时（sit 4350ms / point 5150ms）各跑一次，最后一次在按钮涨完（4650ms）之后，
+        落点就定住了 —— 不会再出现"晚一步又挪一下"。
+      */
+      placeAt('yes');
       return;
     }
     placeAt(AT_NO_BUTTON.has(act) ? 'no' : 'yes');
