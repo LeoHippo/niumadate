@@ -86,6 +86,9 @@ function parseInviteBody(
   return out as Partial<import('@niumadate/shared').CreateInviteInput>;
 }
 
+/** 一次最多创建多少条 —— 防的是「手滑粘了一万行」。 */
+const BATCH_MAX = 50;
+
 function isStatus(value: unknown): value is SubmissionStatus {
   return typeof value === 'string' && (STATUSES as readonly string[]).includes(value);
 }
@@ -288,6 +291,48 @@ export function registerAdminRoutes(app: FastifyInstance, config: AppConfig): vo
         request.log.info({ ip: request.ip, code: created.code }, '创建了一条邀请');
         return { invite: created };
       });
+
+      /*
+        批量创建：一行一条的邀请。
+
+        ⚠️ 刻意**不做整批回滚**：一批 20 条里第 7 条日期写错，
+        把前 6 条也撤掉才是真的坑（牛马还得重新对一遍已经发出去的链接）。
+        所以逐条校验、逐条创建：成功的照常返回，失败的带着**行号**回去，
+        后台就能把「第 7 行：日期格式应该是 2026-09-20 这样」直接指出来。
+      */
+      admin.post<{ Body: Record<string, unknown> }>('/invites/batch', async (request, reply) => {
+        const raw = (request.body ?? {}) as Record<string, unknown>;
+        const items = raw.items;
+        if (!Array.isArray(items)) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', 'items 应该是一个数组');
+        }
+        if (items.length === 0) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', '没有要创建的邀请');
+        }
+        if (items.length > BATCH_MAX) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', '一次最多 ' + BATCH_MAX + ' 条（防手滑粘一万行）');
+        }
+        const created: import('@niumadate/shared').Invite[] = [];
+        const failed: { index: number; reason: string }[] = [];
+        for (let index = 0; index < items.length; index += 1) {
+          const parsed = parseInviteBody((items[index] ?? {}) as Record<string, unknown>, true);
+          if (typeof parsed === 'string') {
+            failed.push({ index, reason: parsed });
+            continue;
+          }
+          try {
+            created.push(createInvite(parsed as import('@niumadate/shared').CreateInviteInput));
+          } catch (cause) {
+            failed.push({ index, reason: cause instanceof Error ? cause.message : '创建失败' });
+          }
+        }
+        request.log.info({ ip: request.ip, ok: created.length, bad: failed.length }, '批量创建邀请');
+        return { created, failed };
+      });
+
 
       admin.patch<{ Params: { id: string }; Body: Record<string, unknown> }>(
         '/invites/:id',

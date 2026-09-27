@@ -208,6 +208,18 @@ export const api = {
     createInvite: (input: CreateInviteInput): Promise<{ invite: Invite }> =>
       request<{ invite: Invite }>('/admin/invites', { method: 'POST', body: input, auth: true }),
 
+    /*
+      批量创建。返回 created / failed 两份：**部分失败不回滚**，
+      失败的带行号（index），后台好按行提示。
+    */
+    createInvites: (
+      items: CreateInviteInput[],
+    ): Promise<{ created: Invite[]; failed: { index: number; reason: string }[] }> =>
+      request<{ created: Invite[]; failed: { index: number; reason: string }[] }>(
+        '/admin/invites/batch',
+        { method: 'POST', body: { items }, auth: true },
+      ),
+
     updateInvite: (id: string, patch: Partial<CreateInviteInput>): Promise<{ invite: Invite }> =>
       request<{ invite: Invite }>(`/admin/invites/${encodeURIComponent(id)}`, {
         method: 'PATCH',

@@ -50,6 +50,16 @@ console.log('\n本地产物：' + localAssets.join('  '));
 
 // ---- 2. 拷进容器 + 重启 ----
 run('docker', ['compose', 'cp', 'apps/web/dist/.', 'app:/app/apps/web/dist/']);
+    /*
+      ⚠️ 服务端也要一起送。
+      这个脚本原来只把 apps/web/dist 拷进容器 —— 于是**改后端等于没改**：
+      容器里跑的还是镜像里那份旧的 server dist（实测查过一次：
+      源码和本地 dist 都有新路由，容器里 grep 一个都没有，接口一直 404）。
+      所以这里补一步：把本地刚 build 出来的 server dist 也拷进去。
+      顺带记：docker compose build 也不一定吃得到源码改动（COPY 层可能命中缓存），
+      「源码 → 容器」这条链必须每一步都验，别信它自动。
+    */
+run('docker', ['compose', 'cp', 'apps/server/dist/.', 'app:/app/apps/server/dist/']);
 run('docker', ['compose', 'restart', 'app']);
 
 // ---- 3. 等健康检查 ----

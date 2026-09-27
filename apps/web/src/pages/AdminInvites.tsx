@@ -421,6 +421,7 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
       )}
 
       {/* ---------- 列表 ---------- */}
+          <BatchPanel config={config} base={base} say={say} onCreated={() => void load()} />
       {items === null ? (
         <p className="boot-title">正在读邀请……</p>
       ) : items.length === 0 ? (
@@ -532,6 +533,197 @@ function ChatBox({
           发送
         </button>
       </form>
+    </div>
+  );
+}
+/**
+ * 批量邀请：一行一条，粘一次生成一批。
+ *
+ * 为什么要有它：一份一份建、建完手动复制链接，发 10 个人就是 10 遍 ——
+ * 牛马真实的场景是「这周六叫上这几个人」，那就该粘一次搞定。
+ *
+ * 格式：`名字, 日期[, 时间[, 地点]]`，中英文逗号都认，`#` 开头当注释。
+ *
+ * ⚠️ 失败要报**用户眼里的行号**：服务端返回的是数组下标（第 0 项起），
+ * 而用户数的是「第 3 行」——中间差一位，不能让用户自己去换算是哪一行错了。
+ */
+function BatchPanel({
+  config,
+  base,
+  say,
+  onCreated,
+}: {
+  config: AppConfig | null;
+  base: string;
+  say: (text: string) => void;
+  onCreated: () => void;
+}) {
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  /** 这一批要不要都设成「不允许拒绝」。默认关 —— 那是特殊场合才用的。 */
+  const [noDecline, setNoDecline] = useState(false);
+  const [result, setResult] = useState<{
+    created: Invite[];
+    failed: { line: number; reason: string }[];
+  } | null>(null);
+  const roles = (config?.roles ?? []).filter((role) => role.enabled);
+  const [role, setRole] = useState<RoleKey | ''>('');
+  const picked: RoleKey = role === '' ? (roles[0]?.key ?? 'brother') : role;
+
+  const linkFor = (invite: Invite): string => {
+    const origin = base.trim() === '' ? window.location.origin : base.trim().replace(/\/+$/, '');
+    return origin + '/i/' + invite.code;
+  };
+
+  const copyText = async (value: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(value);
+      say('复制了 ' + value.split('\n').length + ' 条 ✓');
+    } catch {
+      window.prompt('复制下面这些链接：', value);
+    }
+  };
+
+  const submit = async (): Promise<void> => {
+    const items: CreateInviteInput[] = [];
+    const lineOf: number[] = [];
+    const bad: { line: number; reason: string }[] = [];
+    text.split(/\r?\n/).forEach((raw, index) => {
+      const line = index + 1;
+      const trimmed = raw.trim();
+      if (trimmed === '' || trimmed.startsWith('#')) return;
+      const parts = trimmed.split(/[,，]/).map((part) => part.trim());
+      const date = parts[1] ?? '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        bad.push({ line, reason: '日期要写成 2026-10-01 这样' });
+        return;
+      }
+      /*
+        CreateInviteInput 的文案字段是必填的（类型上不允许少写），
+        所以这里和单条创建那条路一样走身份预设 —— 批量生成的这批人
+        看到的就是各自身份该有的那套话，而不是空标题。
+      */
+      const preset = invitePresetFor(picked);
+      items.push({
+        role: picked,
+        date,
+        inviteeName: parts[0] ?? '',
+        timeText: parts[2] ?? '',
+        place: parts[3] ?? '',
+        activity: '',
+        noDecline,
+        title: preset.title,
+        greeting: preset.greeting,
+        body: preset.body,
+        signature: preset.signature,
+      });
+      lineOf.push(line);
+    });
+    if (bad.length > 0) {
+      setResult({ created: [], failed: bad });
+      return;
+    }
+    if (items.length === 0) {
+      say('还没有可用的行');
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await api.admin.createInvites(items);
+      setResult({
+        created: res.created,
+        failed: res.failed.map((item) => ({
+          line: lineOf[item.index] ?? item.index + 1,
+          reason: item.reason,
+        })),
+      });
+      say('建好了 ' + String(res.created.length) + ' 条 ✓');
+      setText('');
+      onCreated();
+    } catch (cause) {
+      say(cause instanceof Error ? cause.message : '批量创建失败');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="invite-panel">
+      <p className="invite-editor-title">批量邀请</p>
+      <p className="receipt-hint">
+        一行一条：「名字, 日期」，后面可以再跟时间和地点。中英文逗号都认，# 开头当注释。
+      </p>
+      <div className="invite-toolbar">
+        <label className="invite-field">
+          <span className="invite-field-label">身份</span>
+          <select
+            className="invite-input"
+            value={picked}
+            onChange={(event) => setRole(event.target.value as RoleKey)}
+          >
+            {roles.map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <textarea
+        className="invite-input invite-textarea"
+        rows={5}
+        value={text}
+        placeholder={'老王, 2026-10-01, 下午三点, 楼下咖啡\n小李, 2026-10-02'}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <label className="invite-check">
+        <input
+          type="checkbox"
+          checked={noDecline}
+          onChange={(event) => setNoDecline(event.target.checked)}
+        />
+        <span>这一批都不允许拒绝</span>
+      </label>
+      <div className="invite-editor-actions">
+        <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void submit()}>
+          {busy ? '生成中…' : '批量生成'}
+        </button>
+      </div>
+      {result !== null && result.failed.length > 0 && (
+        <ul className="invite-error">
+          {result.failed.map((item) => (
+            <li key={item.line}>第 {item.line} 行：{item.reason}</li>
+          ))}
+        </ul>
+      )}
+      {result !== null && result.created.length > 0 && (
+        <>
+          <div className="invite-list">
+            {result.created.map((invite) => (
+              <div className="invite-row" key={invite.id}>
+                <div className="invite-row-main">
+                  <span className="invite-row-name">{invite.inviteeName === '' ? '（通用链接）' : invite.inviteeName}</span>
+                  <span className="invite-row-when">{invite.date}</span>
+                </div>
+                <div className="invite-row-actions">
+                  <button type="button" className="btn btn-link" onClick={() => void copyText(linkFor(invite))}>
+                    复制链接
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="invite-editor-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => void copyText(result.created.map((invite) => linkFor(invite)).join('\n'))}
+            >
+              复制全部链接
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
