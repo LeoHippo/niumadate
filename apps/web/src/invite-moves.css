@@ -980,16 +980,16 @@ body .invite-page .card-leaving-fly {
 }
 
 @keyframes mv-card-fly-3 {
-  0%, 30% { transform: translate(0, 0) rotate(0deg) rotateY(0deg) skewY(0deg) rotateX(0deg); filter: drop-shadow(0 10px 12px rgba(70, 34, 58, 0.16)); }
-  34% { transform: translate(-6px, 1px) rotate(1deg) rotateY(16deg) skewY(-0.5deg) rotateX(-2deg) scale(1.004); filter: drop-shadow(10px 14px 16px rgba(70, 34, 58, 0.24)) brightness(1.01); }
-  44% { transform: translate(14px, 1px) rotate(1.2deg) rotateY(26deg) skewY(-1.2deg) rotateX(-4deg) scale(1.012); filter: drop-shadow(24px 22px 24px rgba(70, 34, 58, 0.3)) brightness(1.02); }
-  52% { transform: translate(19px, 1px) rotate(1.4deg) rotateY(32deg) skewY(-1.6deg) rotateX(-5deg) scale(1.016); filter: drop-shadow(30px 26px 28px rgba(70, 34, 58, 0.34)) brightness(1.026); }
-  56% { transform: translate(4px, 0) rotate(0.4deg) rotateY(8deg) skewY(-0.3deg) rotateX(-1deg) scale(1.002); filter: drop-shadow(8px 12px 14px rgba(70, 34, 58, 0.2)) brightness(1.004); }
-  64% { transform: translate(16px, 1px) rotate(1.8deg) rotateY(28deg) skewY(-1.3deg) rotateX(-4deg) scale(1.014); filter: drop-shadow(26px 22px 24px rgba(70, 34, 58, 0.32)) brightness(1.022); }
-  74% { transform: translate(26px, 2px) rotate(2.6deg) rotateY(34deg) skewY(-2.2deg) rotateX(-6deg) scale(1.02); filter: drop-shadow(34px 26px 28px rgba(70, 34, 58, 0.36)) brightness(1.03); }
-  78% { transform: translate(12px, 2px) rotate(1.2deg) rotateY(12deg) skewY(-0.6deg) rotateX(-2deg) scale(1.006); filter: drop-shadow(12px 14px 16px rgba(70, 34, 58, 0.22)) brightness(1.008); }
-  86% { transform: translate(28px, 4px) rotate(3deg) rotateY(30deg) skewY(-1.8deg) rotateX(-5deg) scale(1.016); filter: drop-shadow(30px 24px 26px rgba(70, 34, 58, 0.32)) brightness(1.024); }
-  100% { transform: translate(420px, 8px) rotate(6deg) rotateY(18deg) skewY(-0.9deg) rotateX(-3deg) scale(0.97); filter: drop-shadow(18px 16px 20px rgba(70, 34, 58, 0.2)) brightness(1); opacity: 0.5; }
+  0%, 30% { transform: translate(0, 0) rotate(0deg) rotateY(0deg) skewY(0deg) rotateX(0deg); }
+  34% { transform: translate(-6px, 1px) rotate(1deg) rotateY(16deg) skewY(-0.5deg) rotateX(-2deg) scale(1.004); }
+  44% { transform: translate(14px, 1px) rotate(1.2deg) rotateY(26deg) skewY(-1.2deg) rotateX(-4deg) scale(1.012); }
+  52% { transform: translate(19px, 1px) rotate(1.4deg) rotateY(32deg) skewY(-1.6deg) rotateX(-5deg) scale(1.016); }
+  56% { transform: translate(4px, 0) rotate(0.4deg) rotateY(8deg) skewY(-0.3deg) rotateX(-1deg) scale(1.002); }
+  64% { transform: translate(16px, 1px) rotate(1.8deg) rotateY(28deg) skewY(-1.3deg) rotateX(-4deg) scale(1.014); }
+  74% { transform: translate(26px, 2px) rotate(2.6deg) rotateY(34deg) skewY(-2.2deg) rotateX(-6deg) scale(1.02); }
+  78% { transform: translate(12px, 2px) rotate(1.2deg) rotateY(12deg) skewY(-0.6deg) rotateX(-2deg) scale(1.006); }
+  86% { transform: translate(28px, 4px) rotate(3deg) rotateY(30deg) skewY(-1.8deg) rotateX(-5deg) scale(1.016); }
+  100% { transform: translate(420px, 8px) rotate(6deg) rotateY(18deg) skewY(-0.9deg) rotateX(-3deg) scale(0.97); opacity: 0.5; }
 }
 
 /* ==========================================================================
@@ -1001,3 +1001,47 @@ body .invite-page-letter .screen {
   perspective-origin: 50% 62%;
 }
 
+
+/* 动画里不再逐帧改 filter —— 每帧重算 drop-shadow/brightness 是这一版最贵的一笔（手机上直接掉帧）。
+   阴影改成**静态一条**：纸被压/被拽时靠位移、旋转、投影面本身表达，不再靠影子变长短。
+   transform-origin 落到 88%：纸是躺在桌面上的，受力弯曲的支点在靠近下缘的地方，
+   绕**中心**弯会像一块被扭的饼干。 */
+body .invite-page .card-leaving-push,
+body .invite-page .card-leaving-fly {
+  filter: drop-shadow(0 16px 20px rgba(70, 34, 58, 0.22));
+  transform-origin: 50% 88%;
+}
+
+/* ⚠️ 这两个关键帧曾经被我用 shell 截断文件时误删，只留下指过来的 animation-name ——
+   于是「压」那一支变成：小人自己在使劲，纸一动不动（用户一眼看出'往下压的动作不对'）。
+   教训：验证必须以产物里的 '@keyframes <名字> {' 为准，不能只 grep 名字 ——
+   animation-name 里也有那个名字，会骗过检查。 */
+@keyframes mv-press-doll-3 {
+  0% { transform: translateY(-280px) rotate(3deg); opacity: 0; }
+  5% { opacity: 1; }
+  12% { transform: translateY(36px) scale(1.12, 0.86) rotate(0deg); }
+  18% { transform: translateY(20px) scale(0.95, 1.06); }
+  22% { transform: translateY(32px) scale(1.05, 0.96); }
+  26% { transform: translateY(30px) scale(1, 1); }
+  38% { transform: translateY(56px) scale(1.07, 0.92); }
+  46% { transform: translateY(64px) scale(1.08, 0.9); }
+  52% { transform: translateY(30px) scale(1, 1); }
+  64% { transform: translateY(96px) scale(1.1, 0.84); }
+  70% { transform: translateY(62px) scale(1.04, 0.96); }
+  82% { transform: translateY(150px) scale(1.14, 0.76); }
+  92% { transform: translateY(186px) scale(1.15, 0.72); }
+  100% { transform: translateY(-20px) scale(1.02, 0.98); opacity: 0.9; }
+}
+
+@keyframes mv-card-push-3 {
+  0%, 22% { transform: translateY(0) rotateX(0deg) skewX(0deg); }
+  26% { transform: translateY(30px) rotateX(-3deg) skewX(0deg); }
+  38% { transform: translateY(56px) rotateX(-8deg) skewX(-1.1deg); }
+  46% { transform: translateY(64px) rotateX(-10deg) skewX(-1.4deg); }
+  52% { transform: translateY(30px) rotateX(-3deg) skewX(-0.3deg); }
+  64% { transform: translateY(96px) rotateX(-13deg) skewX(-1.8deg); }
+  70% { transform: translateY(62px) rotateX(-8deg) skewX(-0.9deg); }
+  82% { transform: translateY(150px) rotateX(-16deg) skewX(-2.2deg) scale(1.015, 0.97); }
+  92% { transform: translateY(186px) rotateX(-12deg) skewX(-1.4deg) scale(1.02, 0.96); }
+  100% { transform: translateY(250px) rotateX(-6deg) skewX(0deg) scale(1.02, 0.95); opacity: 0.85; }
+}
