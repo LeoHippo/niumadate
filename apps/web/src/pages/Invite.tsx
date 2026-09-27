@@ -525,7 +525,12 @@ export function InvitePage() {
       if (rect.width <= 0) return;
       const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
       const target = Math.round(ratio * (SCREENS.length - 1));
-      jumpTo(Math.min(target, seenMax));
+      /*
+        ⚠️ 下限是 1，不是 0 —— 第 1 屏是「拆信」那一屏（封面 + 展开层），
+        用户明确说了：进度条**不能选首页**，选了会出 bug（拆信那段是一次性的，
+        回去再进来会落在一个半开不合的状态里）。所以最左边那一格也只会跳到第 2 屏。
+      */
+      jumpTo(Math.min(Math.max(target, 1), seenMax));
     },
     [jumpTo, seenMax],
   );
