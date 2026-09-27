@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { findRole, invitePresetFor } from '@niumadate/shared';
 import type { AppConfig, CreateInviteInput, Invite, InviteMessage, RoleKey } from '@niumadate/shared';
 import { api, describeError } from '../api';
@@ -70,6 +70,22 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  /** 编辑器那一块。 */
+  const editorRef = useRef<HTMLElement | null>(null);
+
+  /*
+    用户报「点编辑没有反应」——查下来**不是没反应**：编辑器在**列表上方**渲染，
+    而邀请一旦攒到几十条（实测 66 条），点第 30 行的「编辑」等于在页面底部
+    打开一个页面顶部的表单，用户看到的只有"没反应"。
+    用 scripts/admin-shot.mjs 验过：点下去 .invite-editor 确实出现、保存按钮也在，
+    只是不在视野里。所以打开时顺手滚过去。
+  */
+  const openEditor = (next: Draft | null): void => {
+    setDraft(next);
+    window.setTimeout(() => {
+      editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  };
   const [base, setBase] = useState('');
   /**
    * 小人的性别**单独存一份本地状态**。
@@ -315,7 +331,7 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
 
       {/* ---------- 编辑器 ---------- */}
       {draft !== null && (
-        <section className="invite-editor">
+        <section className="invite-editor" ref={editorRef}>
           <h3 className="invite-editor-title">{draft.id === null ? '新建邀请' : '编辑邀请'}</h3>
 
           <div className="invite-roles">
@@ -449,7 +465,7 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
                   <button type="button" className="btn btn-link" onClick={() => void copy(linkFor(invite))}>
                     复制链接
                   </button>
-                  <button type="button" className="btn btn-link" onClick={() => setDraft(draftFrom(invite))}>
+                  <button type="button" className="btn btn-link" onClick={() => openEditor(draftFrom(invite))}>
                     编辑
                   </button>
                   <button type="button" className="btn btn-link" onClick={() => void openChat(invite)}>
