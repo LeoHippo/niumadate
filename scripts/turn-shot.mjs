@@ -102,6 +102,17 @@ async function main() {
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
     await cdp.send('Page.bringToFront');
+    /*
+      ⚠️ 光改 --window-size 不够：headless Chrome 有**最小窗口宽度**（实测卡在 ~478），
+      所以 W=320/360 那几次其实还是按 430 左右在渲染 —— 我前几轮的"窄屏验收"全是假的。
+      真正决定布局的是 Emulation.setDeviceMetricsOverride，mobile:true 才会按手机视口排版。
+    */
+    await cdp.send('Emulation.setDeviceMetricsOverride', {
+      width: Number(process.env.W || '430'),
+      height: Number(process.env.H || '932'),
+      deviceScaleFactor: 1,
+      mobile: true,
+    });
     const evaluate = async (expr) => {
       const r = await cdp.send('Runtime.evaluate', { expression: expr, returnByValue: true });
       return r.result.value;

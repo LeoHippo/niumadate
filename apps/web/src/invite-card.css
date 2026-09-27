@@ -301,3 +301,34 @@
   .invite-page .screen-card .icard-foot-text { font-size: calc(var(--t-small) * 0.92); }
   .invite-page .screen-card .save-poster-btn { padding: 8px 18px; }
 }
+/* 用户第三次指出：请柬**右半部分**不完整。这次把"任何窄屏都不许把卡片顶出右边"写成硬约束：
+   ① 这一屏不允许横向溢出；② 卡片、行容器一律 max-width:100%；③ dd 允许任意断词（长地名不撑破）。
+   都是防御性规则，不会改变宽屏下的观感。 */
+.invite-page .screen-card { overflow-x: hidden; }
+.invite-page .screen-card .screen-inner { max-width: 100%; }
+.invite-page .screen-card .icard { max-width: 100%; }
+.invite-page .screen-card .icard-rows,
+.invite-page .screen-card .icard-row { max-width: 100%; }
+.invite-page .screen-card .icard-row dd { min-width: 0; overflow-wrap: anywhere; }
+.invite-page .screen-card .icard-title,
+.invite-page .screen-card .icard-foot-text { overflow-wrap: anywhere; }
+/* ==========================================================================
+   ★ 邀请页自适应（用户：这个页面应该做的都是自适应各种设备的呀）
+
+   实测 320×640（真机视口，Emulation 覆盖）时请柬**右半被切**：卡片容器约 300px 宽却偏右，
+   右边出界 ~42px。根因是容器宽度取的是"钳制值"（clamp 之类），在窄屏下仍偏大，且居中失效。
+   改成"永远以视口为准"：宽度 = min(可用宽, 430px)，左右各自居中，box-sizing 收进内边距。
+   只作用于请柬这一屏，避免动到别的屏的定位方式。
+   ========================================================================== */
+.invite-page .screen-card .screen-inner {
+  width: min(100% - 32px, 430px) !important;
+  max-width: calc(100vw - 32px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+.invite-page .screen-card .icard {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
