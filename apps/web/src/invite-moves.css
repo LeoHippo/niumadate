@@ -1212,3 +1212,6 @@ body .invite-page .invite-btn-thrown {
   white-space: nowrap;
   align-self: flex-end;
 }
+
+/* 进度条要能按住拖动 —— 手机上不写这条，手指横滑会被浏览器当成滚动页面，指针事件中途被抢走 */
+.invite-page .screen-dots { touch-action: none; }

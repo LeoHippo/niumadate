@@ -147,6 +147,7 @@ async function main() {
       const before = await evaluate("(() => { const el = document.querySelector('.screen-step'); return el === null ? '' : el.textContent.trim(); })()");
       for (let r = 0; r < rapid; r += 1) {
         await clickOnce(process.env.TARGET || '.screen-next');
+
         await sleep(60);
       }
       await sleep(8000);
@@ -156,6 +157,29 @@ async function main() {
     }
     // 最后这一下才是被拍的那次换屏（上面那些只是"把页面推进到想拍的那一支"）
     await clickOnce(process.env.TARGET || '.screen-next');
+
+    /*
+      DOTS=3：点进度条第 3 格，验证「进度条选页」真的生效（读屏号前后对比）。
+      这一步是为用户要的「进度条选页」做的验收 —— 光看代码不算数。
+    */
+    const dotsTarget = Number(process.env.DOTS || '0');
+    if (dotsTarget > 0) {
+      const info = await evaluate("(() => { const el = document.querySelector('.screen-dots'); if (el === null) return null; const r = el.getBoundingClientRect(); return { left: Math.round(r.left), top: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) }; })()");
+      console.log('DOTS 条', JSON.stringify(info));
+      if (info !== null) {
+        const step = info.w / 9;
+        const x = Math.round(info.left + step * (dotsTarget - 0.5));
+        const y = Math.round(info.top + info.h / 2);
+        const beforeStep = await evaluate("(() => { const el = document.querySelector('.screen-step'); return el === null ? '' : el.textContent.trim(); })()");
+        await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
+        await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+        await sleep(800);
+        const afterStep = await evaluate("(() => { const el = document.querySelector('.screen-step'); return el === null ? '' : el.textContent.trim(); })()");
+        console.log('DOTS ' + beforeStep + ' --点第' + dotsTarget + '格--> ' + afterStep);
+      }
+      process.exit(0);
+    }
+
     for (let i = 0; i < FRAMES; i += 1) {
       await sleep(STEP);
       await shot('turn-' + String(i * STEP).padStart(4, '0'));
