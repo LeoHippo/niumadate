@@ -288,3 +288,16 @@
 .invite-page .screen-card .screen-inner {
   padding-bottom: 118px;
 }
+/* 矮屏（≤700px 高）把请柬整体压一档：字号 / 行距 / 内边距一起收，
+   让「卡片 + 保存按钮 + 底部栏」能一屏放下 —— 而不是让好友去滚（360x640 实测底部那两行被压住）。
+   只在这一屏生效；取值都是收一档，不改结构。 */
+@media (max-height: 700px) {
+  .invite-page .screen-card .icard { padding: 14px 14px 12px; }
+  .invite-page .screen-card .icard-head { margin-bottom: 6px; }
+  .invite-page .screen-card .icard-row { padding: 5px 0; }
+  .invite-page .screen-card .icard-title { font-size: calc(var(--t-lead) * 0.82); }
+  .invite-page .screen-card .icard-strong { font-size: calc(var(--t-body) * 0.86); }
+  .invite-page .screen-card .icard-foot { margin-top: 6px; }
+  .invite-page .screen-card .icard-foot-text { font-size: calc(var(--t-small) * 0.92); }
+  .invite-page .screen-card .save-poster-btn { padding: 8px 18px; }
+}
