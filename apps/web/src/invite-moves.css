@@ -1078,3 +1078,30 @@ body .invite-page .card-leaving-fly {
   88% { transform: scaleY(0.42); opacity: 1; }
   100% { transform: scaleY(0.16); opacity: 0.35; }
 }
+/* ★ 最终回应（③）：把「揉成球」和「涨大」做到看得出来（第十轮）
+   实拍现状：小人走进来 →「那天不太行」被拿走（直接消失，没有揉的过程）→
+   「好呀～」只横向宽了约 15% → 小人站在它上沿（不是坐上去）。
+   分镜要的是「把不去揉成球、扔出去」「同意涨大」「一屁股坐上去」——
+   现在后两拍等于没演到。这一版先做足能纯 CSS 解决的两拍：
+   · 揉球：捏住 → 拧 → 团 → 越团越小并旋转，最后缩到 0.3 倍淡出（成球被丢走）
+   · 涨大：带过冲地涨到 1.42 倍，74% 回坐一下再定住（弹性）
+   类是现成的（.invite-btn-crumpled / .invite-btn-seated），只换关键帧，不动 JSX。 */
+.invite-page .invite-btn-crumpled { animation-name: mv-crumple-2 !important; }
+.invite-page .invite-btn-seated { animation-name: mv-grow-2 !important; }
+
+@keyframes mv-crumple-2 {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  18% { transform: scale(1.12, 0.82) rotate(-6deg); opacity: 1; }
+  42% { transform: scale(0.72, 0.9) rotate(14deg) skewX(6deg); opacity: 1; }
+  66% { transform: scale(0.5, 0.62) rotate(-22deg) skewX(-8deg); opacity: 1; }
+  84% { transform: scale(0.34, 0.4) rotate(30deg) skewX(0deg); opacity: 1; }
+  100% { transform: scale(0.28, 0.34) rotate(42deg); opacity: 0; }
+}
+
+@keyframes mv-grow-2 {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.18, 1.06); }
+  55% { transform: scale(1.34, 1.1); }
+  74% { transform: scale(1.27, 1.05); }
+  100% { transform: scale(1.42, 1.14); }
+}
