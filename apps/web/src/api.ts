@@ -220,6 +220,15 @@ export const api = {
         { method: 'POST', body: { items }, auth: true },
       ),
 
+    /* 批量删除。同样部分失败不回滚：返回删了几条 + 哪几条没删掉（带 id）。 */
+    deleteInvites: (
+      ids: string[],
+    ): Promise<{ deleted: number; failed: { id: string; reason: string }[] }> =>
+      request<{ deleted: number; failed: { id: string; reason: string }[] }>(
+        '/admin/invites/delete',
+        { method: 'POST', body: { ids }, auth: true },
+      ),
+
     updateInvite: (id: string, patch: Partial<CreateInviteInput>): Promise<{ invite: Invite }> =>
       request<{ invite: Invite }>(`/admin/invites/${encodeURIComponent(id)}`, {
         method: 'PATCH',

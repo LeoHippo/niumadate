@@ -333,6 +333,44 @@ export function registerAdminRoutes(app: FastifyInstance, config: AppConfig): vo
         return { created, failed };
       });
 
+      /*
+        批量删除。和批量创建用同一个约定：**部分失败不回滚**，
+        逐条删、逐条记账，返回删掉了几条、哪几条没删掉（带 id）。
+        用 POST 而不是 DELETE：DELETE 带 body 各家实现不一致，不值得为语义漂亮冒这个险。
+      */
+      admin.post<{ Body: Record<string, unknown> }>('/invites/delete', async (request, reply) => {
+        const raw = (request.body ?? {}) as Record<string, unknown>;
+        const ids = raw.ids;
+        if (!Array.isArray(ids)) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', 'ids 应该是一个数组');
+        }
+        if (ids.length === 0) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', '没有选中的邀请');
+        }
+        if (ids.length > BATCH_MAX) {
+          reply.code(400);
+          return apiError('BAD_REQUEST', '一次最多 ' + BATCH_MAX + ' 条');
+        }
+        let deleted = 0;
+        const failed: { id: string; reason: string }[] = [];
+        for (const value of ids) {
+          if (typeof value !== 'string') {
+            failed.push({ id: String(value), reason: 'id 应该是字符串' });
+            continue;
+          }
+          try {
+            deleteInvite(value);
+            deleted += 1;
+          } catch (cause) {
+            failed.push({ id: value, reason: cause instanceof Error ? cause.message : '删除失败' });
+          }
+        }
+        request.log.info({ ip: request.ip, deleted, bad: failed.length }, '批量删除邀请');
+        return { deleted, failed };
+      });
+
 
       admin.patch<{ Params: { id: string }; Body: Record<string, unknown> }>(
         '/invites/:id',
