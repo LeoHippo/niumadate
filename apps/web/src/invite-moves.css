@@ -1077,9 +1077,6 @@ body .invite-page[data-theme] .card-entering-fly {
    ========================================================================== */
 
 body .invite-page .screen {
-  /* 给翻页一个共同的透视原点：纸往后倒、往前来才是 3D 的，不然只是被压扁 */
-  perspective: 1000px;
-  perspective-origin: 50% 62%;
 }
 
 body .invite-page .puller-push {
@@ -1125,3 +1122,26 @@ body .invite-page .card-leaving-push {
   26% {
     transform: translateY(30px) rotateX(-3deg) skewX(0deg);
     filter: drop-shadow(0 14px 16px rgba(70, 34, 58, 0.2)) brightness(0.99);
+
+/* =========================================================================
+
+/* 「飞」（右支）：位移照旧镜像（文件里原本就写着"位移取反、旋转取反"），
+   形变照「拉」搬过来并按镜像取反 —— rotateY / skewY / 影子的横向偏移取反，
+   y / scale / opacity 原样。上一轮这里出过一次静默坏掉：关键帧没生成出来，
+   animation-name 却留下了（指向空关键帧 = 这张纸完全没动画），所以这次手写死。 */
+body .invite-page .card-leaving-fly {
+  animation-name: mv-card-fly-3 !important;
+}
+
+@keyframes mv-card-fly-3 {
+  0%, 30% { transform: translate(0, 0) rotate(0deg) rotateY(0deg) skewY(0deg); filter: drop-shadow(0 10px 12px rgba(70, 34, 58, 0.16)); }
+  34% { transform: translate(-6px, 1px) rotate(1deg) rotateY(6deg) skewY(-0.2deg); filter: drop-shadow(6px 12px 14px rgba(70, 34, 58, 0.2)) brightness(1.005); }
+  44% { transform: translate(14px, 1px) rotate(1.2deg) rotateY(10deg) skewY(-0.6deg); filter: drop-shadow(14px 16px 18px rgba(70, 34, 58, 0.24)) brightness(1.008); }
+  52% { transform: translate(19px, 1px) rotate(1.4deg) rotateY(13deg) skewY(-0.8deg); filter: drop-shadow(18px 18px 20px rgba(70, 34, 58, 0.26)) brightness(1.01); }
+  56% { transform: translate(4px, 0) rotate(0.4deg) rotateY(3deg) skewY(-0.1deg); filter: drop-shadow(4px 10px 12px rgba(70, 34, 58, 0.18)) brightness(1); }
+  64% { transform: translate(16px, 1px) rotate(1.8deg) rotateY(12deg) skewY(-0.7deg); filter: drop-shadow(16px 17px 19px rgba(70, 34, 58, 0.25)) brightness(1.008); }
+  74% { transform: translate(26px, 2px) rotate(2.6deg) rotateY(16deg) skewY(-1.1deg); filter: drop-shadow(22px 20px 22px rgba(70, 34, 58, 0.28)) brightness(1.012); }
+  78% { transform: translate(12px, 2px) rotate(1.2deg) rotateY(6deg) skewY(-0.3deg); filter: drop-shadow(8px 12px 14px rgba(70, 34, 58, 0.2)) brightness(1.002); }
+  86% { transform: translate(28px, 4px) rotate(3deg) rotateY(14deg) skewY(-0.9deg) scale(0.99); filter: drop-shadow(20px 20px 22px rgba(70, 34, 58, 0.26)) brightness(1.008); }
+  100% { transform: translate(420px, 8px) rotate(6deg) rotateY(8deg) skewY(-0.4deg) scale(0.96); filter: drop-shadow(14px 14px 18px rgba(70, 34, 58, 0.18)) brightness(1); opacity: 0.5; }
+}
