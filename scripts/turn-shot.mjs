@@ -80,7 +80,7 @@ async function main() {
   const chrome = spawn(CHROME, [
     '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
     '--hide-scrollbars', '--remote-debugging-port=' + port, '--user-data-dir=' + profile,
-    '--window-size=430,932', 'about:blank',
+    '--window-size=' + (process.env.W || '430') + ',' + (process.env.H || '932'), 'about:blank',
   ], { stdio: 'ignore' });
   let cdp = null;
   try {

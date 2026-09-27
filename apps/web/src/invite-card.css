@@ -275,3 +275,16 @@
 .invite-all .save-poster-btn { margin: 0 auto 10px; display: block; }
 
 
+
+/* 第 7 屏在**矮手机**上仍然不完整：卡片+按钮+底部栏加起来超过视口高度，
+   而这一屏不能滚 —— 超出部分直接看不到（用户反复说"显示不完整"）。
+   只留这一条最小规则：让它可滚 + 留出底部固定栏的空间。
+   ⚠️ 上一轮我在这里堆过 fixed / static / order 三条，互相打架、一条都没生效 ——
+   所以这次**只加这一条**，别的什么都不动。 */
+.invite-page .screen-card {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.invite-page .screen-card .screen-inner {
+  padding-bottom: 118px;
+}
