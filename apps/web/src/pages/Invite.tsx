@@ -1598,6 +1598,17 @@ function Answer({
 }
 
 /** 对话区。**这个功能的重点** —— 定下来之后还要来回商量。 */
+/** 留言时间：今天只给时分，其它日期带上月日 —— 聊天里要能定位，但不抢戏。 */
+function chatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const hm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  const now = new Date();
+  const sameDay =
+    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  return sameDay ? hm : String(d.getMonth() + 1) + '月' + String(d.getDate()) + '日 ' + hm;
+}
+
 function Chat({
   code,
   messages,
@@ -1651,6 +1662,8 @@ function Chat({
             >
               <span className="invite-chat-who">{message.from === 'host' ? '牛马' : '我'}</span>
               <span className="invite-chat-text">{message.text}</span>
+              {/* 用户报「发个消息的时间看不到」—— InviteMessage.createdAt 一直是有的，只是没渲染 */}
+              <span className="invite-chat-time">{chatTime(message.createdAt)}</span>
             </div>
           ))}
         </div>
