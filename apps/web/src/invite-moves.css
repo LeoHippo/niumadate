@@ -1045,3 +1045,36 @@ body .invite-page .card-leaving-fly {
   92% { transform: translateY(186px) rotateX(-12deg) skewX(-1.4deg) scale(1.02, 0.96); }
   100% { transform: translateY(250px) rotateX(-6deg) skewX(0deg) scale(1.02, 0.95); opacity: 0.85; }
 }
+/* ==========================================================================
+   ★ 顶吊那一支：让绳子真的看得见（第九轮）
+
+   分镜里这一路是「放下绳子把新页吊上来」，但实拍里看到的只是一小截线头。两个原因：
+   ① .move-rope 的 z-index 是负的 —— 它被画在**页面背后**，正常根本看不见；
+   ② 绳长只有百来像素，从屏幕顶放下来够不到纸的上沿，视觉上就不成立。
+   这里把绳子重做成一条真的绳：从视口顶端垂到纸的上沿（250px 上下），
+   落下来时靠 scaleY 从 0 长到 1（transform-origin 在顶上，所以是'往下放'），
+   20% 处轻微过冲 = 绳子绷紧那一下；钩住之后随着新页上升而**收短**（70%→100% scaleY 递减）。
+   阴影/滤镜一概不用 —— 逐帧 filter 是上一轮确认最贵的一笔。
+   ========================================================================== */
+.invite-page .move-rope {
+  z-index: 21 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: 250px !important;
+  width: 3px !important;
+  transform-origin: 50% 0 !important;
+  background: linear-gradient(180deg, rgba(120, 96, 60, 0.15), #8f7146 18%, #b99566 72%, #8f7146) !important;
+  box-shadow: 1px 0 0 rgba(255, 240, 214, 0.35) !important;
+  animation-name: mv-rope-2 !important;
+}
+
+@keyframes mv-rope-2 {
+  0% { transform: scaleY(0); opacity: 0; }
+  12% { transform: scaleY(0.55); opacity: 1; }
+  20% { transform: scaleY(1.02); opacity: 1; }
+  30% { transform: scaleY(1); opacity: 1; }
+  46% { transform: scaleY(0.96); opacity: 1; }
+  70% { transform: scaleY(0.72); opacity: 1; }
+  88% { transform: scaleY(0.42); opacity: 1; }
+  100% { transform: scaleY(0.16); opacity: 0.35; }
+}
