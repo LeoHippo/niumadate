@@ -1149,3 +1149,31 @@ body .invite-page .card-leaving-fly {
 }
 .invite-page .puppet-sit .puppet-arm-front { transform: rotate(-14deg) !important; }
 .invite-page .puppet-sit .puppet-arm-back { transform: rotate(-8deg) !important; }
+
+/* ★ 第十四轮：按用户反馈改两处
+   ① 扔出去的弧线要更长 —— 0.9s 里只飞 280px，看起来像"掉下去"而不是"扔出去"。
+      改成 1.15s、横向 480px、最高点抬到 -150px，并且**落点在画面外**（460,220）。
+   ② 后面的邀请内容**不许消失**。原来 .invite-stage:has(.invite-puppet-holder) .answer-recap
+      会把摘要淡到 0（paper-look-4.css）。用户的原话是"这个不应该消失" —— 那就一直留着：
+      摘要只占 148px 的绝对定位块，不参与文档流，所以留着不会把卡片撑变形。
+      ⚠️ 代价是小人会在同一块地方和它重叠，等实拍看过再决定要不要把小人整体抬高一点。 */
+body .invite-stage:has(.invite-puppet-holder) .answer-recap {
+  opacity: 1 !important;
+}
+
+body .invite-page .invite-btn-thrown {
+  animation-duration: 1.15s !important;
+}
+
+@keyframes mv-throw-3 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.28); opacity: 1; }
+  14% { transform: translate(-24px, -78px) rotate(-160deg) scale(0.36); opacity: 1; }
+  34% { transform: translate(70px, -150px) rotate(260deg) scale(0.33); opacity: 1; }
+  58% { transform: translate(230px, -128px) rotate(620deg) scale(0.29); opacity: 1; }
+  80% { transform: translate(360px, -24px) rotate(860deg) scale(0.24); opacity: 1; }
+  100% { transform: translate(460px, 220px) rotate(1080deg) scale(0.18); opacity: 0; }
+}
+
+body .invite-page .invite-btn-thrown {
+  animation-name: mv-throw-3 !important;
+}
