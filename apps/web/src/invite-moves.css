@@ -991,3 +991,13 @@ body .invite-page .card-leaving-fly {
   86% { transform: translate(28px, 4px) rotate(3deg) rotateY(14deg) skewY(-0.9deg) scale(0.99); filter: drop-shadow(20px 20px 22px rgba(70, 34, 58, 0.26)) brightness(1.008); }
   100% { transform: translate(420px, 8px) rotate(6deg) rotateY(8deg) skewY(-0.4deg) scale(0.96); filter: drop-shadow(14px 14px 18px rgba(70, 34, 58, 0.18)) brightness(1); opacity: 0.5; }
 }
+
+/* ==========================================================================
+   鈽?閭€璇峰嚱杩欎竴椤电殑閫忚锛堢鍏疆锛?
+   缈婚〉鐨勫舰鍙樼敤浜?rotateY / skewY 鈥斺€?杩欎袱鏍?*娌℃湁閫忚灏卞嚑涔庣湅涓嶈**锛坮otateY 閫€鍖栨垚妯悜鍘嬬缉锛夈€?   涓よ疆鍓嶆垜鏇炬妸 perspective 鍔犲湪 .screen 涓婏紝缁撴灉瀹冨悓鏃朵綔鐢ㄥ埌棰勭害椤碉紙/date/:role 鐢ㄥ悓涓€濂?.screen锛夛紝
+   ui-smoke 鎺夊埌 65/69锛涙挙鎺夊悗閭?4 鏉′緷鏃х孩锛岃鏄庝笉鏄畠鐨勯攨锛屼絾鎴戝綋鏃朵篃娌℃壘鍥炴潵銆?   鐜板湪鍙湪**閭€璇峰嚱杩欎竴椤?*鐨勬牴涓婃寕涓€涓笓灞炵被锛坕nvite-page-letter锛岀敱 Invite.tsx 鍔狅級锛?   閫忚鍙湪杩欓〉鐢熸晥 鈥斺€?棰勭害椤典竴琛岄兘涓嶅彈褰卞搷銆?   ========================================================================== */
+body .invite-page-letter .screen {
+  perspective: 1000px;
+  perspective-origin: 50% 62%;
+}
+

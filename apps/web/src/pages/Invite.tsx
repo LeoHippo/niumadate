@@ -557,7 +557,7 @@ export function InvitePage() {
   const last = index === SCREENS.length - 1;
 
   return (
-    <main className="invite-page" data-theme={invite.role}>
+    <main className="invite-page invite-page-letter" data-theme={invite.role}>
       {/*
         装饰层：**多少本身也是性格**。
         兄弟几乎不摆东西，宝宝摆得最多 —— 这比换配色更能拉开差别。
