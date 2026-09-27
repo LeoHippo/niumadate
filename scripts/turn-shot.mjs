@@ -122,8 +122,24 @@ async function main() {
     console.log('PROBE ' + probe);
     const rect = await evaluate("(() => { const b = document.querySelector('.screen-next'); if (b === null) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()");
     if (rect === null) throw new Error('找不到「轻点继续」按钮');
-    await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
+    /*
+      MOVES 是按屏号轮换的（pull / fly / push），所以"点几次"决定拍到哪一支：
+      第 2 屏点一次 = push，点两次 = pull。CLICKS 环境变量控制。
+    */
+    const clicks = Number(process.env.CLICKS || '1');
+    const clickOnce = async () => {
+      const spot = await evaluate("(() => { const b = document.querySelector('.screen-next'); if (b === null) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()");
+      if (spot === null) return false;
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: spot.x, y: spot.y, button: 'left', clickCount: 1 });
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: spot.x, y: spot.y, button: 'left', clickCount: 1 });
+      return true;
+    };
+    for (let c = 1; c < clicks; c += 1) {
+      if ((await clickOnce()) === false) break;
+      await sleep(6800);
+    }
+    // 最后这一下才是被拍的那次换屏（上面那些只是"把页面推进到想拍的那一支"）
+    await clickOnce();
     for (let i = 0; i < FRAMES; i += 1) {
       await sleep(STEP);
       await shot('turn-' + String(i * STEP).padStart(4, '0'));
