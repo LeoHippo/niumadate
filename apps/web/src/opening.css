@@ -762,3 +762,25 @@ body .opening-hint {
   color: color-mix(in srgb, var(--seal-hi, #ffe6c4) 30%, #fff8ee);
   text-shadow: 0 1px 2px rgba(40, 10, 4, 0.5);
 }
+
+/* 火漆的"摊开痕"太像卡通太阳了 —— 四套一起收细、收淡。
+   数值对比：周期 14deg → 9deg（条纹更多更细），浓度 0.055/0.05 → 0.045/0.042。
+   底色那层 radial 用 var 写，本身就是按身份取的色，所以这一条 8 个选择器共用一份文本。
+   ⚠️ 没有把浓度做成 var 塞进 rgba() 的 alpha 位：万一哪个浏览器不认，
+   整条 background-image 会被丢弃（连底色一起没），不值得为省几行冒这个险。 */
+body .opening .op-env-seal::before,
+body .opening .op-env-seal::after {
+  background-image:
+    radial-gradient(
+      circle at 42% 30%,
+      var(--seal-hi, #e0714a) 0%,
+      var(--seal, #c4472a) 30%,
+      var(--seal-dark, #8f2c17) 74%,
+      color-mix(in srgb, var(--seal-dark, #8f2c17) 66%, #1a0503) 100%
+    ),
+    repeating-conic-gradient(
+      from 7deg at 46% 42%,
+      rgba(255, 255, 255, 0.045) 0deg 4.5deg,
+      rgba(0, 0, 0, 0.042) 4.5deg 9deg
+    ) !important;
+}
