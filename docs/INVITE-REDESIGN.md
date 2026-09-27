@@ -195,3 +195,25 @@ brother / dadmam 把它变成深棕，压在同样深的底上，「按住火漆
 
 改完照旧：`node scripts/turn-shot.mjs` 复拍同一组帧，和 `.shots/turn-*.png` 的基线逐帧对比，
 两套冒烟 + `deploy.mjs --public --image`。
+---
+
+## 交接点 · 「结论」和「说两句」要合成一页（用户 2026-09-27 提）
+
+用户原话：「之后那个结论和说两句放在同一页里面就好了不用再过渡了」。
+
+**现状**：回答完之后是两处内容、两步到达 ——
+1. 「结论」在 `Invite.tsx` 的 `Answer` 组件里，是状态一变（`invite.status !== 'pending'`）就渲染的
+   `.invite-answered` 块（约 1400~1473 行）：欢呼小人 + 🎉 + 「好的，就这么定了 / 到时候见。」+ 一个
+   「改成『那天不太行』」的按钮。
+2. 「说两句」是独立一屏（`SCREENS` 最后一屏 `chat`，约 1210~1218 行），内容是一个可复用的
+   `<Chat code={invite.code} messages={messages} onSent={onMessages} />`。
+
+**要做的**（一次做完，别拆成半截）：
+1. 在 `.invite-answered` 块里直接渲染 `<Chat … />` —— 结论 + 聊天框同页；
+2. 因此 `Answer` 组件要多接两个 prop：`messages` / `onMessages`（渲染点约 1205 行，props 类型在
+   `Answer` 的签名处），照 `ScreenBody` 里 `case 'chat'` 的用法传下去；
+3. 去掉"回答完之后再翻到聊天屏"那一步过渡（用户说的「不用再过渡了」）—— 先确认它是由谁触发的
+   （章节的 onClick 走 `goTo`，还是父级 `onRespond` 里推了一屏），再决定是拦住还是干脆不再用那一屏。
+
+**注意**：`chat` 这一屏在"重新打开一条已经回过的邀请"时仍然要用（那时没有结论块），
+所以别直接删掉它，只断开"回答之后自动过去"这条路径。
