@@ -70,6 +70,31 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  /** 勾选中的邀请 id —— 批量删除用。 */
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
+  /*
+    批量删除。和批量创建同一个约定（部分失败不回滚）：服务端逐条删、逐条记账。
+    这里**不做乐观更新** —— 邀请一删留言也一起没了，不能先装作成功，等接口回来再 reload。
+  */
+  const removePicked = async (): Promise<void> => {
+    const ids = [...picked];
+    if (ids.length === 0) return;
+    if (!window.confirm('删掉选中的 ' + String(ids.length) + ' 份邀请？留言也一起删。')) return;
+    setDeleting(true);
+    try {
+      const res = await api.admin.deleteInvites(ids);
+      say('删掉了 ' + String(res.deleted) + ' 份' + (res.failed.length === 0 ? ' ✓' : '，' + String(res.failed.length) + ' 份没删掉'));
+      if (res.failed.length > 0) setError(res.failed.map((item) => item.reason).join('；'));
+      setPicked(new Set());
+      void load();
+    } catch (cause) {
+      setError(describeError(cause));
+    } finally {
+      setDeleting(false);
+    }
+  };
   /** 编辑器那一块。 */
   const editorRef = useRef<HTMLElement | null>(null);
 
@@ -443,11 +468,44 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
       ) : items.length === 0 ? (
         <p className="receipt-hint">还没有邀请。点右上角「+ 新建邀请」开一份。</p>
       ) : (
+        <>
+        <div className="invite-toolbar">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              const all = items.length > 0 && picked.size === items.length;
+              setPicked(all ? new Set() : new Set(items.map((invite) => invite.id)));
+            }}
+          >
+            {items.length > 0 && picked.size === items.length ? '取消全选' : '全选'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-link invite-danger"
+            disabled={picked.size === 0 || deleting}
+            onClick={() => void removePicked()}
+          >
+            {deleting ? '删除中…' : '删除选中' + (picked.size === 0 ? '' : ' (' + String(picked.size) + ')')}
+          </button>
+        </div>
         <div className="invite-list">
           {items.map((invite) => {
             const role = findRole(config ?? { roles: [] } as unknown as AppConfig, invite.role);
             return (
               <div key={invite.id} className={`invite-row invite-row-${invite.status}`}>
+                <input
+                  type="checkbox"
+                  className="invite-row-pick"
+                  aria-label="选中这份邀请"
+                  checked={picked.has(invite.id)}
+                  onChange={(event) => {
+                    const next = new Set(picked);
+                    if (event.target.checked) next.add(invite.id);
+                    else next.delete(invite.id);
+                    setPicked(next);
+                  }}
+                />
                 <div className="invite-row-main">
                   <span className="invite-row-name">
                     {role?.emoji} {invite.inviteeName.trim() === '' ? '（通用链接）' : invite.inviteeName}
@@ -492,6 +550,7 @@ export function InvitesPanel({ config }: { config: AppConfig | null }) {
             );
           })}
         </div>
+        </>
       )}
     </div>
   );
