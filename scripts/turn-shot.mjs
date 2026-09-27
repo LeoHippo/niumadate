@@ -121,15 +121,15 @@ async function main() {
     const probe = await evaluate("JSON.stringify({ hasNext: document.querySelector('.screen-next') !== null, step: (document.querySelector('.screen-step') || {}).textContent || '', names: [...new Set(document.getAnimations().map((a) => a.animationName))].slice(0, 8) })");
     console.log('PROBE ' + probe);
     const rect = await evaluate("(() => { const b = document.querySelector('.screen-next'); if (b === null) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()");
-    if (rect === null) throw new Error('找不到「轻点继续」按钮');
+    if (rect === null) console.log('提示：这一屏没有「轻点继续」，直接点 TARGET');
     /*
       MOVES 是按屏号轮换的（pull / fly / push），所以"点几次"决定拍到哪一支：
       第 2 屏点一次 = push，点两次 = pull。CLICKS 环境变量控制。
     */
     const clicks = Number(process.env.CLICKS || '1');
-    const clickOnce = async () => {
-      const spot = await evaluate("(() => { const b = document.querySelector('.screen-next'); if (b === null) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()");
-      if (spot === null) return false;
+    const clickOnce = async (sel = '.screen-next') => {
+      const spot = await evaluate("(() => { const b = document.querySelector('" + sel + "'); if (b === null) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()");
+      if (spot === null) { console.log('点不到: ' + sel); return false; }
       await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: spot.x, y: spot.y, button: 'left', clickCount: 1 });
       await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: spot.x, y: spot.y, button: 'left', clickCount: 1 });
       return true;
@@ -139,7 +139,7 @@ async function main() {
       await sleep(6800);
     }
     // 最后这一下才是被拍的那次换屏（上面那些只是"把页面推进到想拍的那一支"）
-    await clickOnce();
+    await clickOnce(process.env.TARGET || '.screen-next');
     for (let i = 0; i < FRAMES; i += 1) {
       await sleep(STEP);
       await shot('turn-' + String(i * STEP).padStart(4, '0'));
