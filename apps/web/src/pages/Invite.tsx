@@ -426,6 +426,22 @@ export function InvitePage() {
   /** 刚刚答应了吗 —— 只在「没回应 → 接受」那一下放爆发，回头再看不再炸。 */
   const justAcceptedRef = useRef(false);
 
+  /**
+   * 换屏正在进行中（拉走那一段 + 送回那一段都算）。
+   *
+   * 用户报的 bug：**换屏动画里连续点按会出问题**。
+   * 根因是 goTo 完全没有防重入 —— 连点 N 下就排 N 个 setTimeout，
+   * 每个都拿着「当时算出来的 next」去 setIndex，于是画面一次跳好几屏，
+   * 同时 leaving / enterFrom 被来回改，出现双小人、过渡纱乱闪。
+   * 修复后的实测（node scripts/turn-shot.mjs + RAPID=5）：连点 5 下只前进一屏 02/09 → 03/09。
+   * 修复前「一次跳好几屏」是从代码推出来的（每个定时器都各自 setIndex），没有回滚单独测过。
+   *
+   * 为什么不排队而是直接丢掉：排队会让手快的人被动连看三段动画，那才是真的烦。
+   */
+  const movingRef = useRef(false);
+  /** 拉走那一段的定时器；卸载时要能收干净。 */
+  const leaveTimerRef = useRef(0);
+
 
 
   const load = useCallback(async () => {
@@ -452,9 +468,12 @@ export function InvitePage() {
    */
   const goTo = useCallback((next: number) => {
     if (next < 0 || next >= SCREENS.length) return;
+    /* 上一段还没演完 → 这一下不算数（防重入，见 movingRef 的注释）。 */
+    if (movingRef.current) return;
+    movingRef.current = true;
     const picked = MOVES[next % MOVES.length] ?? 'pull';
     setLeaving(picked);
-    window.setTimeout(() => {
+    leaveTimerRef.current = window.setTimeout(() => {
       setIndex(next);
       setLeaving(null);
       /*
@@ -476,9 +495,21 @@ export function InvitePage() {
   */
   useEffect(() => {
     if (enterFrom === null) return;
-    const timer = window.setTimeout(() => setEnterFrom(null), RETURN_MS);
+    const timer = window.setTimeout(() => {
+      setEnterFrom(null);
+      /* 这一趟彻底演完，才放行下一次点击 —— 和 goTo 开头那道闸是一对。 */
+      movingRef.current = false;
+    }, RETURN_MS);
     return () => window.clearTimeout(timer);
   }, [enterFrom]);
+
+  /* 卸载时把没跑完的定时器收掉，免得在已经卸载的组件上 setState。 */
+  useEffect(
+    () => () => {
+      window.clearTimeout(leaveTimerRef.current);
+    },
+    [],
+  );
 
   if (error !== null) {
     return (

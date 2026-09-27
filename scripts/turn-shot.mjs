@@ -138,6 +138,22 @@ async function main() {
       if ((await clickOnce()) === false) break;
       await sleep(6800);
     }
+    /*
+      连点测试（RAPID=5）：换屏动画还没演完就接着点，正常应该**只前进一步**。
+      这条是给「换屏期间连续点按」那个 bug 留的回归测试。
+    */
+    const rapid = Number(process.env.RAPID || '0');
+    if (rapid > 0) {
+      const before = await evaluate("(() => { const el = document.querySelector('.screen-step'); return el === null ? '' : el.textContent.trim(); })()");
+      for (let r = 0; r < rapid; r += 1) {
+        await clickOnce(process.env.TARGET || '.screen-next');
+        await sleep(60);
+      }
+      await sleep(8000);
+      const after = await evaluate("(() => { const el = document.querySelector('.screen-step'); return el === null ? '' : el.textContent.trim(); })()");
+      console.log('RAPID 连点 ' + rapid + ' 下: ' + before + ' -> ' + after);
+      process.exit(0);
+    }
     // 最后这一下才是被拍的那次换屏（上面那些只是"把页面推进到想拍的那一支"）
     await clickOnce(process.env.TARGET || '.screen-next');
     for (let i = 0; i < FRAMES; i += 1) {
