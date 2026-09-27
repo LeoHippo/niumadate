@@ -467,10 +467,15 @@
   100% { opacity: 1; transform: translate(0, 0) scale(1); }
 }
 
-/* 缩小之后内部的小人跟着缩 */
-.invite-puppet-holder.puppet-docked .puppet {
-  width: 96px;
-  height: 104px;
+/*
+  ⚠️ 这里原本是「坐定之后把小人缩到 96×104」。那是一次 CSS 瞬变，
+  和 JS 那次瞬移压在同一帧 —— 密集帧里看起来像「又从旁边飞进来一只更小的」。
+  现在缩小交给 JS 一起插值（和位置同一条时间线，见 Invite.tsx 的坐姿 effect），
+  所以这条撤掉。
+*/
+.invite-page .puppet-docked .puppet {
+  width: auto;
+  height: auto;
 }
 
 /* 左上角会和大编号（01/09）重叠 —— 把编号让出来 */

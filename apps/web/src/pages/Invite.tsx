@@ -1280,6 +1280,13 @@ function Answer({
     所以位置一律由 JS 量、用 transform 推，跟祖先无关。
   */
   const [pupY, setPupY] = useState(0);
+  /** 坐下去时顺便缩小的倍率 —— 由 JS 逐帧插值（见下面坐姿那段 effect）。 */
+  const [pupS, setPupS] = useState(1);
+  /* 逐帧插值要读「现在在哪」，但 effect 的依赖里不能放 pupX/pupY（每帧都会重跑）。用 ref 同步。 */
+  const pupXRef = useRef(0);
+  const pupYRef = useRef(0);
+  pupXRef.current = pupX;
+  pupYRef.current = pupY;
   /**
    * 婉拒按钮是不是已经被扔掉了。
    * 为什么要单独记：`crumpled`/`thrown` 是按**当前这一步**挂的，
@@ -1329,17 +1336,42 @@ function Answer({
       时机也对得上：按钮 3600ms 开始放大、4650ms 停稳，
       而这套退场是 6000ms 才发生 —— 量到的是稳下来的位置。
     */
-    if (btn === null) {
-      setPupX((current) => current + (12 - box.left));
-      setPupY(14 - box.top);
-      return;
-    }
-    const b = btn.getBoundingClientRect();
-    const targetLeft = b.left + b.width / 2 - box.width / 2;
+    /*
+      ★ 坐下去 = 一次**连着的**移动，不是瞬移（用户拍板走这条路）。
+
+      原来这里直接 setPupX/setPupY：量完「放大之后」的按钮位置，一帧跳过去；
+      再叠上 CSS 把小人缩到 96×104。一跳一缩压在同一帧 ——
+      密集帧看得清清楚楚：3500ms 小人还大、3900ms 就变成小的了，
+      看起来像「又从旁边飞进来一只更小的」。
+
+      ⚠️ 不用 CSS 过渡：试过，位置/坐姿/尺寸三条过渡各滑各的，
+      反而把「一把坐下去」的利落感拆散了。这里只用一条时间线（rAF）同时插值
+      位置和尺寸 —— 只有一个动作，所以看着是「坐下去」。
+    */
+    const startX = pupXRef.current;
+    const startY = pupYRef.current;
+    const b = btn === null ? null : btn.getBoundingClientRect();
+    const endX = b === null
+      ? startX + (12 - box.left)
+      : startX + (b.left + b.width / 2 - box.width / 2 - box.left);
     /* 0.78：大半个身子在按钮上方，屁股正好压在按钮的上沿 */
-    const targetTop = b.top - box.height * 0.78;
-    setPupX((current) => current + (targetLeft - box.left));
-    setPupY(targetTop - box.top);
+    const endY = b === null
+      ? startY + (14 - box.top)
+      : startY + (b.top - box.height * 0.78 - box.top);
+    const DOCK_MS = 420;
+    const t0 = performance.now();
+    let raf = 0;
+    const step = (now: number): void => {
+      const k = Math.min(1, (now - t0) / DOCK_MS);
+      /* ease-out：先快后慢，最后一点点慢慢落座 */
+      const e = 1 - (1 - k) * (1 - k);
+      setPupX(startX + (endX - startX) * e);
+      setPupY(startY + (endY - startY) * e);
+      setPupS(1 - 0.22 * e);
+      if (k < 1) raf = window.requestAnimationFrame(step);
+    };
+    raf = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(raf);
   }, [docked]);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -1465,7 +1497,7 @@ function Answer({
           <div
             ref={puppetRef}
             className={docked ? 'invite-puppet-holder puppet-docked' : 'invite-puppet-holder'}
-            style={{ transform: `translate(${pupX}px, ${pupY}px)` }}
+            style={{ transform: `translate(${pupX}px, ${pupY}px) scale(${pupS})` }}
           >
             {/* 退场之后是**坐在**左上角的 —— 用户说的就是"坐在左上角" */}
             <Puppet gender={hostGender} mood={docked ? 'sit' : moodFor(act)} />

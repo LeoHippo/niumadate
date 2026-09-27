@@ -24,8 +24,8 @@ const API = BASE + '/api';
 const ROLE = process.env.ROLE || 'sister';
 const PASSWORD = process.env.ADMIN_PASSWORD || 'ZJJR-3SUW-WEHQ';
 const OUT = '.shots';
-const STEP = 250;
-const FRAMES = 28;
+const STEP = Number(process.env.STEP || '250');
+const FRAMES = Number(process.env.FRAMES || '28');
 mkdirSync(OUT, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
