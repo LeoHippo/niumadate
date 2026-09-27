@@ -980,12 +980,200 @@ body .invite-page .card-leaving-fly {
 }
 
 @keyframes mv-card-fly-3 {
-/* ★ 第十五轮（补）：坐下去的时候小人还会**瞬间缩小**
-   invite-motion.css 里有一条 `.invite-puppet-holder.puppet-docked .puppet { width: 96px; height: 104px }` ——
-   坐定那一帧尺寸直接从原尺寸跳到 96×104。加上位置跳、坐姿跳，一共三处瞬变叠在一帧，
-   所以用户看到的是「闪一下」。这里把尺寸也挂上过渡（内联 transform 那条我已经加了）。 */
-.invite-page .invite-puppet-holder .puppet {
-  transition: width 0.45s cubic-bezier(0.22, 0.9, 0.28, 1),
-    height 0.45s cubic-bezier(0.22, 0.9, 0.28, 1),
-    transform 0.45s cubic-bezier(0.22, 0.9, 0.28, 1);
+  0%, 30% { transform: translate(0, 0) rotate(0deg) rotateY(0deg) skewY(0deg) rotateX(0deg); }
+  34% { transform: translate(-6px, 1px) rotate(1deg) rotateY(16deg) skewY(-0.5deg) rotateX(-2deg) scale(1.004); }
+  44% { transform: translate(14px, 1px) rotate(1.2deg) rotateY(26deg) skewY(-1.2deg) rotateX(-4deg) scale(1.012); }
+  52% { transform: translate(19px, 1px) rotate(1.4deg) rotateY(32deg) skewY(-1.6deg) rotateX(-5deg) scale(1.016); }
+  56% { transform: translate(4px, 0) rotate(0.4deg) rotateY(8deg) skewY(-0.3deg) rotateX(-1deg) scale(1.002); }
+  64% { transform: translate(16px, 1px) rotate(1.8deg) rotateY(28deg) skewY(-1.3deg) rotateX(-4deg) scale(1.014); }
+  74% { transform: translate(26px, 2px) rotate(2.6deg) rotateY(34deg) skewY(-2.2deg) rotateX(-6deg) scale(1.02); }
+  78% { transform: translate(12px, 2px) rotate(1.2deg) rotateY(12deg) skewY(-0.6deg) rotateX(-2deg) scale(1.006); }
+  86% { transform: translate(28px, 4px) rotate(3deg) rotateY(30deg) skewY(-1.8deg) rotateX(-5deg) scale(1.016); }
+  100% { transform: translate(420px, 8px) rotate(6deg) rotateY(18deg) skewY(-0.9deg) rotateX(-3deg) scale(0.97); opacity: 0.5; }
+}
+
+/* ==========================================================================
+   �?邀请函这一页的透视（第八轮�?
+   翻页的形变用�?rotateY / skewY —�?这两�?*没有透视就几乎看不见**（rotateY 退化成横向压缩）�?   两轮前我曾把 perspective 加在 .screen 上，结果它同时作用到预约页（/date/:role 用同一�?.screen），
+   ui-smoke 掉到 65/69；撤掉后�?4 条依旧红，说明不是它的锅，但我当时也没找回来�?   现在只在**邀请函这一�?*的根上挂一个专属类（invite-page-letter，由 Invite.tsx 加）�?   透视只在这页生效 —�?预约页一行都不受影响�?   ========================================================================== */
+body .invite-page-letter .screen {
+  perspective: 1000px;
+  perspective-origin: 50% 62%;
+}
+
+
+/* 动画里不再逐帧改 filter —— 每帧重算 drop-shadow/brightness 是这一版最贵的一笔（手机上直接掉帧）。
+   阴影改成**静态一条**：纸被压/被拽时靠位移、旋转、投影面本身表达，不再靠影子变长短。
+   transform-origin 落到 88%：纸是躺在桌面上的，受力弯曲的支点在靠近下缘的地方，
+   绕**中心**弯会像一块被扭的饼干。 */
+body .invite-page .card-leaving-push,
+body .invite-page .card-leaving-fly {
+  filter: drop-shadow(0 16px 20px rgba(70, 34, 58, 0.22));
+  transform-origin: 50% 88%;
+}
+
+/* ⚠️ 这两个关键帧曾经被我用 shell 截断文件时误删，只留下指过来的 animation-name ——
+   于是「压」那一支变成：小人自己在使劲，纸一动不动（用户一眼看出'往下压的动作不对'）。
+   教训：验证必须以产物里的 '@keyframes <名字> {' 为准，不能只 grep 名字 ——
+   animation-name 里也有那个名字，会骗过检查。 */
+@keyframes mv-press-doll-3 {
+  0% { transform: translateY(-280px) rotate(3deg); opacity: 0; }
+  5% { opacity: 1; }
+  12% { transform: translateY(36px) scale(1.12, 0.86) rotate(0deg); }
+  18% { transform: translateY(20px) scale(0.95, 1.06); }
+  22% { transform: translateY(32px) scale(1.05, 0.96); }
+  26% { transform: translateY(30px) scale(1, 1); }
+  38% { transform: translateY(56px) scale(1.07, 0.92); }
+  46% { transform: translateY(64px) scale(1.08, 0.9); }
+  52% { transform: translateY(30px) scale(1, 1); }
+  64% { transform: translateY(96px) scale(1.1, 0.84); }
+  70% { transform: translateY(62px) scale(1.04, 0.96); }
+  82% { transform: translateY(150px) scale(1.14, 0.76); }
+  92% { transform: translateY(186px) scale(1.15, 0.72); }
+  100% { transform: translateY(-20px) scale(1.02, 0.98); opacity: 0.9; }
+}
+
+@keyframes mv-card-push-3 {
+  0%, 22% { transform: translateY(0) rotateX(0deg) skewX(0deg); }
+  26% { transform: translateY(30px) rotateX(-3deg) skewX(0deg); }
+  38% { transform: translateY(56px) rotateX(-8deg) skewX(-1.1deg); }
+  46% { transform: translateY(64px) rotateX(-10deg) skewX(-1.4deg); }
+  52% { transform: translateY(30px) rotateX(-3deg) skewX(-0.3deg); }
+  64% { transform: translateY(96px) rotateX(-13deg) skewX(-1.8deg); }
+  70% { transform: translateY(62px) rotateX(-8deg) skewX(-0.9deg); }
+  82% { transform: translateY(150px) rotateX(-16deg) skewX(-2.2deg) scale(1.015, 0.97); }
+  92% { transform: translateY(186px) rotateX(-12deg) skewX(-1.4deg) scale(1.02, 0.96); }
+  100% { transform: translateY(250px) rotateX(-6deg) skewX(0deg) scale(1.02, 0.95); opacity: 0.85; }
+}
+/* ==========================================================================
+   ★ 顶吊那一支：让绳子真的看得见（第九轮）
+
+   分镜里这一路是「放下绳子把新页吊上来」，但实拍里看到的只是一小截线头。两个原因：
+   ① .move-rope 的 z-index 是负的 —— 它被画在**页面背后**，正常根本看不见；
+   ② 绳长只有百来像素，从屏幕顶放下来够不到纸的上沿，视觉上就不成立。
+   这里把绳子重做成一条真的绳：从视口顶端垂到纸的上沿（250px 上下），
+   落下来时靠 scaleY 从 0 长到 1（transform-origin 在顶上，所以是'往下放'），
+   20% 处轻微过冲 = 绳子绷紧那一下；钩住之后随着新页上升而**收短**（70%→100% scaleY 递减）。
+   阴影/滤镜一概不用 —— 逐帧 filter 是上一轮确认最贵的一笔。
+   ========================================================================== */
+.invite-page .move-rope {
+  z-index: 21 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: 250px !important;
+  width: 3px !important;
+  transform-origin: 50% 0 !important;
+  background: linear-gradient(180deg, rgba(120, 96, 60, 0.15), #8f7146 18%, #b99566 72%, #8f7146) !important;
+  box-shadow: 1px 0 0 rgba(255, 240, 214, 0.35) !important;
+  animation-name: mv-rope-2 !important;
+}
+
+@keyframes mv-rope-2 {
+  0% { transform: scaleY(0); opacity: 0; }
+  12% { transform: scaleY(0.55); opacity: 1; }
+  20% { transform: scaleY(1.02); opacity: 1; }
+  30% { transform: scaleY(1); opacity: 1; }
+  46% { transform: scaleY(0.96); opacity: 1; }
+  70% { transform: scaleY(0.72); opacity: 1; }
+  88% { transform: scaleY(0.42); opacity: 1; }
+  100% { transform: scaleY(0.16); opacity: 0.35; }
+}
+/* ★ 最终回应（③）：把「揉成球」和「涨大」做到看得出来（第十轮）
+   实拍现状：小人走进来 →「那天不太行」被拿走（直接消失，没有揉的过程）→
+   「好呀～」只横向宽了约 15% → 小人站在它上沿（不是坐上去）。
+   分镜要的是「把不去揉成球、扔出去」「同意涨大」「一屁股坐上去」——
+   现在后两拍等于没演到。这一版先做足能纯 CSS 解决的两拍：
+   · 揉球：捏住 → 拧 → 团 → 越团越小并旋转，最后缩到 0.3 倍淡出（成球被丢走）
+   · 涨大：带过冲地涨到 1.42 倍，74% 回坐一下再定住（弹性）
+   类是现成的（.invite-btn-crumpled / .invite-btn-seated），只换关键帧，不动 JSX。 */
+.invite-page .invite-btn-crumpled { animation-name: mv-crumple-2 !important; }
+.invite-page .invite-btn-seated { animation-name: mv-grow-2 !important; }
+
+@keyframes mv-crumple-2 {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  18% { transform: scale(1.12, 0.82) rotate(-6deg); opacity: 1; }
+  42% { transform: scale(0.72, 0.9) rotate(14deg) skewX(6deg); opacity: 1; }
+  66% { transform: scale(0.5, 0.62) rotate(-22deg) skewX(-8deg); opacity: 1; }
+  84% { transform: scale(0.34, 0.4) rotate(30deg) skewX(0deg); opacity: 1; }
+  100% { transform: scale(0.28, 0.34) rotate(42deg); opacity: 0; }
+}
+
+@keyframes mv-grow-2 {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.18, 1.06); }
+  55% { transform: scale(1.34, 1.1); }
+  74% { transform: scale(1.27, 1.05); }
+  100% { transform: scale(1.42, 1.14); }
+}
+/* ★ ③ 第二拍：揉成球之后**真的扔出去**（第十一轮）
+   原来揉完就淡出，没有飞的观感。这里给 .invite-btn-thrown 一条抛物线：
+   从「已经缩到 0.28 倍」接上（所以 scale 从 0.28 起步，不是突然出现），
+   先往后上方一挑（-14,-54），再往前上方抛（40,-96）→ 远（140,-70）→ 落出画面（280,60），
+   同时一路自转 900 度 —— 一个被揉皱的纸团丢出去就是这个样子。
+   类名如果不存在，这条规则只是不生效，不会坏事。 */
+.invite-page .invite-btn-thrown {
+  animation: mv-throw-2 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) both !important;
+  transform-origin: 50% 50%;
+}
+
+@keyframes mv-throw-2 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.28); opacity: 1; }
+  18% { transform: translate(-14px, -54px) rotate(-140deg) scale(0.34); opacity: 1; }
+  42% { transform: translate(40px, -96px) rotate(220deg) scale(0.3); opacity: 1; }
+  68% { transform: translate(140px, -70px) rotate(560deg) scale(0.26); opacity: 1; }
+  100% { transform: translate(280px, 60px) rotate(900deg) scale(0.2); opacity: 0; }
+}
+/* ★ ③ 最后一拍：一屁股坐上去（第十二轮，第十三轮修正）
+   用户反馈：「向下坐的时候腿和身子分家了」—— 原因是我把 CSS transform 用到 SVG 的 <g> 上，
+   却没有给 transform-box。SVG 元素默认按 **view-box** 算 transform-origin（整张 SVG），
+   所以 `transform-origin: 50% 0` 指的是**整张图的顶边**，不是这条腿的顶边；
+   于是 rotate(64deg) 绕着一个很远的点转，腿直接从身上甩出去。
+   `transform-box: fill-box` 才是「以自己的外框为准」—— 加了它，origin 落在腿根上。
+   顺带把角度收敛：原来 64/78 度对这么短的腿太大，绕对点也还是别扭，改成 22/30 度；
+   手臂同理（原来完全没写 origin，也在乱转）。 */
+.invite-page .puppet-sit {
+  transform: translateY(10px) scaleY(0.9) scaleX(1.06) !important;
+  transform-origin: 50% 100% !important;
+}
+.invite-page .puppet-sit .puppet-leg-l,
+.invite-page .puppet-sit .puppet-leg-r {
+  transform-box: fill-box !important;
+  transform-origin: 50% 6% !important;
+}
+.invite-page .puppet-sit .puppet-leg-l { transform: rotate(22deg) !important; }
+.invite-page .puppet-sit .puppet-leg-r { transform: rotate(30deg) !important; }
+.invite-page .puppet-sit .puppet-arm-front,
+.invite-page .puppet-sit .puppet-arm-back {
+  transform-box: fill-box !important;
+  transform-origin: 50% 10% !important;
+}
+.invite-page .puppet-sit .puppet-arm-front { transform: rotate(-14deg) !important; }
+.invite-page .puppet-sit .puppet-arm-back { transform: rotate(-8deg) !important; }
+
+/* ★ 第十四轮：按用户反馈改两处
+   ① 扔出去的弧线要更长 —— 0.9s 里只飞 280px，看起来像"掉下去"而不是"扔出去"。
+      改成 1.15s、横向 480px、最高点抬到 -150px，并且**落点在画面外**（460,220）。
+   ② 后面的邀请内容**不许消失**。原来 .invite-stage:has(.invite-puppet-holder) .answer-recap
+      会把摘要淡到 0（paper-look-4.css）。用户的原话是"这个不应该消失" —— 那就一直留着：
+      摘要只占 148px 的绝对定位块，不参与文档流，所以留着不会把卡片撑变形。
+      ⚠️ 代价是小人会在同一块地方和它重叠，等实拍看过再决定要不要把小人整体抬高一点。 */
+body .invite-stage:has(.invite-puppet-holder) .answer-recap {
+  opacity: 1 !important;
+}
+
+body .invite-page .invite-btn-thrown {
+  animation-duration: 1.15s !important;
+}
+
+@keyframes mv-throw-3 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.28); opacity: 1; }
+  14% { transform: translate(-24px, -78px) rotate(-160deg) scale(0.36); opacity: 1; }
+  34% { transform: translate(70px, -150px) rotate(260deg) scale(0.33); opacity: 1; }
+  58% { transform: translate(230px, -128px) rotate(620deg) scale(0.29); opacity: 1; }
+  80% { transform: translate(360px, -24px) rotate(860deg) scale(0.24); opacity: 1; }
+  100% { transform: translate(460px, 220px) rotate(1080deg) scale(0.18); opacity: 0; }
+}
+
+body .invite-page .invite-btn-thrown {
+  animation-name: mv-throw-3 !important;
 }
