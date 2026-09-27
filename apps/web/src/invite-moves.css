@@ -234,7 +234,7 @@ body .invite-page[data-theme] .puller-fly {
   78% { transform: translateX(-12px) rotate(-8deg) scale(1.01); }
   /* 86~100%：第 3 次，整个人快躺下去，被纸带着滑出左边 */
   86% { transform: translateX(-30px) rotate(-16deg) scale(1.04); }
-  100% { transform: translateX(-104px) rotate(-19deg) scale(0.96); opacity: 0.28; }
+  100% { transform: translateX(-420px) rotate(-16deg) scale(0.96); opacity: 0.55; }
 }
 
 /* 纸：先不动，被拽三下，最后拖出左边 */
@@ -245,22 +245,24 @@ body .invite-page[data-theme] .puller-fly {
 @keyframes mv-card-pull {
   0%, 30% { transform: translate(0, 0) rotate(0deg); }
   /* 被抓住：轻轻一颤 */
-  34% { transform: translate(-7px, 1px) rotate(-1deg); }
+  /* ★ 从这里开始，纸的位移**和小人的位移完全一致**：
+     手抓着纸边，纸就不可能比手多走或少走 —— 这就是"真的抓住了"。 */
+  34% { transform: translate(6px, 1px) rotate(-1deg); }
   /* 第 1 下：几乎不动（"拉不动"这件事只能是这么演出来的） */
-  44% { transform: translate(-9px, 1px) rotate(-1.2deg); }
-  52% { transform: translate(-11px, 1px) rotate(-1.4deg); }
+  44% { transform: translate(-14px, 1px) rotate(-1.2deg); }
+  52% { transform: translate(-19px, 1px) rotate(-1.4deg); }
   /* 手滑，缩回一点 */
-  56% { transform: translate(-3px, 0) rotate(-0.4deg); }
-  /* 第 2 下：动了 */
-  64% { transform: translate(-14%, 1px) rotate(-3.4deg); }
-  74% { transform: translate(-24%, 2px) rotate(-6deg); }
+  56% { transform: translate(-4px, 0) rotate(-0.4deg); }
+  /* 第 2 下 */
+  64% { transform: translate(-16px, 1px) rotate(-1.8deg); }
+  74% { transform: translate(-26px, 2px) rotate(-2.6deg); }
   /* 顿住 */
-  78% { transform: translate(-25%, 2px) rotate(-6.2deg); }
-  /* 第 3 下：一路拖出去 */
-  86% { transform: translate(-58%, 4px) rotate(-10deg) scale(0.98); }
+  78% { transform: translate(-12px, 2px) rotate(-1.2deg); }
+  /* 第 3 下：手和纸一起走出去 */
+  86% { transform: translate(-28px, 4px) rotate(-3deg) scale(0.99); }
   /* 到 100% 还看得见它在走（opacity 0.45）：换屏那一瞬由过渡纱盖住，
      这样"旧页走"和"新页来"之间没有一段真正的空白。 */
-  100% { transform: translate(-118%, 6px) rotate(-9deg) scale(0.94); opacity: 0.45; }
+  100% { transform: translate(-420px, 8px) rotate(-6deg) scale(0.96); opacity: 0.5; }
 }
 
 /* ---------- 右：完全镜像（用同一套关键帧，整块 scaleX(-1) 会连字一起翻，
