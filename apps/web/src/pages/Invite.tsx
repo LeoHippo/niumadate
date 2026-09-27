@@ -736,6 +736,20 @@ export function InvitePage() {
                 .filter((item) => item !== '')
                 .join(' ')}
             >
+              {/*
+                ★ 「存下这张请柬」放在**卡片上方**（用户两次提："太低了、点不到"）。
+
+                为什么不靠 CSS 挪：它原来在 <ScreenBody> 之后，而 .screen-inner 会被换屏动画
+                挂上 transform —— 有 transform 的祖先会成为 fixed 的包含块，所以
+                position: fixed + bottom 是相对那张卡片算的，不是视口（实测两次都没动）。
+                同一个祖先也让 order:-1 失效（按钮不是那个 flex 容器的直接子元素）。
+                改成把 JSX 挪到前面：不依赖任何定位技巧，天然就在卡片上面、首屏可见。
+              */}
+              {!showAll && screen === 'card' && (
+                <button type="button" className="save-poster-btn" onClick={savePoster}>
+                  存下这张请柬
+                </button>
+              )}
               <ScreenBody
                 screen={screen}
                 invite={invite}
@@ -850,12 +864,6 @@ export function InvitePage() {
             所以它得贴在页面上、跟着那一屏一起走，而不是飘在一层遮罩上。
           */}
           {/* 刚答应：满屏爆发。前面那么长的铺垫，就是为了这一下 */}
-                    {/* 请柬那一屏下面给一个"存下来"的出口 —— 可收藏本身就是向往感 */}
-          {!showAll && screen === 'card' && (
-            <button type="button" className="save-poster-btn" onClick={savePoster}>
-              存下这张请柬
-            </button>
-          )}
 
           {/* 存图面板：手机上长按最容易，桌面上给下载 */}
           {poster !== null && (
