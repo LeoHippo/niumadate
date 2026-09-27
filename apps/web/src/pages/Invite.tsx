@@ -480,6 +480,22 @@ export function InvitePage() {
    * 下一屏从**相反方向**滑进来，接得严丝合缝 —— 观感上就是
    * 「小人把上面那张拖走，下面这张跟着补上来」。
    */
+  /*
+    ★ 直接跳（不演换屏动画）。两个用处：
+      · 回应完之后**直接**落到对话那一屏 —— 用户 2026-09-27：「点完以后就直接结果和说两句，
+        不需要中间那个过程」。（原来这里走的是 goTo，会播 4.5 秒的拖页动画 ✗）
+      · 「整体看完之后可以滑动选择页数」：底部的进度条点/拖哪一格就跳哪一屏。
+    跳之前要把换屏的中间状态清干净，否则上一次的 puller / 过渡纱会挂着。
+  */
+  const jumpTo = useCallback((next: number) => {
+    if (next < 0 || next >= SCREENS.length) return;
+    window.clearTimeout(leaveTimerRef.current);
+    movingRef.current = false;
+    setLeaving(null);
+    setEnterFrom(null);
+    setIndex(next);
+  }, []);
+
   const goTo = useCallback((next: number) => {
     if (next < 0 || next >= SCREENS.length) return;
     /* 上一段还没演完 → 这一下不算数（防重入，见 movingRef 的注释）。 */
@@ -704,8 +720,11 @@ export function InvitePage() {
                           ? current
                           : { invite: result.invite, messages: current.messages },
                       );
-                      // 回应完自动进对话 —— 定下来之后就该商量了
-                      goTo(SCREENS.indexOf('chat'));
+                      /*
+                        回应完**直接**进对话 —— 定下来之后就该商量了，
+                        但不该再让好友看一遍 4.5 秒的换屏动画（用户：不需要中间那个过程）。
+                      */
+                      jumpTo(SCREENS.indexOf('chat'));
                     })
                     .catch((cause: unknown) => setError(describeError(cause)));
                 }}
