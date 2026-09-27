@@ -64,7 +64,7 @@ async function createInvite() {
   const res = await fetch(API + '/admin/invites', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: 'Bearer ' + login.token },
-    body: JSON.stringify({ role: ROLE, date, inviteeName: '翻页验收', timeText: '周六下午三点', place: '楼下那家咖啡', activity: '坐着聊聊' }),
+    body: JSON.stringify({ role: ROLE, date, inviteeName: '翻页验收', timeText: '周六下午三点', place: '楼下那家咖啡', activity: '坐着聊聊', noDecline: process.env.NO_DECLINE !== '0' }),
   });
   const payload = await res.json();
   if (payload.invite === undefined) throw new Error('建邀请失败：' + JSON.stringify(payload));
